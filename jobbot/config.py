@@ -12,7 +12,11 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 CONFIG_DIR = ROOT / "config"
 RESUME_PATH = ROOT / "resume" / "resume.md"
-DATA_DIR = ROOT / "data"
+
+# Каталог состояния (seen.json, shortlist.json и т.п.). На Railway можно
+# примонтировать Volume и указать JOBBOT_DATA_DIR=/data, чтобы данные не терялись
+# между перезапусками контейнера.
+DATA_DIR = Path(os.environ.get("JOBBOT_DATA_DIR") or (ROOT / "data"))
 REPORTS_DIR = ROOT / "reports"
 APPLICATIONS_DIR = ROOT / "applications"
 

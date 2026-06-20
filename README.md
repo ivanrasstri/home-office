@@ -67,6 +67,42 @@ python -m jobbot apply --ids ID1,ID2
 Результаты бот коммитит обратно: подборку — `reports/latest.md` и `data/shortlist.json`,
 отклики — папка `applications/`.
 
+## Telegram-бот (интерактивный режим) 🤖
+
+Самый удобный способ «клик и согласие»: бот присылает подборку карточками с
+кнопкой **✍️ Откликнуться** — жмёшь, и он точечно через Claude готовит письмо +
+адаптированное резюме и присылает их прямо в чат.
+
+Команды: `/search` — собрать свежую подборку, `/help` — помощь. Плюс авто-подборка
+по будням (`JOBBOT_AUTO_SEARCH`).
+
+Интерактивные кнопки требуют постоянно работающего процесса (long polling),
+поэтому бот запускается как воркер (например, на Railway), а не в GitHub Actions.
+
+### Запуск локально
+```bash
+pip install -r requirements.txt
+export TELEGRAM_BOT_TOKEN=...   # токен от @BotFather
+export ANTHROPIC_API_KEY=...    # для откликов
+python -m jobbot.telegram_bot
+# напиши боту /start, затем /search
+```
+
+### Деплой на Railway
+1. Создай бота у **@BotFather**, получи `TELEGRAM_BOT_TOKEN`.
+2. На Railway: **New Project → Deploy from GitHub repo** (этот репозиторий).
+   Railway сам поставит зависимости из `requirements.txt` и запустит процесс
+   `worker` из `Procfile` (`python -m jobbot.telegram_bot`).
+3. **Variables:** `TELEGRAM_BOT_TOKEN`, `ANTHROPIC_API_KEY`, и (рекомендуется)
+   `TELEGRAM_CHAT_ID` — твой chat_id (бот покажет его в ответ на `/start`), чтобы
+   ботом не мог пользоваться кто-то ещё.
+4. **Volume:** добавь Volume и смонтируй, например, в `/data`, затем поставь
+   переменную `JOBBOT_DATA_DIR=/data` — так дедуп и подборка переживут перезапуски.
+5. (Необязательно) `JOBBOT_AUTO_SEARCH=true`, `JOBBOT_DAILY_HOUR_UTC=6`.
+
+> Заметка: профиль/резюме/источники (`config/*.yaml`, `resume/resume.md`) бот
+> читает из репозитория. Поменял — сделай commit, Railway передеплоит.
+
 ## Структура
 
 ```
@@ -77,8 +113,10 @@ jobbot/                  # код бота
   sources/               # сборщики по источникам (hh, remoteok, wwr, telegram, linkedin)
   scoring.py             # балл соответствия
   ai.py                  # Claude: письма + адаптация резюме (фаза 2)
-  pipeline.py            # оркестрация: run_collect (фаза 1) / run_apply (фаза 2)
+  pipeline.py            # оркестрация: gather_new / apply_one (общие для CLI и TG)
   __main__.py            # CLI: `collect` и `apply --ids`
+  telegram_bot.py        # интерактивный Telegram-бот (кнопка «Откликнуться»)
+Procfile                 # запуск воркера на Railway
 data/seen.json           # дедуп (генерируется)
 data/shortlist.json      # полные данные подборки для отклика по ID (генерируется)
 reports/                 # отчёты подборки (генерируются)

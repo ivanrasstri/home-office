@@ -33,14 +33,12 @@ def _cmd_collect() -> int:
     log = logging.getLogger("jobbot")
     s = pipeline.run_collect()
     log.info(
-        "Подборка готова. Просмотрено=%d, подходящих=%d, новых=%d",
-        s["total_found"], s["relevant"], s["new"],
+        "Подборка готова. Просмотрено=%d, новых=%d", s["total_found"], s["new"],
     )
     _gh_summary([
         "## 🔎 Job Search Bot — подборка",
         "",
         f"- Просмотрено вакансий: **{s['total_found']}**",
-        f"- Подходящих по баллу: **{s['relevant']}**",
         f"- Новых с прошлого запуска: **{s['new']}**",
         f"- Отчёт: `{s['report']}`",
         "",
