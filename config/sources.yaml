@@ -1,0 +1,40 @@
+# Какие источники вакансий опрашивать. Выключай ненадёжные/ненужные через enabled: false.
+#
+# Надёжность (из коробки, без логина и ключей):
+#   headhunter      — официальный REST API api.hh.ru, стабильно.
+#   remoteok        — публичный JSON API, стабильно (только удалёнка, EN).
+#   weworkremotely  — RSS-ленты, стабильно (только удалёнка, EN).
+#   telegram        — чтение публичных каналов через t.me/s/<channel>, обычно работает.
+#   linkedin        — гостевой поиск без логина; часто упирается в rate-limit
+#                     с IP дата-центров (GitHub Actions). Включён, но "best-effort":
+#                     если LinkedIn отдаёт пусто/429 — бот просто идёт дальше.
+#
+# Каждый источник падает «мягко»: ошибка одного не ломает весь запуск.
+
+headhunter:
+  enabled: true
+
+remoteok:
+  enabled: true
+
+weworkremotely:
+  enabled: true
+  # RSS-ленты категорий, релевантных продюсеру/проектному менеджеру.
+  feeds:
+    - "https://weworkremotely.com/categories/remote-management-and-finance-jobs.rss"
+    - "https://weworkremotely.com/categories/remote-product-jobs.rss"
+    - "https://weworkremotely.com/categories/remote-marketing-jobs.rss"
+
+telegram:
+  enabled: true
+  # Публичные каналы с вакансиями (без @). Подставь свои — это примеры
+  # каналов с креатив/маркетинг/диджитал вакансиями.
+  channels:
+    - "designhunters"
+    - "smm_jobs"
+    - "marketing_jobs"
+
+linkedin:
+  enabled: true
+  # Локация для гостевого поиска LinkedIn.
+  location: "Uzbekistan"
