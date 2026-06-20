@@ -15,6 +15,10 @@ from .config import DATA_DIR
 from .models import Job
 
 SEEN_PATH = DATA_DIR / "seen.json"
+SHORTLIST_PATH = DATA_DIR / "shortlist.json"
+
+# Сколько вакансий держать в shortlist (полные данные для отклика по ID).
+SHORTLIST_MAX = 300
 
 
 def _now() -> str:
@@ -55,3 +59,38 @@ def mark_seen(jobs: list[Job], seen: dict[str, Any]) -> None:
             "score": j.score,
             "first_seen": ts,
         }
+
+
+def load_shortlist() -> dict[str, Any]:
+    """Полные данные вакансий из подборки (id -> dict), для отклика по ID."""
+    if not SHORTLIST_PATH.exists():
+        return {}
+    try:
+        return json.loads(SHORTLIST_PATH.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+
+def save_shortlist(jobs: list[Job]) -> None:
+    """Добавить вакансии в shortlist (с полным описанием) и подрезать до лимита.
+
+    Храним полные данные, чтобы фаза «отклик по ID» не зависела от повторного
+    запроса к источнику. Новые записи идут в начало; старые вытесняются.
+    """
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    existing = load_shortlist()
+    ts = _now()
+    # Собираем заново, чтобы новые оказались первыми и обновили старые записи.
+    merged: dict[str, Any] = {}
+    for j in jobs:
+        d = j.to_dict()
+        d["shortlisted_at"] = ts
+        merged[j.id] = d
+    for jid, data in existing.items():
+        merged.setdefault(jid, data)
+    # Подрезаем до SHORTLIST_MAX (сохраняем порядок: сначала свежие).
+    trimmed = dict(list(merged.items())[:SHORTLIST_MAX])
+    SHORTLIST_PATH.write_text(
+        json.dumps(trimmed, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )

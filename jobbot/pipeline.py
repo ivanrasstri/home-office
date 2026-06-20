@@ -1,4 +1,10 @@
-"""Оркестрация: собрать -> оценить -> отсеять виденные -> отчёт -> отклики."""
+"""Оркестрация в две фазы (human-in-the-loop):
+
+Фаза 1 — collect: собрать -> оценить -> отсеять виденные -> отчёт + shortlist.
+         Никакого Claude: бот только предлагает подборку.
+Фаза 2 — apply:   по выбранным ID готовит отклик (письмо + адаптация резюме).
+         Запускается вручную, когда ты «соглашаешься» откликнуться.
+"""
 
 from __future__ import annotations
 
@@ -31,42 +37,28 @@ def collect(profile: dict, sources_cfg: dict) -> list[Job]:
     return list(all_jobs.values())
 
 
-def run() -> dict:
-    """Главный цикл. Возвращает краткую сводку для логов/Action summary."""
+def run_collect() -> dict:
+    """Фаза 1: подборка вакансий без генерации откликов."""
     profile = config.load_profile()
     sources_cfg = config.load_sources()
-    resume = config.load_resume()
     cfg = config.settings()
 
-    # 1) Сбор
     jobs = collect(profile, sources_cfg)
     total_found = len(jobs)
 
-    # 2) Скоринг
     jobs = score_all(jobs, profile)
 
-    # 3) Отсев по минимальному баллу + по уже виденным
     seen = store.load_seen()
     relevant = [j for j in jobs if j.score >= cfg["min_score"]]
     fresh = store.filter_new(relevant, seen)
     fresh.sort(key=lambda j: j.score, reverse=True)
 
-    # 4) Отчёт
+    # Отчёт с ID каждой вакансии (по нему ты потом запустишь отклик).
     content = report.build_report(fresh, total_found)
     report_path = report.save_report(content)
 
-    # 5) Отклики для топ-N (через Claude, если есть ключ)
-    ai = AIClient(cfg["anthropic_api_key"], cfg["model"])
-    apps_written = 0
-    if ai.enabled and resume:
-        for job in fresh[: cfg["top_n"]]:
-            letter = ai.cover_letter(job, profile, resume)
-            tailored = ai.tailor_resume(job, profile, resume)
-            if report.save_application(job, letter, tailored):
-                apps_written += 1
-        log.info("Подготовлено откликов: %d", apps_written)
-
-    # 6) Запомнить новые вакансии, чтобы не показывать их снова
+    # Сохраняем полные данные для фазы 2 и помечаем как виденные.
+    store.save_shortlist(fresh)
     store.mark_seen(fresh, seen)
     store.save_seen(seen)
 
@@ -74,6 +66,58 @@ def run() -> dict:
         "total_found": total_found,
         "relevant": len(relevant),
         "new": len(fresh),
-        "applications": apps_written,
         "report": str(report_path),
+    }
+
+
+def run_apply(ids: list[str]) -> dict:
+    """Фаза 2: подготовить отклик для конкретных вакансий по ID."""
+    profile = config.load_profile()
+    resume = config.load_resume()
+    cfg = config.settings()
+
+    if not resume:
+        log.warning("Пустое резюме (resume/resume.md) — отклик не сделать.")
+        return {"requested": len(ids), "written": 0, "missing": ids}
+
+    ai = AIClient(cfg["anthropic_api_key"], cfg["model"])
+    if not ai.enabled:
+        log.warning("ANTHROPIC_API_KEY не задан — отклик не сделать.")
+        return {"requested": len(ids), "written": 0, "missing": ids}
+
+    shortlist = store.load_shortlist()
+    written: list[str] = []
+    missing: list[str] = []
+    paths: list[str] = []
+
+    for jid in ids:
+        data = shortlist.get(jid)
+        if not data:
+            log.warning("ID %s не найден в shortlist — пропуск.", jid)
+            missing.append(jid)
+            continue
+        job = Job(
+            source=data.get("source", ""),
+            title=data.get("title", ""),
+            company=data.get("company", ""),
+            url=data.get("url", ""),
+            description=data.get("description", ""),
+            location=data.get("location", ""),
+            salary=data.get("salary", ""),
+        )
+        letter = ai.cover_letter(job, profile, resume)
+        tailored = ai.tailor_resume(job, profile, resume)
+        path = report.save_application(job, letter, tailored)
+        if path:
+            written.append(jid)
+            paths.append(str(path))
+            log.info("Отклик готов: %s", path)
+        else:
+            missing.append(jid)
+
+    return {
+        "requested": len(ids),
+        "written": len(written),
+        "missing": missing,
+        "paths": paths,
     }

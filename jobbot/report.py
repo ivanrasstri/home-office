@@ -23,6 +23,11 @@ def build_report(new_jobs: list[Job], total_found: int) -> str:
         "",
         f"Всего просмотрено: **{total_found}**. Новых подходящих: **{len(new_jobs)}**.",
         "",
+        "> **Как откликнуться:** скопируй `ID` нужной вакансии и запусти workflow",
+        "> **Actions → Apply to job → Run workflow**, вставив ID в поле `job_ids`",
+        "> (можно несколько через запятую). Бот точечно подготовит письмо и",
+        "> адаптированное резюме в папке `applications/`.",
+        "",
     ]
     if not new_jobs:
         lines.append("_Новых подходящих вакансий с прошлого запуска не найдено._")
@@ -37,8 +42,9 @@ def build_report(new_jobs: list[Job], total_found: int) -> str:
             meta.append(job.salary)
         lines.append(f"_{' · '.join(meta)}_")
         lines.append("")
+        lines.append(f"- 🆔 `{job.id}`  ← вставь в Apply to job, чтобы откликнуться")
         if job.url:
-            lines.append(f"🔗 {job.url}")
+            lines.append(f"- 🔗 {job.url}")
         if job.score_reasons:
             lines.append(f"- Почему подходит: {'; '.join(job.score_reasons)}")
         if job.description:

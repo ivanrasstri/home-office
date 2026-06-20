@@ -1,13 +1,12 @@
 name: Job Search Bot
 
-# Запуск по расписанию + вручную (кнопка Run workflow во вкладке Actions).
+# Фаза 1: подборка вакансий по расписанию. Без генерации откликов (без Claude).
 on:
   schedule:
     # Каждый будний день в 06:00 UTC (~11:00 по Ташкенту). cron в UTC.
     - cron: "0 6 * * 1-5"
   workflow_dispatch: {}
 
-# Нужны права на запись, чтобы коммитить отчёты/отклики/seen.json обратно.
 permissions:
   contents: write
 
@@ -16,7 +15,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  search:
+  collect:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -31,23 +30,19 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run job search bot
+      - name: Collect jobs (no AI)
         env:
-          # Добавь секрет в Settings → Secrets and variables → Actions.
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          JOBBOT_MODEL: ${{ vars.JOBBOT_MODEL || 'claude-opus-4-8' }}
-          JOBBOT_TOP_N: ${{ vars.JOBBOT_TOP_N || '5' }}
           JOBBOT_MIN_SCORE: ${{ vars.JOBBOT_MIN_SCORE || '25' }}
-        run: python -m jobbot
+        run: python -m jobbot collect
 
       - name: Commit results
         run: |
           git config user.name "job-search-bot"
           git config user.email "actions@github.com"
-          git add data/ reports/ applications/
+          git add data/ reports/
           if git diff --cached --quiet; then
             echo "Изменений нет — коммит не требуется."
           else
-            git commit -m "chore: job search results $(date -u +%Y-%m-%d)"
+            git commit -m "chore: job shortlist $(date -u +%Y-%m-%d)"
             git push
           fi
