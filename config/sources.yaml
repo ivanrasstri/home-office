@@ -27,12 +27,27 @@ weworkremotely:
 
 telegram:
   enabled: true
-  # Публичные каналы с вакансиями (без @). Подставь свои — это примеры
-  # каналов с креатив/маркетинг/диджитал вакансиями.
+  # Публичные каналы с вакансиями (без @). Бот читает их через t.me/s/<channel>
+  # и фильтрует посты по ключевым словам из profile.yaml.
   channels:
-    - "designhunters"
-    - "smm_jobs"
-    - "marketing_jobs"
+    - "forproducer"
+    - "careerwithh"
+    - "rabota_kripta"
+    - "rfoundersjobs"
+    - "opento_crypto"
+    - "razoomjobs"
+    - "tochnopw"
+    - "hyper_career_channel"
+    - "marketing_rabota_jobs"
+    - "IGamingPros"
+    - "wntdpm"
+    - "digital_jobster"
+    - "zarubezhom_jobs"
+    - "evacuatejobs"
+    - "vakanser"
+    - "careerspace"
+    - "careerstation_pm"
+    - "cyprusithr"
 
 linkedin:
   enabled: true
