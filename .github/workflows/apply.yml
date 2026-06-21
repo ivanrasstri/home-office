@@ -1,0 +1,52 @@
+name: Apply to job
+
+# Фаза 2: точечный отклик по выбранным вакансиям. Запуск ВРУЧНУЮ.
+# Возьми ID из reports/latest.md и вставь в поле job_ids ниже.
+on:
+  workflow_dispatch:
+    inputs:
+      job_ids:
+        description: "ID вакансий из подборки (через запятую)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: job-apply
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Prepare applications (Claude)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          JOBBOT_MODEL: ${{ vars.JOBBOT_MODEL || 'claude-opus-4-8' }}
+        run: python -m jobbot apply --ids "${{ inputs.job_ids }}"
+
+      - name: Commit applications
+        run: |
+          git config user.name "job-search-bot"
+          git config user.email "actions@github.com"
+          git add applications/
+          if git diff --cached --quiet; then
+            echo "Нет новых откликов — коммит не требуется."
+          else
+            git commit -m "chore: applications $(date -u +%Y-%m-%d)"
+            git push
+          fi
