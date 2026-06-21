@@ -45,6 +45,7 @@ API = "https://api.telegram.org/bot{token}/{method}"
 SUBS_PATH = config.DATA_DIR / "telegram_chats.json"
 STATE_PATH = config.DATA_DIR / "telegram_state.json"
 MAX_CARDS = 15  # сколько карточек слать за одну подборку
+NAME = "Олег Михайлович"  # персона бота — кадровик «на твоей стороне»
 
 
 # --------------------------------------------------------------------------- #
@@ -160,12 +161,17 @@ def _job_card(job: Job) -> tuple[str, list]:
 
 def send_shortlist(tg: Telegram, chat_id: int, fresh: list[Job], total: int) -> None:
     if not fresh:
-        tg.send_message(chat_id, f"🔎 Просмотрено {total}. Новых подходящих вакансий нет.")
+        tg.send_message(
+            chat_id,
+            f"Посмотрел {total} вакансий — ничего нового подходящего пока нет. "
+            "Не переживай, загляну ещё.",
+        )
         return
     tg.send_message(
         chat_id,
-        f"🔎 Просмотрено {total}. Новых подходящих: <b>{len(fresh)}</b> "
-        f"(показываю до {MAX_CARDS}). Жми «Откликнуться» под подходящей.",
+        f"Посмотрел {total} вакансий. Свежих подходящих: <b>{len(fresh)}</b> "
+        f"(показываю до {MAX_CARDS}). Что приглянётся — жми «Откликнуться», "
+        "остальное я беру на себя.",
     )
     for job in fresh[:MAX_CARDS]:
         text, buttons = _job_card(job)
@@ -173,18 +179,18 @@ def send_shortlist(tg: Telegram, chat_id: int, fresh: list[Job], total: int) -> 
 
 
 def do_search(tg: Telegram, chat_id: int) -> None:
-    tg.send_message(chat_id, "Ищу свежие вакансии… ⏳")
+    tg.send_message(chat_id, "Так, дай-ка гляну, что на рынке… ⏳")
     try:
         fresh, total = pipeline.gather_new()
     except Exception as e:
         log.exception("Сбор упал: %s", e)
-        tg.send_message(chat_id, f"Не получилось собрать вакансии: {html.escape(str(e))}")
+        tg.send_message(chat_id, f"Что-то не заладилось со сбором: {html.escape(str(e))}")
         return
     send_shortlist(tg, chat_id, fresh, total)
 
 
 def do_apply(tg: Telegram, chat_id: int, job_id: str) -> None:
-    tg.send_message(chat_id, "Готовлю отклик… ✍️")
+    tg.send_message(chat_id, "Понял, оформляю… ✍️")
     res = pipeline.apply_one(job_id)
     if res.get("error"):
         tg.send_message(chat_id, f"⚠️ {html.escape(res['error'])}")
@@ -200,18 +206,19 @@ def do_apply(tg: Telegram, chat_id: int, job_id: str) -> None:
         fname = f"resume-{job.id}.md"
         tg.send_document(chat_id, fname, res["resume"], caption="Адаптированное резюме")
     if not res.get("letter") and not res.get("resume"):
-        tg.send_message(chat_id, "Claude не вернул текст — попробуй ещё раз позже.")
+        tg.send_message(chat_id, "Что-то заминка вышла — давай попробуем ещё разок позже.")
 
 
 # --------------------------------------------------------------------------- #
 # Обработка апдейтов
 # --------------------------------------------------------------------------- #
 HELP = (
-    "Я ищу вакансии под твой профиль и помогаю с откликами.\n\n"
-    "<b>/search</b> — собрать свежую подборку\n"
-    "<b>/help</b> — помощь\n\n"
-    "Под каждой вакансией есть кнопка <b>✍️ Откликнуться</b> — нажми, и я "
-    "подготовлю письмо и адаптированное резюме."
+    f"Я {NAME}, твой личный кадровик — но, в отличие от заводских, работаю "
+    "на <b>тебя</b> 🤝\n\n"
+    "<b>/search</b> — гляну, что есть свежего по твоему профилю\n"
+    "<b>/help</b> — это сообщение\n\n"
+    "Под каждой вакансией будет кнопка <b>✍️ Откликнуться</b> — жми, и я "
+    "подготовлю сопроводительное письмо и подгоню резюме под вакансию."
 )
 
 
@@ -223,17 +230,21 @@ def handle_message(tg: Telegram, msg: dict[str, Any]) -> None:
         if not _allowed_env():
             add_subscriber(chat_id)  # TOFU, если нет явного allowlist
         if is_allowed(chat_id):
-            tg.send_message(chat_id, f"Привет! 👋\n\n{HELP}")
+            tg.send_message(chat_id, f"Здравствуй! На связи {NAME} 🤝\n\n{HELP}")
         else:
             tg.send_message(
                 chat_id,
-                f"Этот чат не в списке разрешённых. Твой chat_id: <code>{chat_id}</code>.\n"
-                "Добавь его в переменную TELEGRAM_CHAT_ID на сервере.",
+                f"Я {NAME}, но тебя нет в моём списке. Твой chat_id: "
+                f"<code>{chat_id}</code>.\nДобавь его в переменную TELEGRAM_CHAT_ID "
+                "на сервере — и приходи снова.",
             )
         return
 
     if not is_allowed(chat_id):
-        tg.send_message(chat_id, f"Доступ ограничен. Твой chat_id: <code>{chat_id}</code>.")
+        tg.send_message(
+            chat_id,
+            f"Извини, доступ только для своих. Твой chat_id: <code>{chat_id}</code>.",
+        )
         return
 
     if text.startswith("/search"):
@@ -249,10 +260,10 @@ def handle_callback(tg: Telegram, cb: dict[str, Any]) -> None:
     data = cb.get("data", "")
     chat_id = cb["message"]["chat"]["id"]
     if not is_allowed(chat_id):
-        tg.answer_callback(cb_id, "Доступ ограничен.")
+        tg.answer_callback(cb_id, "Доступ только для своих.")
         return
     if data.startswith("apply:"):
-        tg.answer_callback(cb_id, "Готовлю отклик…")
+        tg.answer_callback(cb_id, "Принял, оформляю…")
         do_apply(tg, chat_id, data.split(":", 1)[1])
     else:
         tg.answer_callback(cb_id)
@@ -300,7 +311,7 @@ def main() -> int:
 
     threading.Thread(target=_scheduler, args=(tg,), daemon=True).start()
 
-    log.info("Бот запущен. Жду сообщения…")
+    log.info("%s на связи. Жду сообщения…", NAME)
     offset: int | None = None
     while True:
         try:
