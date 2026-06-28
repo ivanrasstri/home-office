@@ -126,6 +126,35 @@ reports/                 # отчёты подборки (генерируютс
 applications/            # отклики по выбранным вакансиям (генерируются)
 ```
 
+## Удалённая разработка (Claude Code on the web)
+
+Репозиторий настроен для работы через **Claude Code on the web** — кодить можно
+прямо в облаке, без локального окружения.
+
+**SessionStart-хук** (`.claude/hooks/session-start.sh`) — при старте удалённой
+сессии автоматически ставит зависимости из `requirements.txt` и прописывает
+`PYTHONPATH`, чтобы сразу работали `python -m jobbot collect` / `apply`.
+Зарегистрирован в `.claude/settings.json`. Локально (вне веб-сессии) хук ничего
+не делает — проверяет `CLAUDE_CODE_REMOTE`.
+
+**MCP** (`.mcp.json`) — подключает внешние инструменты к Claude.
+Сейчас включён `fetch` (через `uvx mcp-server-fetch`): даёт Claude возможность
+открывать веб-страницы — удобно при отладке сборщиков в `jobbot/sources/`.
+Project-scoped сервер требует подтверждения при первом запуске сессии.
+
+Добавить ещё серверы — допиши их в `.mcp.json` (формат и опции:
+https://code.claude.com/docs/en/mcp). Пример удалённого HTTP-сервера с OAuth
+(подтверждение через команду `/mcp`, секреты в файле не хранятся):
+
+```json
+{
+  "mcpServers": {
+    "fetch": { "command": "uvx", "args": ["mcp-server-fetch"] },
+    "github": { "type": "http", "url": "https://api.githubcopilot.com/mcp/" }
+  }
+}
+```
+
 ## Замечания по источникам
 
 - **LinkedIn / Indeed** не дают надёжного доступа без логина/официального API и
