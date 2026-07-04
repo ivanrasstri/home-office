@@ -1,0 +1,55 @@
+name: Figma export (PDF + PPTX)
+
+# Экспорт презентации из Figma сразу в PDF и PPTX. Запуск ВРУЧНУЮ.
+# file_key бери из ссылки: figma.com/design/FILE_KEY/... или .../file/FILE_KEY/...
+on:
+  workflow_dispatch:
+    inputs:
+      file_key:
+        description: "Figma file key (из ссылки на файл)"
+        required: true
+        type: string
+      page:
+        description: "Имя страницы (пусто = первая страница файла)"
+        required: false
+        type: string
+      scale:
+        description: "Масштаб рендера (1..4)"
+        required: false
+        type: string
+        default: "2"
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Export PDF + PPTX
+        env:
+          FIGMA_TOKEN: ${{ secrets.FIGMA_TOKEN }}
+        run: |
+          python -m figma_export "${{ inputs.file_key }}" \
+            --page "${{ inputs.page }}" \
+            --scale "${{ inputs.scale }}" \
+            --out dist
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: figma-export-${{ inputs.file_key }}
+          path: dist/*
+          if-no-files-found: error

@@ -106,6 +106,29 @@ python -m jobbot.telegram_bot
 > Заметка: профиль/резюме/источники (`config/*.yaml`, `resume/resume.md`) бот
 > читает из репозитория. Поменял — сделай commit, Railway передеплоит.
 
+## Экспорт презентаций из Figma (PDF + PPTX)
+
+Отдельный инструмент, не связанный с поиском работы: по ключу файла Figma
+рендерит слайды (топ-уровневые фреймы на странице) и собирает из **одних и тех
+же** картинок и PDF, и PPTX за один запуск — файлы гарантированно совпадают
+между собой.
+
+Локально:
+```bash
+export FIGMA_TOKEN=...   # https://www.figma.com/developers/api#access-tokens
+python -m figma_export FILE_KEY --page "Slides" --out dist
+# dist/FILE_KEY.pdf и dist/FILE_KEY.pptx
+```
+
+`FILE_KEY` — часть ссылки на файл: `figma.com/design/FILE_KEY/...` или
+`figma.com/file/FILE_KEY/...`. Если `--page` не указан — берётся первая
+страница файла.
+
+В GitHub Actions: положи `FIGMA_TOKEN` в **Settings → Secrets and variables →
+Actions → Secrets**, затем **Actions → Figma export (PDF + PPTX) → Run
+workflow**, укажи `file_key` (и опционально `page`). Результат появится как
+артефакт запуска (не коммитится в репозиторий).
+
 ## Структура
 
 ```
@@ -119,6 +142,11 @@ jobbot/                  # код бота
   pipeline.py            # оркестрация: gather_new / apply_one (общие для CLI и TG)
   __main__.py            # CLI: `collect` и `apply --ids`
   telegram_bot.py        # интерактивный Telegram-бот (кнопка «Откликнуться»)
+figma_export/            # экспорт презентаций Figma в PDF + PPTX (не связано с ботом)
+  client.py              # клиент Figma REST API (файл, рендер картинок)
+  frames.py              # поиск и сортировка слайдов (фреймов) на странице
+  build.py               # сборка PDF и PPTX из одних и тех же PNG
+  __main__.py            # CLI: `python -m figma_export FILE_KEY`
 Procfile                 # запуск воркера на Railway
 data/seen.json           # дедуп (генерируется)
 data/shortlist.json      # полные данные подборки для отклика по ID (генерируется)
