@@ -1,3 +1,6 @@
+import { buildSlideElements } from "./elements";
+import type { SlideData, SlideElement } from "./shared";
+
 figma.showUI(__html__, { width: 340, height: 320, themeColors: true });
 
 type ExportableNode = FrameNode | ComponentNode | ComponentSetNode | InstanceNode;
@@ -41,14 +44,40 @@ figma.ui.onmessage = async (msg: { type: string; scale?: number }) => {
     return;
   }
 
-  const slides: { name: string; width: number; height: number; png: Uint8Array }[] = [];
+  const slides: SlideData[] = [];
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];
+
+    // Полный растр фрейма — нужен только для PDF (там "экран" и предполагается).
     const png = await node.exportAsync({
       format: "PNG",
       constraint: { type: "SCALE", value: scale },
     });
-    slides.push({ name: node.name, width: node.width, height: node.height, png });
+
+    // Для PPTX — реальные элементы (текст/фигуры), а не картинка целиком.
+    // Если слайд слишком сложный (много узлов) — откатываемся на один
+    // элемент-картинку на весь слайд, чтобы не сгенерировать неподъёмный pptx.
+    let elements: SlideElement[] | null = null;
+    try {
+      elements = await buildSlideElements(node, scale);
+    } catch (e) {
+      elements = null;
+    }
+    if (!elements) {
+      elements = [
+        {
+          kind: "image",
+          x: 0,
+          y: 0,
+          w: node.width,
+          h: node.height,
+          rotation: 0,
+          png,
+        },
+      ];
+    }
+
+    slides.push({ name: node.name, width: node.width, height: node.height, png, elements });
     figma.ui.postMessage({ type: "progress", done: i + 1, total: nodes.length });
   }
 

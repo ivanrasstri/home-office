@@ -1,12 +1,6 @@
 import { PDFDocument } from "pdf-lib";
 import PptxGenJS from "pptxgenjs";
-
-interface Slide {
-  name: string;
-  width: number;
-  height: number;
-  png: Uint8Array;
-}
+import type { SlideData, SlideElement, TextRun } from "./shared";
 
 const exportBtn = document.getElementById("export") as HTMLButtonElement;
 const scaleInput = document.getElementById("scale") as HTMLInputElement;
@@ -37,11 +31,11 @@ window.onmessage = async (event: MessageEvent) => {
   }
 
   if (msg.type === "slides") {
-    const slides: Slide[] = msg.slides;
+    const slides: SlideData[] = msg.slides;
     try {
       statusEl.textContent = "Собираю PDF...";
       await buildAndDownloadPdf(msg.fileName, slides);
-      statusEl.textContent = "Собираю PPTX...";
+      statusEl.textContent = "Собираю PPTX (текст и фигуры как элементы)...";
       await buildAndDownloadPptx(msg.fileName, slides);
       statusEl.textContent = `Готово: ${slides.length} слайдов -> скачаны PDF и PPTX.`;
     } catch (e) {
@@ -52,7 +46,7 @@ window.onmessage = async (event: MessageEvent) => {
   }
 };
 
-async function buildAndDownloadPdf(fileName: string, slides: Slide[]): Promise<void> {
+async function buildAndDownloadPdf(fileName: string, slides: SlideData[]): Promise<void> {
   const pdf = await PDFDocument.create();
   for (const slide of slides) {
     const image = await pdf.embedPng(slide.png);
@@ -63,31 +57,110 @@ async function buildAndDownloadPdf(fileName: string, slides: Slide[]): Promise<v
   download(`${fileName}.pdf`, new Blob([new Uint8Array(bytes)], { type: "application/pdf" }));
 }
 
-async function buildAndDownloadPptx(fileName: string, slides: Slide[]): Promise<void> {
+const PX_PER_INCH = 96;
+const PT_PER_PX = 0.75; // 96dpi -> 72dpi
+
+async function buildAndDownloadPptx(fileName: string, slides: SlideData[]): Promise<void> {
   const pptx = new PptxGenJS();
 
-  // pptxgenjs оперирует дюймами; переводим px (96dpi) в дюймы и ограничиваем
-  // максимум разрешённым PowerPoint размером слайда (56").
-  const maxW = clampInches(Math.max(...slides.map((s) => s.width)) / 96);
-  const maxH = clampInches(Math.max(...slides.map((s) => s.height)) / 96);
-  pptx.defineLayout({ name: "FIGMA", width: maxW, height: maxH });
+  // У pptx один общий размер слайда на всю презентацию — берём самый крупный
+  // фрейм за основу, остальные слайды масштабируем и центрируем в него, не
+  // теряя относительного расположения элементов.
+  const baseWpx = Math.max(...slides.map((s) => s.width));
+  const baseHpx = Math.max(...slides.map((s) => s.height));
+  const baseWin = clampInches(baseWpx / PX_PER_INCH);
+  const baseHin = clampInches(baseHpx / PX_PER_INCH);
+  pptx.defineLayout({ name: "FIGMA", width: baseWin, height: baseHin });
   pptx.layout = "FIGMA";
 
   for (const slide of slides) {
     const s = pptx.addSlide();
-    const { x, y, w, h } = fit(slide.width / 96, slide.height / 96, maxW, maxH);
-    s.addImage({ data: toBase64Png(slide.png), x, y, w, h });
+    const fit = fitBox(slide.width, slide.height, baseWpx, baseHpx);
+    for (const el of slide.elements) {
+      addElementToSlide(s, el, fit);
+    }
   }
 
   const blob = (await pptx.write({ outputType: "blob" })) as Blob;
   download(`${fileName}.pptx`, blob);
 }
 
-function fit(w: number, h: number, boxW: number, boxH: number) {
+interface Fit {
+  offsetXpx: number;
+  offsetYpx: number;
+  scale: number;
+}
+
+function fitBox(w: number, h: number, boxW: number, boxH: number): Fit {
+  if (!w || !h) return { offsetXpx: 0, offsetYpx: 0, scale: 1 };
   const scale = Math.min(boxW / w, boxH / h);
-  const fw = w * scale;
-  const fh = h * scale;
-  return { x: (boxW - fw) / 2, y: (boxH - fh) / 2, w: fw, h: fh };
+  return { offsetXpx: (boxW - w * scale) / 2, offsetYpx: (boxH - h * scale) / 2, scale };
+}
+
+function px(el: number, fit: Fit): number {
+  return el * fit.scale;
+}
+
+function toInches(pxValue: number): number {
+  return pxValue / PX_PER_INCH;
+}
+
+function addElementToSlide(slide: PptxGenJS.Slide, el: SlideElement, fit: Fit): void {
+  const x = toInches(fit.offsetXpx + px(el.x, fit));
+  const y = toInches(fit.offsetYpx + px(el.y, fit));
+  const w = toInches(px(el.w, fit));
+  const h = toInches(px(el.h, fit));
+  const rotate = el.rotation ? -Math.round(el.rotation) : 0; // Figma: по часовой = отрицательный угол в pptxgenjs
+
+  if (el.kind === "text") {
+    const runs = el.runs.map((run: TextRun) => ({
+      text: run.text,
+      options: {
+        bold: run.bold,
+        italic: run.italic,
+        underline: run.underline ? { style: "sng" as const } : undefined,
+        color: run.color,
+        fontSize: Math.max(1, Math.round(run.fontSize * PT_PER_PX * fit.scale)),
+        fontFace: run.fontFace,
+      },
+    }));
+    slide.addText(runs, {
+      x,
+      y,
+      w,
+      h,
+      rotate,
+      align: el.align,
+      valign: el.valign,
+      wrap: true,
+      margin: 0,
+    });
+    return;
+  }
+
+  if (el.kind === "shape") {
+    const shapeType =
+      el.shape === "ellipse"
+        ? "ellipse"
+        : el.shape === "line"
+          ? "line"
+          : el.shape === "roundRect"
+            ? "roundRect"
+            : "rect";
+    slide.addShape(shapeType as PptxGenJS.ShapeType, {
+      x,
+      y,
+      w,
+      h,
+      rotate,
+      fill: el.fillColor ? { color: el.fillColor, transparency: Math.round((1 - el.fillAlpha) * 100) } : { type: "none" },
+      line: el.lineColor ? { color: el.lineColor, width: el.lineWidth || 1 } : { type: "none" },
+    });
+    return;
+  }
+
+  // image
+  slide.addImage({ data: toBase64Png(el.png), x, y, w, h, rotate });
 }
 
 function clampInches(value: number): number {
