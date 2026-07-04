@@ -1,0 +1,21 @@
+{
+  "name": "figma-export-pdf-pptx",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Figma-плагин: экспорт слайдов (фреймов) сразу в PDF и PPTX, без внешних токенов.",
+  "scripts": {
+    "build": "npm run build:code && npm run build:ui",
+    "build:code": "esbuild src/code.ts --bundle --outfile=code.js --target=es2017",
+    "build:ui": "node scripts/build-ui.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.90.0",
+    "esbuild": "^0.28.1",
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "pdf-lib": "^1.17.1",
+    "pptxgenjs": "^3.12.0"
+  }
+}

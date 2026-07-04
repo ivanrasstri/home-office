@@ -129,6 +129,11 @@ Actions → Secrets**, затем **Actions → Figma export (PDF + PPTX) → Ru
 workflow**, укажи `file_key` (и опционально `page`). Результат появится как
 артефакт запуска (не коммитится в репозиторий).
 
+**Вариант без токена и скрипта** — плагин Figma `figma-plugin/`: экспортирует
+выделенные слайды в PDF и PPTX прямо из интерфейса Figma (Plugins →
+Development → Import plugin from manifest…). Подробности и сборка —
+`figma-plugin/README.md`.
+
 ## Структура
 
 ```

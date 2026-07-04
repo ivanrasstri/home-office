@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      body {
+        font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 12px;
+        margin: 0;
+        padding: 16px;
+        color: #1a1a1a;
+      }
+      h1 {
+        font-size: 13px;
+        margin: 0 0 8px;
+      }
+      p {
+        color: #666;
+        line-height: 1.5;
+      }
+      label {
+        display: block;
+        margin: 12px 0 4px;
+        font-weight: 600;
+      }
+      input[type="number"] {
+        width: 60px;
+        padding: 4px 6px;
+      }
+      button {
+        margin-top: 16px;
+        width: 100%;
+        padding: 8px 12px;
+        background: #18a0fb;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button:disabled {
+        background: #b3d9f7;
+        cursor: default;
+      }
+      #status {
+        margin-top: 12px;
+        min-height: 32px;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Экспорт в PDF + PPTX</h1>
+    <p>
+      Выдели фреймы-слайды (или ничего не выделяй — тогда возьмутся все фреймы
+      текущей страницы) и нажми «Экспортировать».
+    </p>
+    <label for="scale">Масштаб рендера</label>
+    <input id="scale" type="number" min="1" max="4" step="0.5" value="2" />
+    <button id="export">Экспортировать</button>
+    <div id="status"></div>
+    <!-- BUNDLE -->
+  </body>
+</html>
