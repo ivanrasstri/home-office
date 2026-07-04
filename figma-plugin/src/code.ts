@@ -1,7 +1,7 @@
 import { buildSlideElements } from "./elements";
 import type { SlideData, SlideElement } from "./shared";
 
-figma.showUI(__html__, { width: 340, height: 320, themeColors: true });
+figma.showUI(__html__, { width: 340, height: 560, themeColors: true });
 
 type ExportableNode = FrameNode | ComponentNode | ComponentSetNode | InstanceNode;
 

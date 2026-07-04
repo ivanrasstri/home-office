@@ -6,6 +6,7 @@
   "ui": "ui.html",
   "editorType": ["figma"],
   "networkAccess": {
-    "allowedDomains": ["none"]
+    "allowedDomains": ["*"],
+    "reasoning": "Публикация презентации на собственном сервере pitchdeck_server — адрес сервера задаёт сам пользователь в UI плагина, поэтому список доменов нельзя зафиксировать заранее."
   }
 }

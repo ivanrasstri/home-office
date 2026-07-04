@@ -6,45 +6,136 @@ const exportBtn = document.getElementById("export") as HTMLButtonElement;
 const scaleInput = document.getElementById("scale") as HTMLInputElement;
 const statusEl = document.getElementById("status") as HTMLDivElement;
 
-exportBtn.addEventListener("click", () => {
-  exportBtn.disabled = true;
-  statusEl.textContent = "Рендерю кадры в Figma...";
+const publishBtn = document.getElementById("publish") as HTMLButtonElement;
+const serverUrlInput = document.getElementById("server-url") as HTMLInputElement;
+const apiTokenInput = document.getElementById("api-token") as HTMLInputElement;
+const publishStatusEl = document.getElementById("publish-status") as HTMLDivElement;
+
+serverUrlInput.value = localStorage.getItem("pitchdeck.serverUrl") ?? "";
+apiTokenInput.value = localStorage.getItem("pitchdeck.apiToken") ?? "";
+serverUrlInput.addEventListener("change", () => localStorage.setItem("pitchdeck.serverUrl", serverUrlInput.value.trim()));
+apiTokenInput.addEventListener("change", () => localStorage.setItem("pitchdeck.apiToken", apiTokenInput.value.trim()));
+
+let pendingAction: "export" | "publish" | null = null;
+
+function setBusy(busy: boolean): void {
+  exportBtn.disabled = busy;
+  publishBtn.disabled = busy;
+}
+
+function requestSlides(action: "export" | "publish"): void {
+  pendingAction = action;
+  setBusy(true);
   parent.postMessage(
     { pluginMessage: { type: "export", scale: Number(scaleInput.value) || 2 } },
     "*",
   );
+}
+
+exportBtn.addEventListener("click", () => {
+  statusEl.textContent = "Рендерю кадры в Figma...";
+  requestSlides("export");
+});
+
+publishBtn.addEventListener("click", () => {
+  const serverUrl = serverUrlInput.value.trim();
+  const apiToken = apiTokenInput.value.trim();
+  if (!serverUrl || !apiToken) {
+    publishStatusEl.textContent = "Укажи адрес сервера и API-токен.";
+    return;
+  }
+  publishStatusEl.textContent = "Рендерю кадры в Figma...";
+  requestSlides("publish");
 });
 
 window.onmessage = async (event: MessageEvent) => {
   const msg = event.data.pluginMessage;
-  if (!msg) return;
+  if (!msg || !pendingAction) return;
+
+  const statusFor = pendingAction === "publish" ? publishStatusEl : statusEl;
 
   if (msg.type === "progress") {
-    statusEl.textContent = `Рендер: ${msg.done}/${msg.total}`;
+    statusFor.textContent = `Рендер: ${msg.done}/${msg.total}`;
     return;
   }
 
   if (msg.type === "error") {
-    statusEl.textContent = `Ошибка: ${msg.message}`;
-    exportBtn.disabled = false;
+    statusFor.textContent = `Ошибка: ${msg.message}`;
+    pendingAction = null;
+    setBusy(false);
     return;
   }
 
   if (msg.type === "slides") {
     const slides: SlideData[] = msg.slides;
+    const action = pendingAction;
     try {
-      statusEl.textContent = "Собираю PDF...";
-      await buildAndDownloadPdf(msg.fileName, slides);
-      statusEl.textContent = "Собираю PPTX (текст и фигуры как элементы)...";
-      await buildAndDownloadPptx(msg.fileName, slides);
-      statusEl.textContent = `Готово: ${slides.length} слайдов -> скачаны PDF и PPTX.`;
+      if (action === "export") {
+        statusEl.textContent = "Собираю PDF...";
+        await buildAndDownloadPdf(msg.fileName, slides);
+        statusEl.textContent = "Собираю PPTX (текст и фигуры как элементы)...";
+        await buildAndDownloadPptx(msg.fileName, slides);
+        statusEl.textContent = `Готово: ${slides.length} слайдов -> скачаны PDF и PPTX.`;
+      } else {
+        publishStatusEl.textContent = "Публикую...";
+        await publishDeck(msg.fileName, slides);
+      }
     } catch (e) {
-      statusEl.textContent = `Ошибка сборки: ${(e as Error).message}`;
+      statusFor.textContent = `Ошибка: ${(e as Error).message}`;
     } finally {
-      exportBtn.disabled = false;
+      pendingAction = null;
+      setBusy(false);
     }
   }
 };
+
+async function publishDeck(fileName: string, slides: SlideData[]): Promise<void> {
+  const serverUrl = serverUrlInput.value.trim().replace(/\/+$/, "");
+  const apiToken = apiTokenInput.value.trim();
+
+  const payload = {
+    title: fileName,
+    slides: slides.map((s) => ({
+      width: s.width,
+      height: s.height,
+      elements: s.elements.map(elementToWire),
+    })),
+  };
+
+  const res = await fetch(`${serverUrl}/api/decks`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-API-Token": apiToken },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`сервер ответил ${res.status}: ${text.slice(0, 200)}`);
+  }
+
+  const data = (await res.json()) as { url: string; analytics_url: string };
+  publishStatusEl.innerHTML = "";
+  publishStatusEl.appendChild(document.createTextNode(`Опубликовано: ${slides.length} слайдов.`));
+  const link = document.createElement("a");
+  link.href = data.url;
+  link.target = "_blank";
+  link.textContent = data.url;
+  const analyticsLink = document.createElement("a");
+  analyticsLink.href = data.analytics_url;
+  analyticsLink.target = "_blank";
+  analyticsLink.textContent = "Аналитика просмотров";
+  publishStatusEl.appendChild(link);
+  publishStatusEl.appendChild(analyticsLink);
+}
+
+// Картинки уходят на сервер как data-URL (JSON не умеет в бинарь), остальные
+// поля один в один совпадают с форматом pitchdeck_server.
+function elementToWire(el: SlideElement): Record<string, unknown> {
+  if (el.kind === "image") {
+    return { ...el, png: toBase64Png(el.png) };
+  }
+  return { ...el };
+}
 
 async function buildAndDownloadPdf(fileName: string, slides: SlideData[]): Promise<void> {
   const pdf = await PDFDocument.create();

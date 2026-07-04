@@ -137,6 +137,12 @@ plugin from manifest…). PDF — растровый рендер, а PPTX со�
 честно векторизовать (иконки, сложная графика, эффекты). Подробности и
 сборка — `figma-plugin/README.md`.
 
+Тот же плагин умеет и **публиковать презентацию в веб** — shareable-ссылка
+на HTML-слайд-шоу и аналитика просмотров, без PowerPoint вообще (свой,
+самостоятельно захостенный аналог веб-презентаций Hypermatic Pitchdeck).
+За это отвечает сервис `pitchdeck_server/` — деплоится как второй Railway-
+сервис в этом же проекте, см. `pitchdeck_server/README.md`.
+
 ## Структура
 
 ```
@@ -155,6 +161,11 @@ figma_export/            # экспорт презентаций Figma в PDF + 
   frames.py              # поиск и сортировка слайдов (фреймов) на странице
   build.py               # сборка PDF и PPTX из одних и тех же PNG
   __main__.py            # CLI: `python -m figma_export FILE_KEY`
+figma-plugin/            # плагин Figma: экспорт PDF/PPTX + публикация в веб, см. его README
+pitchdeck_server/        # веб-хостинг опубликованных презентаций (ссылка + аналитика)
+  storage.py             # SQLite: презентации, просмотры, просмотры по слайдам
+  render.py              # HTML-просмотрщик слайдов и дашборд аналитики
+  app.py                 # FastAPI: /api/decks, /p/{id}, /p/{id}/analytics
 Procfile                 # запуск воркера на Railway
 data/seen.json           # дедуп (генерируется)
 data/shortlist.json      # полные данные подборки для отклика по ID (генерируется)
