@@ -1,4 +1,38 @@
 {
+  "ca70b7f963669716": {
+    "source": "linkedin",
+    "title": "Production Director / Head of Production",
+    "company": "hr_texnopark_uz",
+    "url": "https://uz.linkedin.com/jobs/view/production-director-head-of-production-at-hr-texnopark-uz-4443691112",
+    "description": "",
+    "location": "Ташкент, Ташкент, Узбекистан",
+    "salary": "",
+    "posted": "",
+    "score": 52,
+    "score_reasons": [
+      "совпадение в названии: production, head of production",
+      "локация: Ташкент"
+    ],
+    "id": "ca70b7f963669716",
+    "shortlisted_at": "2026-07-29 08:45:29Z"
+  },
+  "1fbab70e096fc25e": {
+    "source": "linkedin",
+    "title": "Production Supervisor",
+    "company": "UztexGroup",
+    "url": "https://uz.linkedin.com/jobs/view/production-supervisor-at-uztexgroup-4446550876",
+    "description": "",
+    "location": "Развязка Ташкент-Джизак, Ташкентская область, Узбекистан",
+    "salary": "",
+    "posted": "",
+    "score": 32,
+    "score_reasons": [
+      "совпадение в названии: production",
+      "локация: Ташкент"
+    ],
+    "id": "1fbab70e096fc25e",
+    "shortlisted_at": "2026-07-29 08:45:29Z"
+  },
   "f3196a048be9e66c": {
     "source": "linkedin",
     "title": "CG Artist / Creative Retoucher",
