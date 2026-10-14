@@ -1,96 +1,55 @@
-# Подборка вакансий — 2026-10-13 13:49 UTC
+# Подборка вакансий — 2026-10-14 11:26 UTC
 
-Всего просмотрено: **169**. Новых подходящих: **11**.
+Всего просмотрено: **179**. Новых подходящих: **6**.
 
 > **Как откликнуться:** скопируй `ID` нужной вакансии и запусти workflow
 > **Actions → Apply to job → Run workflow**, вставив ID в поле `job_ids`
 > (можно несколько через запятую). Бот точечно подготовит письмо и
 > адаптированное резюме в папке `applications/`.
 
-## 1. Creative Producer Удалённо (Мир) Чем предстоит заниматься — Отвечать за производство моушн-креативов для performance-кам — @marketing_rabota_jobs  ·  84/100
+## 1. Project Manager Deepriver Soft Местоположение: Грузия Формат работы: Удаленно Опубликована: 12 — @wntdpm  ·  36/100
 _telegram_
 
-- 🆔 `6b610b2d085ff959`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/marketing_rabota_jobs/821
-- Почему подходит: совпадение в названии: producer, креатив, creative; совпадение в описании: продюсер; доп. сигналы: маркетинг, marketing, кампани, моушн, ии; удалёнка
-- Creative Producer Удалённо (Мир) Чем предстоит заниматься — Отвечать за производство моушн-креативов для performance-кампаний и руководить этим направлением. — Исследовать рынок и формировать креативную стратегию — это главный приоритет роли. — Создавать и организовывать производство десятков качест…
+- 🆔 `c99b9498fcd069e8`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/wntdpm/1468
+- Почему подходит: совпадение в названии: project manager; доп. сигналы: jira, ии; удалёнка
+- Project Manager Deepriver Soft Местоположение: Грузия Формат работы: Удаленно Опубликована: 12.10.2026 Требования: • Не менее 1 года опыта в управлении IT-проектами или на похожей роли • Хорошее практическое знание Jira: задачи, доски, воркфлоу • Базовое понимание процессов разработки ПО • Свободный…
 
-## 2. Creative Producer Ruby Labs is a leading tech company that creates and operates innovative consumer products across heal — @forproducer  ·  52/100
+## 2. #Вакансия #OperationsManager #manager #Fintech #Crypto #Fulltime #Remote #Удаленно Требуется Operations Manager (трек ро — @opento_crypto  ·  32/100
 _telegram_
 
-- 🆔 `1e23bc5efa9efa86`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/forproducer/2030
-- Почему подходит: совпадение в названии: producer, creative; доп. сигналы: ai; удалёнка
-- Creative Producer Ruby Labs is a leading tech company that creates and operates innovative consumer products across health, education, and entertainment industries. Remote work (Serbia, CET ±4). Job description on LinkedIn .
+- 🆔 `e7330eec0e4e3f31`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/opento_crypto/821
+- Почему подходит: совпадение в названии: operations manager; доп. сигналы: ии; удалёнка
+- #Вакансия #OperationsManager #manager #Fintech #Crypto #Fulltime #Remote #Удаленно Требуется Operations Manager (трек роста до COO) Ищем операционного менеджера, который возьмёт на себя управление операционной деятельностью международного финансового сервиса и станет правой рукой CEO. О компании Ico…
 
-## 3. Creative Producer Mira is a company that transforms hormone health through AI-powered technology, helping individuals tr — @forproducer  ·  52/100
+## 3. Project Manager | FinTech HES FinTech Местоположение: Польша Формат работы: Удаленно Опубликована: 12 — @wntdpm  ·  32/100
 _telegram_
 
-- 🆔 `30903e32bd7e2541`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/forproducer/2033
-- Почему подходит: совпадение в названии: producer, creative; доп. сигналы: ai; удалёнка
-- Creative Producer Mira is a company that transforms hormone health through AI-powered technology, helping individuals track and understand their hormones through every stage of life. Remote work (Belgrade, Serbia). Flexible working hours. Job description on LinkedIn .
-
-## 4. 🔹 Marketing Creatives Producer 🔹 Game Producer (Hybrid Casual) Tripledot Studios is one of the largest independent mobil — @forproducer  ·  48/100
-_telegram_
-
-- 🆔 `0004b3f0d857d071`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/forproducer/2036
-- Почему подходит: совпадение в названии: producer, creative; доп. сигналы: marketing, ai
-- 🔹 Marketing Creatives Producer 🔹 Game Producer (Hybrid Casual) Tripledot Studios is one of the largest independent mobile games companies in the world (Woodoku, Woodoku Blast, Solitaire, TripleTile). Hybrid (Minsk, Belarus).
-
-## 5. Creative Producer в Joyteractive — игровая студия, разработчик и издатель мобильных игр, специализирующаяся на жанре гол — @forproducer  ·  40/100
-_telegram_
-
-- 🆔 `70068a0db745eb8d`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/forproducer/2032
-- Почему подходит: совпадение в названии: producer, creative
-- Creative Producer в Joyteractive — игровая студия, разработчик и издатель мобильных игр, специализирующаяся на жанре головоломок. Ищет Дарья Ямпольская, её пост на LinkedIn .
-
-## 6. Project Manager LEIME Местоположение: Минск Формат работы: Удаленно Опубликована: 13 — @wntdpm  ·  40/100
-_telegram_
-
-- 🆔 `01b1bca52ba5082b`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/wntdpm/1453
-- Почему подходит: совпадение в названии: project manager; доп. сигналы: маркетинг, бренд, ии; удалёнка
-- Project Manager LEIME Местоположение: Минск Формат работы: Удаленно Опубликована: 13.10.2026 Требования: • От 3 лет опыта Project Manager в IT-разработке • Опыт одновременного ведения нескольких продуктов или проектов • Практический опыт Scrum / Kanban и планирования спринтов • Понимание процесса ра…
-
-## 7. 💼 💼 💼 Вакансии в маркетинге Product marketing manager (WoW Forever) / Overgear (удалёнка) Зарплата: до 230 000 ₽ /на рук — @careerspace  ·  40/100
-_telegram_
-
-- 🆔 `a418d877a4919499`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/careerspace/15452
-- Почему подходит: совпадение в описании: продюсер, креатив; доп. сигналы: маркетинг, marketing, кампани, design, ии; удалёнка
-- 💼 💼 💼 Вакансии в маркетинге Product marketing manager (WoW Forever) / Overgear (удалёнка) Зарплата: до 230 000 ₽ /на руки Подробнее Трейд-маркетолог / Zolla Зарплата: от 142 000 ₽ /на руки Подробнее Комьюнити-менеджер / Sminex Зарплата: от 120 000 ₽ /на руки Подробнее Маркетолог в IT-компанию / Mish…
-
-## 8. 🌸 Что нашли за неделю: 9 вакансий с прямым контактом Если вы у нас недавно — добро пожаловать, рады вам! В этой подборке — @careerwithh  ·  36/100
-_telegram_
-
-- 🆔 `2dcc6e297599ee6f`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/careerwithh/10004
-- Почему подходит: совпадение в описании: продюсер, креатив; доп. сигналы: маркетинг, дизайн, ии, ai; удалёнка
-- 🌸 Что нашли за неделю: 9 вакансий с прямым контактом Если вы у нас недавно — добро пожаловать, рады вам! В этой подборке мы собрали вакансии, где можно написать напрямую рекрутеру или нанимающему менеджеру компании. Контакт — в карточке вакансии 👇 🏢 Руководитель направления CRM — Альфа-Банк Москва 🏢…
-
-## 9. Project Manager (Gamedev) SETRA GAMES Местоположение: Весь мир Формат работы: Удаленно Опубликована: 12 — @wntdpm  ·  32/100
-_telegram_
-
-- 🆔 `adf5eb43175a9d42`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/wntdpm/1450
+- 🆔 `2acba57448013290`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/wntdpm/1460
 - Почему подходит: совпадение в названии: project manager; доп. сигналы: ии; удалёнка
-- Project Manager (Gamedev) SETRA GAMES Местоположение: Весь мир Формат работы: Удаленно Опубликована: 12.10.2026 Требования: • Обязателен опыт в геймдеве от 3-х лет • Будет плюсом знание английского Важно: 📌 Не рассматриваем кандидатов из РФ и РБ. О компании: Игровая студия, активно растёт и ищет спе…
+- Project Manager | FinTech HES FinTech Местоположение: Польша Формат работы: Удаленно Опубликована: 12.10.2026 Требования: • Опыт в IT Project Management от 5 лет, желательно в FinTech, банкинге или финансовом ПО • Опыт управления сложными web- или enterprise-проектами • Понимание полного цикла разра…
 
-## 10. Project Manager (PM) Galaxy Technology Местоположение: Весь мир Формат работы: Удаленно Опубликована: 13 — @wntdpm  ·  32/100
+## 4. Project Manager HES FinTech Местоположение: Польша Формат работы: Удаленно Опубликована: 13 — @wntdpm  ·  32/100
 _telegram_
 
-- 🆔 `2cba6d5218620571`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/wntdpm/1456
+- 🆔 `4f5dd213f9c37b03`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/wntdpm/1461
 - Почему подходит: совпадение в названии: project manager; доп. сигналы: ии; удалёнка
-- Project Manager (PM) Galaxy Technology Местоположение: Весь мир Формат работы: Удаленно Опубликована: 13.10.2026 Требования: • Опыт работы Project Manager • Сильные знания банковской сферы • Хороший английский для коммуникации О компании: Проекты в банковском домене. Контакт: recruitment@galaxytechn…
+- Project Manager HES FinTech Местоположение: Польша Формат работы: Удаленно Опубликована: 13.10.2026 Требования: • 5+ лет опыта в IT Project Management, желательно в FinTech или банковской сфере • Опыт управления сложными веб- или enterprise-проектами • Понимание полного SDLC, Agile и современных пра…
 
-## 11. Senior Producer (Film/TV/Digital/Live) YO IT Consulting is an IT company that helps businesses set up, optimize, and sca — @forproducer  ·  28/100
+## 5. Project Manager — TUGUN by Kamola Kelin  ·  32/100
+_linkedin · Ташкент, Ташкент, Узбекистан_
+
+- 🆔 `73b2cd5e65f41659`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://uz.linkedin.com/jobs/view/project-manager-at-tugun-by-kamola-kelin-4478173448
+- Почему подходит: совпадение в названии: project manager; локация: Ташкент
+
+## 6. Senior Project Manager в Acronis 📍 Сербия 💎 5+ лет опыта, Professional‑level English 🚀 Фаундер — Сергей Белоусов, соосно — @zarubezhom_jobs  ·  30/100
 _telegram_
 
-- 🆔 `3066d3a822252cd2`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/forproducer/2031
-- Почему подходит: совпадение в названии: producer; удалёнка
-- Senior Producer (Film/TV/Digital/Live) YO IT Consulting is an IT company that helps businesses set up, optimize, and scale their digital infrastructure. Remote work (Armenia). Job description on LinkedIn .
+- 🆔 `35cba4a89708c2e8`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/zarubezhom_jobs/4313
+- Почему подходит: совпадение в названии: project manager; совпадение в описании: проджект; доп. сигналы: ии
+- Senior Project Manager в Acronis 📍 Сербия 💎 5+ лет опыта, Professional‑level English 🚀 Фаундер — Сергей Белоусов, сооснователь венчурного фонда Runa Capital, который инвестировал в Monite, Chattermill, Sweatcoin и др. Acronis — разрабатывает решения для защиты данных, облачного хранения и др. Размер…
