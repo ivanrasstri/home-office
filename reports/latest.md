@@ -1,78 +1,40 @@
-# Подборка вакансий — 2026-10-20 11:08 UTC
+# Подборка вакансий — 2026-10-21 11:24 UTC
 
-Всего просмотрено: **174**. Новых подходящих: **9**.
+Всего просмотрено: **172**. Новых подходящих: **4**.
 
 > **Как откликнуться:** скопируй `ID` нужной вакансии и запусти workflow
 > **Actions → Apply to job → Run workflow**, вставив ID в поле `job_ids`
 > (можно несколько через запятую). Бот точечно подготовит письмо и
 > адаптированное резюме в папке `applications/`.
 
-## 1. Project manager / Операционный менеджер Местоположение: Весь мир Формат работы: Удаленно Опубликована: 19 — @wntdpm  ·  52/100
+## 1. Lead Creative Producer Ruby Labs is a leading tech company that creates and operates innovative consumer products across — @forproducer  ·  52/100
 _telegram_
 
-- 🆔 `fb4542396afb663e`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/wntdpm/1494
-- Почему подходит: совпадение в названии: project manager, операционный менеджер; доп. сигналы: ии; удалёнка
-- Project manager / Операционный менеджер Местоположение: Весь мир Формат работы: Удаленно Опубликована: 19.10.2026 Требования: • Системность, спокойствие и собранность, способность не потеряться в потоке идей и разложить всё по полочкам • Любовь к порядку, спискам, таблицам и когда всё сделано воврем…
+- 🆔 `1d0751b4ca50ec86`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/forproducer/2055
+- Почему подходит: совпадение в названии: producer, creative; доп. сигналы: ai; удалёнка
+- Lead Creative Producer Ruby Labs is a leading tech company that creates and operates innovative consumer products across health, education, and entertainment industries. Remote work (CET ±4 hours). Job description on LinkedIn.
 
-## 2. UI/UX Design Lead в X-FLOW 📍 Remote 💎 3+ года опыта, Figma, Photoshop, Russian - C1+, English - B1 🚀 Фаундеры — Александ — @zarubezhom_jobs  ·  34/100
+## 2. Junior / Middle Creative Producer в Green Code — продуктовая IT-компания, которая занимается разработкой и развитием соб — @forproducer  ·  52/100
 _telegram_
 
-- 🆔 `5efc8545d62c988b`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/zarubezhom_jobs/4329
-- Почему подходит: совпадение в описании: project manager; доп. сигналы: дизайн, design, motion, figma, ии; удалёнка
-- UI/UX Design Lead в X-FLOW 📍 Remote 💎 3+ года опыта, Figma, Photoshop, Russian - C1+, English - B1 🚀 Фаундеры — Александр Малыхин и Александр Веремеев. X-FLOW — компания по разработке мобильных игр (например, Happy Color). Размер команды — 51-200 Узнать подробнее: тут 🤝 Еще 150+ вакансий для дизайне…
+- 🆔 `b4ba898bfae721a0`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/forproducer/2056
+- Почему подходит: совпадение в названии: producer, creative; доп. сигналы: ии; удалёнка
+- Junior / Middle Creative Producer в Green Code — продуктовая IT-компания, которая занимается разработкой и развитием собственных игровых платформ. До $2К. Удалённая работа. Гибкое начало рабочего дня. Описание вакансии на GeekJob.ru Больше вакансий для junior-специалистов: @jobforjunior
 
-## 3. Project Manager Xmethod Зарплата: €4 000–4 500 в месяц Местоположение: Европейский часовой пояс Формат работы: Удаленно  — @wntdpm  ·  32/100
+## 3. ⚡️ Проджект менеджер в Xmethod Задачи: • вести до четырёх проектов на разных стадиях с общей командой разработки, QA и д — @careerstation_pm  ·  32/100
 _telegram_
 
-- 🆔 `658d6cae4e6bf873`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/wntdpm/1490
-- Почему подходит: совпадение в названии: project manager; доп. сигналы: дизайн; удалёнка
-- Project Manager Xmethod Зарплата: €4 000–4 500 в месяц Местоположение: Европейский часовой пояс Формат работы: Удаленно Опубликована: 19.10.2026 Требования: • От 1 года опыта именно в заказной software-разработке • Немецкий и английский B2+ • Понимание SDLC web/mobile-продуктов, релизов и процессов …
+- 🆔 `7c400a70e313d257`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/careerstation_pm/1516
+- Почему подходит: совпадение в названии: проджект; доп. сигналы: дизайн; удалёнка
+- ⚡️ Проджект менеджер в Xmethod Задачи: • вести до четырёх проектов на разных стадиях с общей командой разработки, QA и дизайна • проводить discovery и presale • отвечать за коммуникацию, требования, сроки, риски и качество поставки • вместе с CEO, архитектором и разработчиками прорабатывать решение …
 
-## 4. ⚡️ Проджект менеджер в Just AI Задачи: • Участие в планировании этапов и сроков проекта • Подготовка протоколов встреч и — @careerstation_pm  ·  32/100
+## 4. ✨ #вакансия Senior Product Manager в ArtWorkout Про ребят: - мобильное приложение для обучения рисованию: креатив, обуче — @rfoundersjobs  ·  28/100
 _telegram_
 
-- 🆔 `0fe837541baf36d7`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/careerstation_pm/1515
-- Почему подходит: совпадение в названии: проджект; доп. сигналы: дизайн, ии, ai
-- ⚡️ Проджект менеджер в Just AI Задачи: • Участие в планировании этапов и сроков проекта • Подготовка протоколов встреч и контроль выполнения договорённостей • Взаимодействие с разработчиками, дизайнерами и другими участниками команды • Подготовка статусов проекта для руководителя или заказчика. Пост…
-
-## 5. Production Superviaor Ice Cream — FC SINGAPORE SAMARKAND  ·  32/100
-_linkedin · Ташкент, Ташкент, Узбекистан_
-
-- 🆔 `e32d3be2139edc28`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://uz.linkedin.com/jobs/view/production-superviaor-ice-cream-4478278599
-- Почему подходит: совпадение в названии: production; локация: Ташкент
-
-## 6. Media Production Specialist в Onde — продуктовая IT-компания-резидент ПВТ, разрабатывающая платформу и мобильные приложе — @forproducer  ·  30/100
-_telegram_
-
-- 🆔 `9a9bfc5cfa4b286a`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/forproducer/2053
-- Почему подходит: совпадение в названии: production; совпадение в описании: producer; доп. сигналы: ии
-- Media Production Specialist в Onde — продуктовая IT-компания-резидент ПВТ, разрабатывающая платформу и мобильные приложения для организации on-demand сервисов такси, доставки и других услуг по вызову. Описание вакансии. Ищет Светлана Фурманова, её пост на LinkedIn .
-
-## 7. Резюме: SMM-специалист 👩‍💻 Валерия Ник tg: @smm_valeriiaaa Номер телефона: +84 - 03-9414-802 Email: shafranova_va@mail — @digital_jobster  ·  30/100
-_telegram_
-
-- 🆔 `ca5fb0ac311a3f04`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/digital_jobster/6503
-- Почему подходит: совпадение в описании: креатив; доп. сигналы: контент, дизайн, ии, ai; удалёнка
-- Резюме: SMM-специалист 👩‍💻 Валерия Ник tg: @smm_valeriiaaa Номер телефона: +84 - 03-9414-802 Email: shafranova_va@mail.ru https://www.tiktok.com/@shafranovaa Возраст: 21 Формат/Локация : Москва - Удаленка Привет! Я SMM-специалист, который сочетает креативный подход с ориентацией на результат. Люблю …
-
-## 8. Apply for the job - IT Operations Manager — B&B Computer Solutions  ·  28/100
-_linkedin · Мангит, Кашкадарьинская область, Узбекистан_
-
-- 🆔 `27d040f304265a1e`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://uz.linkedin.com/jobs/view/apply-for-the-job-it-operations-manager-at-b-b-computer-solutions-4481560391
-- Почему подходит: совпадение в названии: operations manager; страна: Узбекистан
-
-## 9. 🚀 #кандидат Senior Performance Marketer | International DTC Marketing Manager - 6+ лет в международном e-commerce и DTC- — @rfoundersjobs  ·  26/100
-_telegram_
-
-- 🆔 `e6836278078ce10b`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/rfoundersjobs/809
-- Почему подходит: совпадение в описании: креатив; доп. сигналы: marketing, кампани, бренд, контент, бюджет, ии
-- 🚀 #кандидат Senior Performance Marketer | International DTC Marketing Manager - 6+ лет в международном e-commerce и DTC-проектах. Ведёт рост через paid traffic, воронки, креативы, retention и аналитику. Рынки: США 🇺🇸 , Великобритания 🇬🇧 , Европа 🇪🇺 , ОАЭ 🇦🇪 , Саудовская Аравия 🇸🇦 и Япония 🇯🇵 . - Зап…
+- 🆔 `a398aeb5da362393`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/rfoundersjobs/810
+- Почему подходит: совпадение в названии: креатив; доп. сигналы: маркетинг, ии
+- ✨ #вакансия Senior Product Manager в ArtWorkout Про ребят: - мобильное приложение для обучения рисованию: креатив, обучение и геймификация в одном продукте; - 1M+ iOS MAU и 1.5M+ Android MAU по всему миру; - ~80 млн событий в ClickHouse в день, 600+ A/B-экспериментов за историю продукта. Что предсто…
