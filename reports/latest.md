@@ -1,40 +1,48 @@
-# Подборка вакансий — 2026-10-21 11:24 UTC
+# Подборка вакансий — 2026-10-22 11:24 UTC
 
-Всего просмотрено: **172**. Новых подходящих: **4**.
+Всего просмотрено: **169**. Новых подходящих: **5**.
 
 > **Как откликнуться:** скопируй `ID` нужной вакансии и запусти workflow
 > **Actions → Apply to job → Run workflow**, вставив ID в поле `job_ids`
 > (можно несколько через запятую). Бот точечно подготовит письмо и
 > адаптированное резюме в папке `applications/`.
 
-## 1. Lead Creative Producer Ruby Labs is a leading tech company that creates and operates innovative consumer products across — @forproducer  ·  52/100
+## 1. 🔹 Lead Creative Producer 🔹 Creative Producer в Appercut — продуктовая IT-компания, которая занимается созданием и развит — @forproducer  ·  48/100
 _telegram_
 
-- 🆔 `1d0751b4ca50ec86`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/forproducer/2055
-- Почему подходит: совпадение в названии: producer, creative; доп. сигналы: ai; удалёнка
-- Lead Creative Producer Ruby Labs is a leading tech company that creates and operates innovative consumer products across health, education, and entertainment industries. Remote work (CET ±4 hours). Job description on LinkedIn.
+- 🆔 `e07427bf6fb33e1c`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/forproducer/2058
+- Почему подходит: совпадение в названии: producer, creative; удалёнка
+- 🔹 Lead Creative Producer 🔹 Creative Producer в Appercut — продуктовая IT-компания, которая занимается созданием и развитием своих собственных мобильных приложений. Remote work. Ищет Анастасия С., её пост на LinkedIn .
 
-## 2. Junior / Middle Creative Producer в Green Code — продуктовая IT-компания, которая занимается разработкой и развитием соб — @forproducer  ·  52/100
+## 2. 🔥 #вакансия Head of Marketing (B2B + PLG) в Phygital+ Про ребят: - AI-платформа для креативных и дизайн-команд: помогают — @rfoundersjobs  ·  40/100
 _telegram_
 
-- 🆔 `b4ba898bfae721a0`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/forproducer/2056
-- Почему подходит: совпадение в названии: producer, creative; доп. сигналы: ии; удалёнка
-- Junior / Middle Creative Producer в Green Code — продуктовая IT-компания, которая занимается разработкой и развитием собственных игровых платформ. До $2К. Удалённая работа. Гибкое начало рабочего дня. Описание вакансии на GeekJob.ru Больше вакансий для junior-специалистов: @jobforjunior
+- 🆔 `193d594d79717e27`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/rfoundersjobs/811
+- Почему подходит: совпадение в названии: креатив; доп. сигналы: маркетинг, marketing, контент, дизайн, figma, ии
+- 🔥 #вакансия Head of Marketing (B2B + PLG) в Phygital+ Про ребят: - AI-платформа для креативных и дизайн-команд: помогают крупным компаниям быстрее создавать визуальный контент с помощью нейросетей; - 200+ enterprise-клиентов — Яндекс, Альфа-Банк, X5, Лента, Авито, МТС, агентства Depot, Setters, Grea…
 
-## 3. ⚡️ Проджект менеджер в Xmethod Задачи: • вести до четырёх проектов на разных стадиях с общей командой разработки, QA и д — @careerstation_pm  ·  32/100
+## 3. Senior Marketing Operations Manager — Netlify  ·  32/100
+_weworkremotely · Remote_
+
+- 🆔 `3a08df016d790f9d`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://weworkremotely.com/remote-jobs/netlify-senior-marketing-operations-manager
+- Почему подходит: совпадение в названии: operations manager; доп. сигналы: marketing; удалёнка
+- Headquarters: Remote About the Team Netlify is a product-led growth company, and Revenue Operations owns the systems, data, and infrastructure that turn that growth into revenue.&nbsp; With a large volume of people discovering and signing up for Netlify every day, Marketing Operations is critical to…
+
+## 4. Project Manager Freedom Bank Местоположение: Алматы Формат работы: Офис Опубликована: 21 — @wntdpm  ·  32/100
 _telegram_
 
-- 🆔 `7c400a70e313d257`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/careerstation_pm/1516
-- Почему подходит: совпадение в названии: проджект; доп. сигналы: дизайн; удалёнка
-- ⚡️ Проджект менеджер в Xmethod Задачи: • вести до четырёх проектов на разных стадиях с общей командой разработки, QA и дизайна • проводить discovery и presale • отвечать за коммуникацию, требования, сроки, риски и качество поставки • вместе с CEO, архитектором и разработчиками прорабатывать решение …
+- 🆔 `44d1be50c230cfae`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/wntdpm/1502
+- Почему подходит: совпадение в названии: project manager; доп. сигналы: ии; удалёнка
+- Project Manager Freedom Bank Местоположение: Алматы Формат работы: Офис Опубликована: 21.10.2026 Требования: • Понимание банковских процессов, архитектуры систем и принципов интеграции • Знание SQL, REST/SOAP API, JSON/XML • Умение собирать и формализовать требования, готовить ТЗ, User Stories и Acc…
 
-## 4. ✨ #вакансия Senior Product Manager в ArtWorkout Про ребят: - мобильное приложение для обучения рисованию: креатив, обуче — @rfoundersjobs  ·  28/100
+## 5. PM Design JT MARKETING Местоположение: Весь мир Формат работы: Удаленно Опубликована: 20 — @wntdpm  ·  30/100
 _telegram_
 
-- 🆔 `a398aeb5da362393`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/rfoundersjobs/810
-- Почему подходит: совпадение в названии: креатив; доп. сигналы: маркетинг, ии
-- ✨ #вакансия Senior Product Manager в ArtWorkout Про ребят: - мобильное приложение для обучения рисованию: креатив, обучение и геймификация в одном продукте; - 1M+ iOS MAU и 1.5M+ Android MAU по всему миру; - ~80 млн событий в ClickHouse в день, 600+ A/B-экспериментов за историю продукта. Что предсто…
+- 🆔 `3b2c0403aba735a3`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/wntdpm/1498
+- Почему подходит: совпадение в описании: креатив; доп. сигналы: marketing, дизайн, design, ии; удалёнка
+- PM Design JT MARKETING Местоположение: Весь мир Формат работы: Удаленно Опубликована: 20.10.2026 Требования: • Опыт управления дизайн-командой от 8 человек или двумя командами одновременно, и построения процессов • Опыт и с продуктовым дизайном, и с поточным креативным производством • Понимание диза…
