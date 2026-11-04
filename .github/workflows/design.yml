@@ -1,0 +1,68 @@
+name: Designer
+
+# Дизайнер по брифу: HTML-макет в стиле одной из 84 дизайн-систем.
+# Запуск вручную; результат — артефакт запуска (в репозиторий не коммитится).
+on:
+  workflow_dispatch:
+    inputs:
+      brief:
+        description: "Бриф: что делаем, для кого и о чём"
+        required: true
+        type: string
+      kind:
+        description: "Формат"
+        required: true
+        type: choice
+        default: landing
+        options: [landing, deck, onepager, resume, post, email, ui]
+      style:
+        description: "Стиль (slug из галереи, напр. linear.app). Пусто — подберёт Claude"
+        required: false
+        type: string
+      polish:
+        description: "Второй проход арт-директора (дольше и дороже)"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  design:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate design (Claude)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          API_KEY_21ST: ${{ secrets.API_KEY_21ST }}
+          DESIGNER_MODEL: ${{ vars.DESIGNER_MODEL }}
+          BRIEF: ${{ inputs.brief }}
+          KIND: ${{ inputs.kind }}
+          STYLE: ${{ inputs.style }}
+          POLISH: ${{ inputs.polish }}
+        run: |
+          args=(make "$BRIEF" --kind "$KIND" --out dist)
+          if [ -n "$STYLE" ]; then args+=(--style "$STYLE"); fi
+          if [ "$POLISH" = "true" ]; then args+=(--polish); fi
+          python -m designer "${args[@]}"
+          python -m designer gallery --out dist/gallery.html
+
+      - name: Upload design
+        uses: actions/upload-artifact@v4
+        with:
+          name: design
+          path: dist/

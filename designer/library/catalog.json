@@ -1,0 +1,2005 @@
+[
+ {
+  "slug": "1win",
+  "name": "1win",
+  "category": "Медиа и потребительская техника",
+  "tagline": "Crypto casino and sportsbook. Near-black canvas, vivid green action color, dense game-tile rails",
+  "theme": "dark",
+  "palette": [
+   "#141415",
+   "#F0F2F5",
+   "#00B24B",
+   "#0075FF",
+   "#FFFFFF",
+   "#2E3035",
+   "#2D2F33",
+   "#9AA1B1"
+  ],
+  "fonts": [
+   "Inter"
+  ],
+  "canvas": "#141415",
+  "ink": "#F0F2F5",
+  "accent": "#00B24B"
+ },
+ {
+  "slug": "airbnb",
+  "name": "Airbnb",
+  "category": "E-commerce и ритейл",
+  "tagline": "Travel marketplace. Warm coral accent, photography-driven, rounded UI",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#222222",
+   "#FF385C",
+   "#E00B41",
+   "#FFD1DA",
+   "#C13515",
+   "#B32505",
+   "#460479"
+  ],
+  "fonts": [
+   "Airbnb Cereal VF"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#222222",
+  "accent": "#FF385C"
+ },
+ {
+  "slug": "airtable",
+  "name": "Airtable",
+  "category": "Дизайн и креатив",
+  "tagline": "Spreadsheet-database hybrid. Colorful, friendly, structured data aesthetic",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#181D26",
+   "#0D1218",
+   "#333840",
+   "#41454D",
+   "#DDDDDD",
+   "#9297A0",
+   "#F8FAFC"
+  ],
+  "fonts": [
+   "Haas Groot Disp",
+   "Haas",
+   "Inter Display"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#181D26",
+  "accent": "#181D26"
+ },
+ {
+  "slug": "aljazeera",
+  "name": "Al Jazeera",
+  "category": "Медиа и потребительская техника",
+  "tagline": "Global news network. Flat white paper, dense Roboto headlines, orange signature and live red",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#000000",
+   "#FA9000",
+   "#C31833",
+   "#333333",
+   "#595959",
+   "#F0F0F0",
+   "#D8D8D8"
+  ],
+  "fonts": [
+   "Roboto"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#000000",
+  "accent": "#FA9000"
+ },
+ {
+  "slug": "apple",
+  "name": "Apple",
+  "category": "Медиа и потребительская техника",
+  "tagline": "Consumer electronics. Premium white space, SF Pro, cinematic imagery",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#1D1D1F",
+   "#0066CC",
+   "#0071E3",
+   "#2997FF",
+   "#CCCCCC",
+   "#333333",
+   "#7A7A7A"
+  ],
+  "fonts": [
+   "SF Pro Display",
+   "SF Pro Text"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#1D1D1F",
+  "accent": "#0066CC"
+ },
+ {
+  "slug": "binance",
+  "name": "Binance",
+  "category": "Финтех и крипта",
+  "tagline": "Crypto exchange. Bold Binance Yellow on monochrome, trading-floor urgency",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#181A20",
+   "#FCD535",
+   "#F0B90B",
+   "#3A3A1F",
+   "#EAECEF",
+   "#707A8A",
+   "#929AA5"
+  ],
+  "fonts": [
+   "BinanceNova",
+   "BinancePlex"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#181A20",
+  "accent": "#FCD535"
+ },
+ {
+  "slug": "bmw",
+  "name": "BMW",
+  "category": "Авто",
+  "tagline": "Luxury automotive. Dark premium surfaces, precise German engineering aesthetic",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#262626",
+   "#1C69D4",
+   "#0653B6",
+   "#D6D6D6",
+   "#3C3C3C",
+   "#1A1A1A",
+   "#6B6B6B"
+  ],
+  "fonts": [
+   "BMW Type Next Latin"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#262626",
+  "accent": "#1C69D4"
+ },
+ {
+  "slug": "bmw-m",
+  "name": "BMW M",
+  "category": "Авто",
+  "tagline": "Performance automotive. Motorsport-inspired contrast, M color accents, precision-driven layout",
+  "theme": "dark",
+  "palette": [
+   "#000000",
+   "#FFFFFF",
+   "#0066B1",
+   "#BBBBBB",
+   "#E6E6E6",
+   "#7E7E7E",
+   "#3C3C3C",
+   "#262626"
+  ],
+  "fonts": [
+   "BMWTypeNextLatin",
+   "BMWTypeNextLatin Light"
+  ],
+  "canvas": "#000000",
+  "ink": "#FFFFFF",
+  "accent": "#0066B1"
+ },
+ {
+  "slug": "bugatti",
+  "name": "Bugatti",
+  "category": "Авто",
+  "tagline": "Luxury hypercar. Cinema-black canvas, monochrome austerity, monumental display type",
+  "theme": "dark",
+  "palette": [
+   "#000000",
+   "#FFFFFF",
+   "#D4A017",
+   "#CCCCCC",
+   "#E6E6E6",
+   "#999999",
+   "#666666",
+   "#262626"
+  ],
+  "fonts": [
+   "Bugatti Display",
+   "Bugatti Monospace",
+   "Bugatti Text Regular"
+  ],
+  "canvas": "#000000",
+  "ink": "#FFFFFF",
+  "accent": "#D4A017"
+ },
+ {
+  "slug": "cal",
+  "name": "Cal.com",
+  "category": "Продуктивность и SaaS",
+  "tagline": "Open-source scheduling. Clean neutral UI, developer-oriented simplicity",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#111111",
+   "#374151",
+   "#242424",
+   "#E5E7EB",
+   "#6B7280",
+   "#898989",
+   "#F3F4F6"
+  ],
+  "fonts": [
+   "Cal Sans",
+   "Inter",
+   "JetBrains Mono"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#111111",
+  "accent": "#374151"
+ },
+ {
+  "slug": "claude",
+  "name": "Claude",
+  "category": "AI и LLM",
+  "tagline": "Anthropic's AI assistant. Warm terracotta accent, clean editorial layout",
+  "theme": "light",
+  "palette": [
+   "#FAF9F5",
+   "#141413",
+   "#CC785C",
+   "#A9583E",
+   "#E6DFD8",
+   "#3D3D3A",
+   "#252523",
+   "#6C6A64"
+  ],
+  "fonts": [
+   "Copernicus",
+   "StyreneB",
+   "JetBrains Mono"
+  ],
+  "canvas": "#FAF9F5",
+  "ink": "#141413",
+  "accent": "#CC785C"
+ },
+ {
+  "slug": "clay",
+  "name": "Clay",
+  "category": "Дизайн и креатив",
+  "tagline": "Creative agency. Organic shapes, soft gradients, art-directed layout",
+  "theme": "light",
+  "palette": [
+   "#FFFAF0",
+   "#0A0A0A",
+   "#0A1A1A",
+   "#1F1F1F",
+   "#E5E5E5",
+   "#3A3A3A",
+   "#1A1A1A",
+   "#6A6A6A"
+  ],
+  "fonts": [
+   "Plain Black",
+   "Inter"
+  ],
+  "canvas": "#FFFAF0",
+  "ink": "#0A0A0A",
+  "accent": "#0A1A1A"
+ },
+ {
+  "slug": "clickhouse",
+  "name": "ClickHouse",
+  "category": "Бэкенд и DevOps",
+  "tagline": "Fast analytics database. Yellow-accented, technical documentation style",
+  "theme": "dark",
+  "palette": [
+   "#0A0A0A",
+   "#FFFFFF",
+   "#FAFF69",
+   "#E6EB52",
+   "#3A3A1F",
+   "#CCCCCC",
+   "#E6E6E6",
+   "#888888"
+  ],
+  "fonts": [
+   "Inter",
+   "JetBrains Mono"
+  ],
+  "canvas": "#0A0A0A",
+  "ink": "#FFFFFF",
+  "accent": "#FAFF69"
+ },
+ {
+  "slug": "cohere",
+  "name": "Cohere",
+  "category": "AI и LLM",
+  "tagline": "Enterprise AI platform. Vibrant gradients, data-rich dashboard aesthetic",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#212121",
+   "#003C33",
+   "#17171C",
+   "#000000",
+   "#071829",
+   "#EEECE7",
+   "#EDFCE9"
+  ],
+  "fonts": [
+   "CohereText",
+   "Unica77 Cohere Web",
+   "CohereMono"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#212121",
+  "accent": "#003C33"
+ },
+ {
+  "slug": "coinbase",
+  "name": "Coinbase",
+  "category": "Финтех и крипта",
+  "tagline": "Crypto exchange. Clean blue identity, trust-focused, institutional feel",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#0A0B0D",
+   "#0052FF",
+   "#003ECC",
+   "#A8B8CC",
+   "#5B616E",
+   "#7C828A",
+   "#A8ACB3"
+  ],
+  "fonts": [
+   "Coinbase Display",
+   "Coinbase Sans",
+   "Coinbase Mono"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#0A0B0D",
+  "accent": "#0052FF"
+ },
+ {
+  "slug": "composio",
+  "name": "Composio",
+  "category": "Бэкенд и DevOps",
+  "tagline": "Tool integration platform. Modern dark with colorful integration icons",
+  "theme": "dark",
+  "palette": [
+   "#0F0F0F",
+   "#FFFFFF",
+   "#0007CD",
+   "#0005A3",
+   "#1A26FF",
+   "#A8A8A8",
+   "#888888",
+   "#666666"
+  ],
+  "fonts": [
+   "abcDiatype",
+   "JetBrains Mono"
+  ],
+  "canvas": "#0F0F0F",
+  "ink": "#FFFFFF",
+  "accent": "#0007CD"
+ },
+ {
+  "slug": "cursor",
+  "name": "Cursor",
+  "category": "Инструменты разработчика",
+  "tagline": "AI-first code editor. Sleek dark interface, gradient accents",
+  "theme": "light",
+  "palette": [
+   "#F7F7F4",
+   "#26251E",
+   "#F54E00",
+   "#D04200",
+   "#5A5852",
+   "#807D72",
+   "#A09C92",
+   "#E6E5E0"
+  ],
+  "fonts": [
+   "CursorGothic",
+   "JetBrains Mono"
+  ],
+  "canvas": "#F7F7F4",
+  "ink": "#26251E",
+  "accent": "#F54E00"
+ },
+ {
+  "slug": "dell-1996",
+  "name": "Dell (1996)",
+  "category": "Ретро-веб",
+  "tagline": "Catalog-era enterprise web. Literal black page frame, flat color-block \"ribbon cards\", chunky Helvetica-Black titles over Times Roman body, and hand-cut GIF stickers (NEW! bursts, award seals, beveled product photos).",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#000000",
+   "#E91D2A",
+   "#FCC20F",
+   "#6A26A4",
+   "#0000EE",
+   "#8E8A25",
+   "#B3BD95"
+  ],
+  "fonts": [
+   "Arial Black",
+   "Helvetica",
+   "Times New Roman"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#000000",
+  "accent": "#E91D2A"
+ },
+ {
+  "slug": "dji",
+  "name": "DJI",
+  "category": "Медиа и потребительская техника",
+  "tagline": "Drone and camera maker. Studio product tiles, engineering-blue pills, tight Open Sans",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#262626",
+   "#0070D5",
+   "#0060EF",
+   "#DEEAFD",
+   "#1890FF",
+   "#BE4E04",
+   "#FA8C16"
+  ],
+  "fonts": [
+   "Open Sans"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#262626",
+  "accent": "#0070D5"
+ },
+ {
+  "slug": "elevenlabs",
+  "name": "ElevenLabs",
+  "category": "AI и LLM",
+  "tagline": "AI voice platform. Dark cinematic UI, audio-waveform aesthetics",
+  "theme": "light",
+  "palette": [
+   "#F5F5F5",
+   "#0C0A09",
+   "#292524",
+   "#4E4E4E",
+   "#777169",
+   "#A8A29E",
+   "#E7E5E4",
+   "#F0EFED"
+  ],
+  "fonts": [
+   "Waldenburg",
+   "Inter"
+  ],
+  "canvas": "#F5F5F5",
+  "ink": "#0C0A09",
+  "accent": "#0C0A09"
+ },
+ {
+  "slug": "expo",
+  "name": "Expo",
+  "category": "Инструменты разработчика",
+  "tagline": "React Native platform. Dark theme, tight letter-spacing, code-centric",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#171717",
+   "#0D74CE",
+   "#000000",
+   "#1A1A1A",
+   "#476CFF",
+   "#60646C",
+   "#999999"
+  ],
+  "fonts": [
+   "Inter",
+   "JetBrains Mono"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#171717",
+  "accent": "#0D74CE"
+ },
+ {
+  "slug": "ferrari",
+  "name": "Ferrari",
+  "category": "Авто",
+  "tagline": "Luxury automotive. Chiaroscuro black-white editorial, Ferrari Red with extreme sparseness",
+  "theme": "dark",
+  "palette": [
+   "#181818",
+   "#FFFFFF",
+   "#DA291C",
+   "#B01E0A",
+   "#9D2211",
+   "#969696",
+   "#666666",
+   "#8F8F8F"
+  ],
+  "fonts": [
+   "FerrariSans"
+  ],
+  "canvas": "#181818",
+  "ink": "#FFFFFF",
+  "accent": "#DA291C"
+ },
+ {
+  "slug": "figma",
+  "name": "Figma",
+  "category": "Дизайн и креатив",
+  "tagline": "Collaborative design tool. Vibrant multi-color, playful yet professional",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#000000",
+   "#DCEEB1",
+   "#E6E6E6",
+   "#F1F1F1",
+   "#F7F7F5",
+   "#C5B0F4",
+   "#F4ECD6"
+  ],
+  "fonts": [
+   "figmaSans",
+   "figmaMono"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#000000",
+  "accent": "#DCEEB1"
+ },
+ {
+  "slug": "framer",
+  "name": "Framer",
+  "category": "Дизайн и креатив",
+  "tagline": "Website builder. Bold black and blue, motion-first, design-forward",
+  "theme": "dark",
+  "palette": [
+   "#090909",
+   "#FFFFFF",
+   "#0099FF",
+   "#000000",
+   "#999999",
+   "#141414",
+   "#1C1C1C",
+   "#262626"
+  ],
+  "fonts": [
+   "GT Walsheim Framer Medium",
+   "GT Walsheim Medium",
+   "Inter"
+  ],
+  "canvas": "#090909",
+  "ink": "#FFFFFF",
+  "accent": "#0099FF"
+ },
+ {
+  "slug": "hashicorp",
+  "name": "HashiCorp",
+  "category": "Бэкенд и DevOps",
+  "tagline": "Infrastructure automation. Enterprise-clean, black and white",
+  "theme": "dark",
+  "palette": [
+   "#000000",
+   "#FFFFFF",
+   "#2B89FF",
+   "#B2B6BD",
+   "#656A76",
+   "#15181E",
+   "#1F232B",
+   "#3B3D45"
+  ],
+  "fonts": [
+   "hashicorpSans"
+  ],
+  "canvas": "#000000",
+  "ink": "#FFFFFF",
+  "accent": "#2B89FF"
+ },
+ {
+  "slug": "hp",
+  "name": "HP",
+  "category": "Медиа и потребительская техника",
+  "tagline": "PC and printer maker. Pure white canvas, HP Electric Blue signal CTA, geometric Forma DJR Micro, blue chevron decorations",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#1A1A1A",
+   "#024AD8",
+   "#296EF9",
+   "#0E3191",
+   "#C9E0FC",
+   "#000000",
+   "#292929"
+  ],
+  "fonts": [
+   "Forma DJR Micro"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#1A1A1A",
+  "accent": "#024AD8"
+ },
+ {
+  "slug": "ibm",
+  "name": "IBM",
+  "category": "Медиа и потребительская техника",
+  "tagline": "Enterprise technology. Carbon design system, structured blue palette",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#161616",
+   "#0F62FE",
+   "#525252",
+   "#8C8C8C",
+   "#F4F4F4",
+   "#E0E0E0",
+   "#262626"
+  ],
+  "fonts": [
+   "IBM Plex Sans"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#161616",
+  "accent": "#0F62FE"
+ },
+ {
+  "slug": "intercom",
+  "name": "Intercom",
+  "category": "Продуктивность и SaaS",
+  "tagline": "Customer messaging. Friendly blue palette, conversational UI patterns",
+  "theme": "light",
+  "palette": [
+   "#F5F1EC",
+   "#111111",
+   "#FF5600",
+   "#FFFFFF",
+   "#626260",
+   "#7B7B78",
+   "#9C9FA5",
+   "#EBE7E1"
+  ],
+  "fonts": [
+   "Saans",
+   "SaansMono"
+  ],
+  "canvas": "#F5F1EC",
+  "ink": "#111111",
+  "accent": "#FF5600"
+ },
+ {
+  "slug": "jobright",
+  "name": "Jobright",
+  "category": "AI и LLM",
+  "tagline": "AI job-hunting platform. Spring-mint green, black pill buttons, condensed Titillium headlines",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#000000",
+   "#00F0A0",
+   "#ECFFE0",
+   "#86909C",
+   "#E5E7EB",
+   "#F2F4F5"
+  ],
+  "fonts": [
+   "Titillium Web",
+   "Inter"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#000000",
+  "accent": "#00F0A0"
+ },
+ {
+  "slug": "kraken",
+  "name": "Kraken",
+  "category": "Финтех и крипта",
+  "tagline": "Crypto trading platform. Purple-accented dark UI, data-dense dashboards",
+  "theme": "dark",
+  "palette": [
+   "#101114",
+   "#FFFFFF",
+   "#7132F5",
+   "#5741D8",
+   "#5B1ECF",
+   "#149E61",
+   "#9497A9",
+   "#026B3F"
+  ],
+  "fonts": [
+   "Kraken-Brand",
+   "Kraken-Product"
+  ],
+  "canvas": "#101114",
+  "ink": "#FFFFFF",
+  "accent": "#7132F5"
+ },
+ {
+  "slug": "lamborghini",
+  "name": "Lamborghini",
+  "category": "Авто",
+  "tagline": "Luxury automotive. True black cathedral, gold accent, LamboType custom Neo-Grotesk",
+  "theme": "dark",
+  "palette": [
+   "#000000",
+   "#FFFFFF",
+   "#FFC000",
+   "#202020",
+   "#7D7D7D",
+   "#3860BE",
+   "#181818",
+   "#1EAEDB"
+  ],
+  "fonts": [
+   "LamboType",
+   "Open Sans"
+  ],
+  "canvas": "#000000",
+  "ink": "#FFFFFF",
+  "accent": "#FFC000"
+ },
+ {
+  "slug": "linear.app",
+  "name": "Linear",
+  "category": "Продуктивность и SaaS",
+  "tagline": "Project management for engineers. Ultra-minimal, precise, purple accent",
+  "theme": "dark",
+  "palette": [
+   "#010102",
+   "#F7F8F8",
+   "#5E6AD2",
+   "#FFFFFF",
+   "#828FFF",
+   "#5E69D1",
+   "#D0D6E0",
+   "#8A8F98"
+  ],
+  "fonts": [
+   "Linear Display",
+   "Linear Text",
+   "Linear Mono"
+  ],
+  "canvas": "#010102",
+  "ink": "#F7F8F8",
+  "accent": "#5E6AD2"
+ },
+ {
+  "slug": "lovable",
+  "name": "Lovable",
+  "category": "Инструменты разработчика",
+  "tagline": "AI full-stack builder. Playful gradients, friendly dev aesthetic",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#111111",
+   "#3B82F6",
+   "#1C1C1C",
+   "#ECEAE4",
+   "#F7F4ED",
+   "#5F5F5D",
+   "#FCFBF8"
+  ],
+  "fonts": [
+   "Camera Plain Variable"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#111111",
+  "accent": "#3B82F6"
+ },
+ {
+  "slug": "mastercard",
+  "name": "Mastercard",
+  "category": "Финтех и крипта",
+  "tagline": "Global payments network. Warm cream canvas, orbital pill shapes, editorial warmth",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#111111",
+   "#CF4500",
+   "#141413",
+   "#F3F0EE",
+   "#F37338",
+   "#EB001B",
+   "#F79E1B"
+  ],
+  "fonts": [
+   "MarkForMC",
+   "MarkOffcForMC",
+   "SofiaSans"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#111111",
+  "accent": "#CF4500"
+ },
+ {
+  "slug": "mercury",
+  "name": "Mercury",
+  "category": "Финтех и крипта",
+  "tagline": "Startup banking platform. Ink-violet night world, indigo action pill, light custom sans",
+  "theme": "light",
+  "palette": [
+   "#FBFCFD",
+   "#28253B",
+   "#5266EB",
+   "#FFFFFF",
+   "#9CB4E8",
+   "#FBFBFF",
+   "#EDECFB",
+   "#171721"
+  ],
+  "fonts": [
+   "arcadiaDisplay",
+   "arcadia"
+  ],
+  "canvas": "#FBFCFD",
+  "ink": "#28253B",
+  "accent": "#5266EB"
+ },
+ {
+  "slug": "meta",
+  "name": "Meta",
+  "category": "E-commerce и ритейл",
+  "tagline": "Tech retail store. Photography-first, binary light/dark surfaces, Meta Blue CTAs",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#1C1E21",
+   "#0064E0",
+   "#0457CB",
+   "#0091FF",
+   "#000000",
+   "#1876F2",
+   "#385898"
+  ],
+  "fonts": [
+   "Optimistic VF"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#1C1E21",
+  "accent": "#0064E0"
+ },
+ {
+  "slug": "minimax",
+  "name": "Minimax",
+  "category": "AI и LLM",
+  "tagline": "AI model provider. Bold dark interface with neon accents",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#0A0A0A",
+   "#181E25",
+   "#FF5530",
+   "#EA5EC1",
+   "#1456F0",
+   "#3B82F6",
+   "#1D4ED8"
+  ],
+  "fonts": [
+   "DM Sans"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#0A0A0A",
+  "accent": "#181E25"
+ },
+ {
+  "slug": "mintlify",
+  "name": "Mintlify",
+  "category": "Продуктивность и SaaS",
+  "tagline": "Documentation platform. Clean, green-accented, reading-optimized",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#0A0A0A",
+   "#00D4A4",
+   "#00B48A",
+   "#7CEBCB",
+   "#3772CF",
+   "#C37D0D",
+   "#1BA673"
+  ],
+  "fonts": [
+   "Inter",
+   "Geist Mono"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#0A0A0A",
+  "accent": "#00D4A4"
+ },
+ {
+  "slug": "miro",
+  "name": "Miro",
+  "category": "Дизайн и креатив",
+  "tagline": "Visual collaboration. Bright yellow accent, infinite canvas aesthetic",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#1C1C1E",
+   "#FFD02F",
+   "#FCB900",
+   "#FFF4C4",
+   "#746019",
+   "#4262FF",
+   "#5B76FE"
+  ],
+  "fonts": [
+   "Roobert PRO"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#1C1C1E",
+  "accent": "#FFD02F"
+ },
+ {
+  "slug": "mistral.ai",
+  "name": "Mistral AI",
+  "category": "AI и LLM",
+  "tagline": "Open-weight LLM provider. French-engineered minimalism, purple-toned",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#1F1F1F",
+   "#FA520F",
+   "#CC3A05",
+   "#FFD06A",
+   "#FFB83E",
+   "#FFA110",
+   "#FF8105"
+  ],
+  "fonts": [
+   "PP Editorial Old",
+   "Inter",
+   "JetBrains Mono"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#1F1F1F",
+  "accent": "#FA520F"
+ },
+ {
+  "slug": "mongodb",
+  "name": "MongoDB",
+  "category": "Бэкенд и DevOps",
+  "tagline": "Document database. Green leaf branding, developer documentation focus",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#001E2B",
+   "#00ED64",
+   "#00B545",
+   "#008C34",
+   "#00684A",
+   "#00A35C",
+   "#C3F0D2"
+  ],
+  "fonts": [
+   "Euclid Circular A",
+   "Source Code Pro"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#001E2B",
+  "accent": "#00ED64"
+ },
+ {
+  "slug": "mydealz",
+  "name": "mydealz",
+  "category": "E-commerce и ритейл",
+  "tagline": "German deals community. Dense white-card feed, hot and cold voting pill, brand green",
+  "theme": "light",
+  "palette": [
+   "#F3F5F7",
+   "#000000",
+   "#30A83C",
+   "#FFFFFF",
+   "#197E25",
+   "#DEFDE4",
+   "#CE1736",
+   "#034EB1"
+  ],
+  "fonts": [
+   "Averta CY"
+  ],
+  "canvas": "#F3F5F7",
+  "ink": "#000000",
+  "accent": "#30A83C"
+ },
+ {
+  "slug": "nerdwallet",
+  "name": "NerdWallet",
+  "category": "Финтех и крипта",
+  "tagline": "Personal finance comparison platform. Deep spruce green, mint washes, near-square corners",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#000000",
+   "#008254",
+   "#006642",
+   "#00482F",
+   "#9AE600",
+   "#E8FDAC",
+   "#DDFA88"
+  ],
+  "fonts": [
+   "Gotham",
+   "GothamDisplay"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#000000",
+  "accent": "#008254"
+ },
+ {
+  "slug": "nike",
+  "name": "Nike",
+  "category": "E-commerce и ритейл",
+  "tagline": "Athletic retail. Monochrome UI, massive uppercase Futura, full-bleed photography",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#111111",
+   "#D30005",
+   "#F5F5F5",
+   "#39393B",
+   "#4B4B4D",
+   "#707072",
+   "#9E9EA0"
+  ],
+  "fonts": [
+   "Nike Futura ND",
+   "Helvetica Now Display Medium",
+   "Helvetica Now Text"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#111111",
+  "accent": "#D30005"
+ },
+ {
+  "slug": "nintendo-2001",
+  "name": "Nintendo.com (2001)",
+  "category": "Ретро-веб",
+  "tagline": "Y2K \"console chrome\" web. Brushed-periwinkle beveled metal panels, a halftone-dotted carbon nav glowing amber, outlined Arial-Black box-art wordmarks over circuit-board hero fields, and a pixel Mario welcome bubble.",
+  "theme": "light",
+  "palette": [
+   "#7A8ABA",
+   "#21242E",
+   "#E60012",
+   "#F68D1F",
+   "#ECAB37",
+   "#E48600",
+   "#9FBEE7",
+   "#ACACE7"
+  ],
+  "fonts": [
+   "Arial",
+   "Arial Black"
+  ],
+  "canvas": "#7A8ABA",
+  "ink": "#21242E",
+  "accent": "#E60012"
+ },
+ {
+  "slug": "notion",
+  "name": "Notion",
+  "category": "Продуктивность и SaaS",
+  "tagline": "All-in-one workspace. Warm minimalism, serif headings, soft surfaces",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#1A1A1A",
+   "#5645D4",
+   "#4534B3",
+   "#3A2A99",
+   "#0A1530",
+   "#070F24",
+   "#1A2A52"
+  ],
+  "fonts": [
+   "Notion Sans"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#1A1A1A",
+  "accent": "#5645D4"
+ },
+ {
+  "slug": "nvidia",
+  "name": "NVIDIA",
+  "category": "Медиа и потребительская техника",
+  "tagline": "GPU computing. Green-black energy, technical power aesthetic",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#000000",
+   "#76B900",
+   "#5A8D00",
+   "#F7F7F7",
+   "#1A1A1A",
+   "#CCCCCC",
+   "#5E5E5E"
+  ],
+  "fonts": [
+   "NVIDIA-EMEA"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#000000",
+  "accent": "#76B900"
+ },
+ {
+  "slug": "ollama",
+  "name": "Ollama",
+  "category": "AI и LLM",
+  "tagline": "Run LLMs locally. Terminal-first, monochrome simplicity",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#000000",
+   "#FF5F56",
+   "#090909",
+   "#525252",
+   "#737373",
+   "#A3A3A3",
+   "#FAFAFA"
+  ],
+  "fonts": [
+   "SF Pro Rounded"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#000000",
+  "accent": "#FF5F56"
+ },
+ {
+  "slug": "opencode.ai",
+  "name": "OpenCode AI",
+  "category": "AI и LLM",
+  "tagline": "AI coding platform. Developer-centric dark theme",
+  "theme": "light",
+  "palette": [
+   "#FDFCFC",
+   "#201D1D",
+   "#0F0000",
+   "#302C2C",
+   "#424245",
+   "#646262",
+   "#6E6E73",
+   "#9A9898"
+  ],
+  "fonts": [
+   "Berkeley Mono"
+  ],
+  "canvas": "#FDFCFC",
+  "ink": "#201D1D",
+  "accent": "#0F0000"
+ },
+ {
+  "slug": "oracle",
+  "name": "Oracle",
+  "category": "Бэкенд и DevOps",
+  "tagline": "Enterprise cloud and database software. Warm neutral ladder, charcoal-only actions, red saved for the wordmark",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#161513",
+   "#C74634",
+   "#312D2A",
+   "#47423E",
+   "#211E1C",
+   "#FBF9F8",
+   "#F5F4F2"
+  ],
+  "fonts": [
+   "Georgia",
+   "Oracle Sans"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#161513",
+  "accent": "#C74634"
+ },
+ {
+  "slug": "oura",
+  "name": "Oura",
+  "category": "Медиа и потребительская техника",
+  "tagline": "Smart ring wellness brand. Warm paper cream, editorial serif, earth-tone accents",
+  "theme": "light",
+  "palette": [
+   "#F7F1E8",
+   "#1C1B1A",
+   "#2A72DE",
+   "#FFFFFF",
+   "#4A4741",
+   "#6B443D",
+   "#39221E",
+   "#AF751B"
+  ],
+  "fonts": [
+   "Editorial New",
+   "AkkuratLL"
+  ],
+  "canvas": "#F7F1E8",
+  "ink": "#1C1B1A",
+  "accent": "#2A72DE"
+ },
+ {
+  "slug": "pinterest",
+  "name": "Pinterest",
+  "category": "Медиа и потребительская техника",
+  "tagline": "Visual discovery platform. Red accent, masonry grid, image-first",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#000000",
+   "#E60023",
+   "#CC001F",
+   "#211922",
+   "#33332E",
+   "#262622",
+   "#62625B"
+  ],
+  "fonts": [
+   "Pin Sans"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#000000",
+  "accent": "#E60023"
+ },
+ {
+  "slug": "playstation",
+  "name": "PlayStation",
+  "category": "Медиа и потребительская техника",
+  "tagline": "Gaming console retail. Three-surface channel layout, cyan hover-scale interaction",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#000000",
+   "#0070D1",
+   "#0064B7",
+   "#004D8D",
+   "#53B1FF",
+   "#D53B00",
+   "#AA2F00"
+  ],
+  "fonts": [
+   "PlayStation SST"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#000000",
+  "accent": "#0070D1"
+ },
+ {
+  "slug": "posthog",
+  "name": "PostHog",
+  "category": "Бэкенд и DevOps",
+  "tagline": "Product analytics. Playful hedgehog branding, developer-friendly dark UI",
+  "theme": "light",
+  "palette": [
+   "#EEEFE9",
+   "#23251D",
+   "#F7A501",
+   "#DD9001",
+   "#B17816",
+   "#4D4F46",
+   "#33342D",
+   "#6C6E63"
+  ],
+  "fonts": [
+   "IBM Plex Sans Variable",
+   "Source Code Pro"
+  ],
+  "canvas": "#EEEFE9",
+  "ink": "#23251D",
+  "accent": "#F7A501"
+ },
+ {
+  "slug": "raycast",
+  "name": "Raycast",
+  "category": "Инструменты разработчика",
+  "tagline": "Productivity launcher. Sleek dark chrome, vibrant gradient accents",
+  "theme": "dark",
+  "palette": [
+   "#07080A",
+   "#F4F4F6",
+   "#57C1FF",
+   "#FFFFFF",
+   "#E8E8E8",
+   "#000000",
+   "#CDCDCD",
+   "#D3D3D4"
+  ],
+  "fonts": [
+   "Inter"
+  ],
+  "canvas": "#07080A",
+  "ink": "#F4F4F6",
+  "accent": "#57C1FF"
+ },
+ {
+  "slug": "renault",
+  "name": "Renault",
+  "category": "Авто",
+  "tagline": "French automotive. Vivid aurora gradients, NouvelR proprietary typeface, zero-radius buttons",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#000000",
+   "#FFED00",
+   "#E6D200",
+   "#222222",
+   "#333333",
+   "#666666",
+   "#8A8A8A"
+  ],
+  "fonts": [
+   "NouvelR"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#000000",
+  "accent": "#FFED00"
+ },
+ {
+  "slug": "replicate",
+  "name": "Replicate",
+  "category": "AI и LLM",
+  "tagline": "Run ML models via API. Clean white canvas, code-forward",
+  "theme": "light",
+  "palette": [
+   "#F9F7F3",
+   "#202020",
+   "#EA2804",
+   "#C01F00",
+   "#FFFFFF",
+   "#3A3A3A",
+   "#575757",
+   "#646464"
+  ],
+  "fonts": [
+   "rb-freigeist-neue",
+   "basier-square",
+   "jetbrains-mono"
+  ],
+  "canvas": "#F9F7F3",
+  "ink": "#202020",
+  "accent": "#EA2804"
+ },
+ {
+  "slug": "resend",
+  "name": "Resend",
+  "category": "Продуктивность и SaaS",
+  "tagline": "Email API for developers. Minimal dark theme, monospace accents",
+  "theme": "dark",
+  "palette": [
+   "#000000",
+   "#FCFDFF",
+   "#FF801F",
+   "#A1A4A5",
+   "#888E90",
+   "#464A4D",
+   "#0A0A0C",
+   "#101012"
+  ],
+  "fonts": [
+   "Domaine Display",
+   "ABC Favorit",
+   "Inter"
+  ],
+  "canvas": "#000000",
+  "ink": "#FCFDFF",
+  "accent": "#FF801F"
+ },
+ {
+  "slug": "revolut",
+  "name": "Revolut",
+  "category": "Финтех и крипта",
+  "tagline": "Digital banking. Sleek dark interface, gradient cards, fintech precision",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#191C1F",
+   "#494FDF",
+   "#4F55F1",
+   "#3A40C4",
+   "#1F2226",
+   "#3A3D40",
+   "#505A63"
+  ],
+  "fonts": [
+   "Aeonik Pro",
+   "Inter"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#191C1F",
+  "accent": "#494FDF"
+ },
+ {
+  "slug": "runwayml",
+  "name": "Runway",
+  "category": "AI и LLM",
+  "tagline": "AI creative-tools platform with an editorial film-festival aesthetic — cinematic dark heroes, paper-white reading bands, single proprietary sans, and pure black pill CTAs.",
+  "theme": "dark",
+  "palette": [
+   "#000000",
+   "#FFFFFF",
+   "#767D88",
+   "#1A1A1A",
+   "#7D848E",
+   "#27272A",
+   "#404040",
+   "#A7A7A7"
+  ],
+  "fonts": [
+   "abcNormal"
+  ],
+  "canvas": "#000000",
+  "ink": "#FFFFFF",
+  "accent": "#FFFFFF"
+ },
+ {
+  "slug": "sanity",
+  "name": "Sanity",
+  "category": "Бэкенд и DevOps",
+  "tagline": "Headless content platform with a dark-first editorial marketing surface — 112px display type, IBM Plex Mono technical eyebrows, and a single coral-red accent reserved for the highest-priority CTA.",
+  "theme": "dark",
+  "palette": [
+   "#000000",
+   "#FFFFFF",
+   "#0052EF",
+   "#0B0B0B",
+   "#212121",
+   "#B9B9B9",
+   "#F36458",
+   "#353535"
+  ],
+  "fonts": [
+   "waldenburgNormal",
+   "IBM Plex Mono",
+   "Helvetica"
+  ],
+  "canvas": "#000000",
+  "ink": "#FFFFFF",
+  "accent": "#0052EF"
+ },
+ {
+  "slug": "sap",
+  "name": "SAP",
+  "category": "Продуктивность и SaaS",
+  "tagline": "Enterprise business software. White canvas, flat blue bands, application-frame chrome",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#000000",
+   "#0057D2",
+   "#0040B0",
+   "#022879",
+   "#6BC0FF",
+   "#F5F6F7",
+   "#EAECEE"
+  ],
+  "fonts": [
+   "72 Brand Variable"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#000000",
+  "accent": "#0057D2"
+ },
+ {
+  "slug": "sentry",
+  "name": "Sentry",
+  "category": "Бэкенд и DevOps",
+  "tagline": "Error monitoring. Dark dashboard, data-dense, pink-purple accent",
+  "theme": "dark",
+  "palette": [
+   "#1F1633",
+   "#FFFFFF",
+   "#C2EF4E",
+   "#150F23",
+   "#FA7FAA",
+   "#6A5FC1",
+   "#422082",
+   "#79628C"
+  ],
+  "fonts": [
+   "Sentri Display",
+   "Rubik",
+   "Monaco"
+  ],
+  "canvas": "#1F1633",
+  "ink": "#FFFFFF",
+  "accent": "#C2EF4E"
+ },
+ {
+  "slug": "shopify",
+  "name": "Shopify",
+  "category": "E-commerce и ритейл",
+  "tagline": "E-commerce platform. Dark-first cinematic, neon green accent, ultra-light display type",
+  "theme": "dark",
+  "palette": [
+   "#000000",
+   "#FFFFFF",
+   "#1E2C31",
+   "#0A0A0A",
+   "#FBFBF5",
+   "#D4D4D8",
+   "#A1A1AA",
+   "#71717A"
+  ],
+  "fonts": [
+   "NeueHaasGrotesk Display",
+   "Inter Variable"
+  ],
+  "canvas": "#000000",
+  "ink": "#FFFFFF",
+  "accent": "#1E2C31"
+ },
+ {
+  "slug": "slack",
+  "name": "Slack",
+  "category": "Продуктивность и SaaS",
+  "tagline": "An inspired interpretation of Slacc's design language — a workplace messaging brand built on a deep aubergine primary, with cream-lavender hero gradients, blue inline links, and pill CTAs. The system ",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#1D1D1D",
+   "#4A154B",
+   "#481A54",
+   "#611F69",
+   "#592466",
+   "#696969",
+   "#1264A3"
+  ],
+  "fonts": [
+   "Salesforce-Avant-Garde",
+   "Salesforce-Sans"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#1D1D1D",
+  "accent": "#4A154B"
+ },
+ {
+  "slug": "spacex",
+  "name": "SpaceX",
+  "category": "Медиа и потребительская техника",
+  "tagline": "Space technology. Stark black and white, full-bleed imagery, futuristic",
+  "theme": "dark",
+  "palette": [
+   "#000000",
+   "#FFFFFF",
+   "#0000EE",
+   "#F0F0FA",
+   "#0A0A0A",
+   "#3A3A3F",
+   "#E0E0E8",
+   "#5A5A5F"
+  ],
+  "fonts": [
+   "D-DIN-Bold",
+   "D-DIN"
+  ],
+  "canvas": "#000000",
+  "ink": "#FFFFFF",
+  "accent": "#0000EE"
+ },
+ {
+  "slug": "spotify",
+  "name": "Spotify",
+  "category": "Медиа и потребительская техника",
+  "tagline": "Music streaming. Vibrant green on dark, bold type, album-art-driven",
+  "theme": "dark",
+  "palette": [
+   "#121212",
+   "#FFFFFF",
+   "#1ED760",
+   "#1F1F1F",
+   "#181818",
+   "#B3B3B3",
+   "#F3727F",
+   "#FFA42B"
+  ],
+  "fonts": [
+   "SpotifyMixUITitle",
+   "SpotifyMixUI"
+  ],
+  "canvas": "#121212",
+  "ink": "#FFFFFF",
+  "accent": "#1ED760"
+ },
+ {
+  "slug": "starbucks",
+  "name": "Starbucks",
+  "category": "E-commerce и ритейл",
+  "tagline": "Coffee retail flagship. Four-tier earth-green system, warm cream canvas, proprietary SoDoSans typography",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#000000",
+   "#00754A",
+   "#1E3932",
+   "#F2F0EB",
+   "#CBA258",
+   "#EDEBE9",
+   "#006241"
+  ],
+  "fonts": [
+   "SoDoSans",
+   "Helvetica Neue",
+   "Lander Tall"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#000000",
+  "accent": "#00754A"
+ },
+ {
+  "slug": "stripe",
+  "name": "Stripe",
+  "category": "Финтех и крипта",
+  "tagline": "Payment infrastructure. Signature purple gradients, weight-300 elegance",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#0D253D",
+   "#533AFD",
+   "#4434D4",
+   "#2E2B8C",
+   "#665EFD",
+   "#B9B9F9",
+   "#1C1E54"
+  ],
+  "fonts": [
+   "sohne-var"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#0D253D",
+  "accent": "#533AFD"
+ },
+ {
+  "slug": "supabase",
+  "name": "Supabase",
+  "category": "Бэкенд и DevOps",
+  "tagline": "Open-source Firebase alternative. Dark emerald theme, code-first",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#171717",
+   "#3ECF8E",
+   "#24B47E",
+   "#4ADE80",
+   "#212121",
+   "#707070",
+   "#9A9A9A"
+  ],
+  "fonts": [
+   "Circular"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#171717",
+  "accent": "#3ECF8E"
+ },
+ {
+  "slug": "superhuman",
+  "name": "Superhuman",
+  "category": "Инструменты разработчика",
+  "tagline": "Fast email client. Premium dark UI, keyboard-first, purple glow",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#292827",
+   "#1B1938",
+   "#0E0C1F",
+   "#73706D",
+   "#9A9794",
+   "#FAFAF8",
+   "#C9B4FA"
+  ],
+  "fonts": [
+   "Super Sans VF"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#292827",
+  "accent": "#1B1938"
+ },
+ {
+  "slug": "tesla",
+  "name": "Tesla",
+  "category": "Авто",
+  "tagline": "Electric vehicles. Radical subtraction, cinematic full-viewport photography, Universal Sans",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#111111",
+   "#3E6AE1",
+   "#171A20",
+   "#5C5E62",
+   "#393C41",
+   "#8E8E8E",
+   "#F4F4F4"
+  ],
+  "fonts": [
+   "Universal Sans Display",
+   "Universal Sans Text"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#111111",
+  "accent": "#3E6AE1"
+ },
+ {
+  "slug": "theverge",
+  "name": "The Verge",
+  "category": "Медиа и потребительская техника",
+  "tagline": "Tech editorial media. Acid-mint and ultraviolet accents, Manuka display type",
+  "theme": "dark",
+  "palette": [
+   "#131313",
+   "#FFFFFF",
+   "#3CFFD0",
+   "#5200FF",
+   "#3860BE",
+   "#2D2D2D",
+   "#3D00BF",
+   "#949494"
+  ],
+  "fonts": [
+   "Manuka",
+   "PolySans",
+   "PolySans Mono"
+  ],
+  "canvas": "#131313",
+  "ink": "#FFFFFF",
+  "accent": "#3CFFD0"
+ },
+ {
+  "slug": "together.ai",
+  "name": "Together AI",
+  "category": "AI и LLM",
+  "tagline": "Open-source AI infrastructure. Technical, blueprint-style design",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#000000",
+   "#010120",
+   "#959494",
+   "#313641",
+   "#FC4C02",
+   "#EF2CC1",
+   "#BDBBFF"
+  ],
+  "fonts": [
+   "The Future",
+   "PP Neue Montreal Mono"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#000000",
+  "accent": "#010120"
+ },
+ {
+  "slug": "uber",
+  "name": "Uber",
+  "category": "Медиа и потребительская техника",
+  "tagline": "Mobility platform. Bold black and white, tight type, urban energy",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#000000",
+   "#0000EE",
+   "#5E5E5E",
+   "#AFAFAF",
+   "#4B4B4B",
+   "#EFEFEF",
+   "#F3F3F3"
+  ],
+  "fonts": [
+   "UberMove",
+   "UberMoveText"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#000000",
+  "accent": "#0000EE"
+ },
+ {
+  "slug": "vercel",
+  "name": "Vercel",
+  "category": "Инструменты разработчика",
+  "tagline": "Frontend deployment platform. Black and white precision, Geist font",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#171717",
+   "#0070F3",
+   "#4D4D4D",
+   "#888888",
+   "#EBEBEB",
+   "#A1A1A1",
+   "#FAFAFA"
+  ],
+  "fonts": [
+   "Geist",
+   "Geist Mono"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#171717",
+  "accent": "#0070F3"
+ },
+ {
+  "slug": "vodafone",
+  "name": "Vodafone",
+  "category": "Медиа и потребительская техника",
+  "tagline": "Global telecom brand. Monumental uppercase display, Vodafone Red chapter bands",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#25282B",
+   "#E60000",
+   "#7E7E7E",
+   "#BEBEBE",
+   "#F2F2F2"
+  ],
+  "fonts": [
+   "Vodafone"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#25282B",
+  "accent": "#E60000"
+ },
+ {
+  "slug": "voltagent",
+  "name": "VoltAgent",
+  "category": "AI и LLM",
+  "tagline": "AI agent framework. Void-black canvas, emerald accent, terminal-native",
+  "theme": "dark",
+  "palette": [
+   "#101010",
+   "#F2F2F2",
+   "#00D992",
+   "#2FD6A1",
+   "#10B981",
+   "#FFFFFF",
+   "#BDBDBD",
+   "#8B949E"
+  ],
+  "fonts": [
+   "Inter",
+   "SFMono-Regular"
+  ],
+  "canvas": "#101010",
+  "ink": "#F2F2F2",
+  "accent": "#00D992"
+ },
+ {
+  "slug": "warp",
+  "name": "Warp",
+  "category": "Инструменты разработчика",
+  "tagline": "Modern terminal. Dark IDE-like interface, block-based command UI",
+  "theme": "dark",
+  "palette": [
+   "#2B2622",
+   "#F7F5F0",
+   "#C9C0AD",
+   "#DAD2C1",
+   "#AEA69C",
+   "#383330",
+   "#3F3A36"
+  ],
+  "fonts": [
+   "Inter",
+   "Instrument Serif",
+   "DM Mono"
+  ],
+  "canvas": "#2B2622",
+  "ink": "#F7F5F0",
+  "accent": "#F7F5F0"
+ },
+ {
+  "slug": "webflow",
+  "name": "Webflow",
+  "category": "Дизайн и креатив",
+  "tagline": "Visual web builder. Blue-accented, polished marketing site aesthetic",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#080808",
+   "#7A3DFF",
+   "#222222",
+   "#363636",
+   "#5A5A5A",
+   "#898989",
+   "#ABABAB"
+  ],
+  "fonts": [
+   "WF Visual Sans Variable",
+   "WFVisualSans-Mono"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#080808",
+  "accent": "#7A3DFF"
+ },
+ {
+  "slug": "wired",
+  "name": "WIRED",
+  "category": "Медиа и потребительская техника",
+  "tagline": "Tech magazine. Paper-white broadsheet density, custom serif, ink-blue links",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#000000",
+   "#057DBC",
+   "#1A1A1A",
+   "#757575",
+   "#E0E0E0",
+   "#F5F5F5"
+  ],
+  "fonts": [
+   "WiredDisplay",
+   "Apercu",
+   "BreveText"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#000000",
+  "accent": "#057DBC"
+ },
+ {
+  "slug": "wise",
+  "name": "Wise",
+  "category": "Финтех и крипта",
+  "tagline": "International money transfer. Bright green accent, friendly and clear",
+  "theme": "light",
+  "palette": [
+   "#FFFFFF",
+   "#0E0F0C",
+   "#9FE870",
+   "#CDFFAD",
+   "#C5EDAB",
+   "#E2F6D5",
+   "#163300",
+   "#454745"
+  ],
+  "fonts": [
+   "Wise Sans",
+   "Inter"
+  ],
+  "canvas": "#FFFFFF",
+  "ink": "#0E0F0C",
+  "accent": "#9FE870"
+ },
+ {
+  "slug": "x.ai",
+  "name": "xAI",
+  "category": "AI и LLM",
+  "tagline": "Elon Musk's AI lab. Stark monochrome, futuristic minimalism",
+  "theme": "dark",
+  "palette": [
+   "#0A0A0A",
+   "#FFFFFF",
+   "#FF7A17",
+   "#FAFAF7",
+   "#DADBDF",
+   "#7D8187",
+   "#212327",
+   "#1A1C20"
+  ],
+  "fonts": [
+   "universalSans",
+   "GeistMono"
+  ],
+  "canvas": "#0A0A0A",
+  "ink": "#FFFFFF",
+  "accent": "#FF7A17"
+ },
+ {
+  "slug": "zapier",
+  "name": "Zapier",
+  "category": "Продуктивность и SaaS",
+  "tagline": "Automation platform. Warm orange, friendly illustration-driven",
+  "theme": "light",
+  "palette": [
+   "#FFFEFB",
+   "#201515",
+   "#FF4F00",
+   "#2F2A26",
+   "#36342E",
+   "#605D52",
+   "#939084",
+   "#C5C0B1"
+  ],
+  "fonts": [
+   "Degular Display",
+   "Inter"
+  ],
+  "canvas": "#FFFEFB",
+  "ink": "#201515",
+  "accent": "#FF4F00"
+ }
+]

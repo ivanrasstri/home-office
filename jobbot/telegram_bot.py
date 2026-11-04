@@ -7,6 +7,8 @@
   /search — собирает свежую подборку и присылает карточки с кнопками.
   Кнопка «✍️ Откликнуться» под вакансией → бот точечно через Claude готовит
   письмо + адаптированное резюме и присылает их прямо в чат.
+  /design — дизайнер: бриф → три стиля на выбор → готовый HTML файлом.
+  /styles — поиск по библиотеке стилей (84 DESIGN.md).
 
 Дополнительно: по будням в заданный час (UTC) бот сам присылает подборку
 подписанным чатам (JOBBOT_AUTO_SEARCH=true).
@@ -16,7 +18,8 @@
   TELEGRAM_CHAT_ID      — разрешённые chat_id через запятую. Если задано —
                           бот реагирует только на них (рекомендуется). Если
                           пусто — доверяет первому, кто напишет /start (TOFU).
-  ANTHROPIC_API_KEY     — нужен для откликов (фаза 2).
+  ANTHROPIC_API_KEY     — нужен для откликов (фаза 2) и для дизайнера.
+  API_KEY_21ST          — (необязательно) референсы компонентов с 21st.dev.
   JOBBOT_DATA_DIR       — каталог состояния (на Railway укажи Volume, напр. /data).
   JOBBOT_AUTO_SEARCH    — "true"/"false", авто-подборка по расписанию (по умолч. true).
   JOBBOT_DAILY_HOUR_UTC — час UTC для авто-подборки (по умолч. 6 ≈ 11:00 Ташкент).
@@ -28,13 +31,20 @@ import html
 import json
 import logging
 import os
+import re
+import secrets
 import threading
 import time
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import requests
+
+from designer import catalog as dcatalog
+from designer import studio as dstudio
+from designer import twentyfirst
 
 from . import config, pipeline, store
 from .models import Job
@@ -85,11 +95,14 @@ class Telegram:
             payload["reply_markup"] = {"inline_keyboard": buttons}
         self._call("sendMessage", json=payload)
 
-    def send_document(self, chat_id: int, filename: str, content: str, caption: str = "") -> None:
+    def send_document(
+        self, chat_id: int, filename: str, content: str, caption: str = "", mime: str = "text/markdown"
+    ) -> None:
         self._call(
             "sendDocument",
             data={"chat_id": chat_id, "caption": caption[:1024]},
-            files={"document": (filename, content.encode("utf-8"), "text/markdown")},
+            files={"document": (filename, content.encode("utf-8"), mime)},
+            _timeout=120,
         )
 
     def answer_callback(self, cb_id: str, text: str = "") -> None:
@@ -210,12 +223,143 @@ def do_apply(tg: Telegram, chat_id: int, job_id: str) -> None:
 
 
 # --------------------------------------------------------------------------- #
+# Дизайнер: бриф → 3 стиля на выбор → HTML-файл
+# --------------------------------------------------------------------------- #
+DESIGN_HELP = (
+    "🎨 <b>Дизайнер</b> делает макеты в стиле одной из 84 дизайн-систем "
+    "(Linear, Stripe, Apple, Spotify и другие).\n\n"
+    "Напиши бриф после команды:\n"
+    "<code>/design лендинг для студии моушн-дизайна, дерзко и тёмно</code>\n"
+    "<code>/design презентация для инвесторов: сервис аренды техники</code>\n"
+    "<code>/design резюме в стиле Linear</code>\n\n"
+    "Форматы: лендинг, презентация, one-pager, резюме, пост/баннер, письмо, "
+    "экран интерфейса. Назови стиль сам («в стиле Stripe») или выбери из трёх, "
+    "которые я предложу. Готовый HTML пришлю файлом.\n"
+    "<b>/styles</b> запрос — поиск по стилям, например <code>/styles тёмный финтех</code>."
+)
+
+_PENDING: dict[str, dict[str, str]] = {}  # id → бриф, пока человек выбирает стиль
+_PENDING_LOCK = threading.Lock()
+
+
+def _explicit_style(brief: str) -> "dcatalog.Style | None":
+    """«…в стиле Linear», «стиль: bmw m» → стиль из каталога."""
+    m = re.search(r"(?:в стиле|стиль|style)[:\s]+([\w.\- ]{2,30})", brief, re.I)
+    if not m:
+        return None
+    words = m.group(1).split()
+    for n in (2, 1):
+        if len(words) >= n:
+            s = dcatalog.get(" ".join(words[:n]))
+            if s:
+                return s
+    return None
+
+
+def do_styles(tg: Telegram, chat_id: int, query: str) -> None:
+    e = html.escape
+    if not query:
+        styles = dcatalog.load()
+        cats = Counter(s.category for s in styles)
+        lines = [f"В библиотеке <b>{len(styles)}</b> стилей:"]
+        lines += [f"• {e(c)} — {n}" for c, n in cats.most_common()]
+        lines.append("\nПоиск: <code>/styles тёмный финтех</code>, <code>/styles редакционный</code>")
+        tg.send_message(chat_id, "\n".join(lines))
+        return
+    found = dcatalog.search(query, limit=10)
+    if not found:
+        tg.send_message(
+            chat_id,
+            f"По «{e(query)}» ничего не нашёл. Попробуй: тёмный, светлый, премиум, "
+            "финтех, редакционный, игривый.",
+        )
+        return
+    lines = [f"Стили по «{e(query)}»:"]
+    lines += [f"• <b>{e(s.name)}</b> <code>{e(s.slug)}</code> — {e(s.tagline[:90])}" for s in found]
+    lines.append("\nВзять стиль: <code>/design … в стиле " + e(found[0].name) + "</code>")
+    tg.send_message(chat_id, "\n".join(lines))
+
+
+def do_design(tg: Telegram, chat_id: int, brief: str) -> None:
+    if not brief:
+        tg.send_message(chat_id, DESIGN_HELP)
+        return
+    kind = dstudio.guess_kind(brief)
+    style = _explicit_style(brief)
+    if style:
+        _start_render(tg, chat_id, brief, kind, style)
+        return
+    tg.send_message(chat_id, "🎨 Подбираю стили под бриф…")
+    try:
+        options = dstudio.Designer().suggest_styles(brief, n=3)
+    except Exception as e:  # сеть / ключ — не страшно, подберём по словам
+        log.warning("Подбор стилей через Claude не удался: %s", e)
+        options = [(s, "") for s in dcatalog.search(brief, limit=3)] or [
+            (s, "") for s in dcatalog.load()[:3]
+        ]
+    pid = secrets.token_hex(4)
+    with _PENDING_LOCK:
+        _PENDING[pid] = {"brief": brief, "kind": kind}
+    lines = [f"Формат: <b>{dstudio.KINDS[kind].title}</b>. Выбери направление:"]
+    buttons = []
+    for i, (s, why) in enumerate(options, 1):
+        theme = "тёмный" if s.theme == "dark" else "светлый"
+        lines.append(f"{i}. <b>{html.escape(s.name)}</b>, {theme} — {html.escape(why or s.tagline)}")
+        buttons.append([{"text": f"{i}. {s.name}", "callback_data": f"ds:{pid}:{s.slug}"[:64]}])
+    tg.send_message(chat_id, "\n".join(lines), buttons)
+
+
+def _start_render(tg: Telegram, chat_id: int, brief: str, kind: str, style: "dcatalog.Style") -> None:
+    tg.send_message(
+        chat_id,
+        f"🎨 Рисую: {dstudio.KINDS[kind].title.lower()} в стиле <b>{html.escape(style.name)}</b>. "
+        "Обычно это 2–5 минут, пришлю файлом.",
+    )
+    # Генерация долгая — в отдельном потоке, чтобы бот не замирал.
+    threading.Thread(target=_render, args=(tg, chat_id, brief, kind, style), daemon=True).start()
+
+
+def _render(tg: Telegram, chat_id: int, brief: str, kind: str, style: "dcatalog.Style") -> None:
+    try:
+        d = dstudio.Designer()
+        if not d.enabled:
+            tg.send_message(chat_id, "Для дизайна нужен ANTHROPIC_API_KEY на сервере.")
+            return
+        extra = config.load_resume() if kind == "resume" else ""
+        refs, used = twentyfirst.references_for(brief, kind)
+        page = d.make(brief, kind, style, extra=extra, references=refs)
+    except Exception as e:
+        log.exception("Дизайн не получился: %s", e)
+        tg.send_message(chat_id, f"⚠️ Не получилось: {html.escape(str(e))[:300]}")
+        return
+    caption = f"{dstudio.KINDS[kind].title} · стиль {style.name}"
+    if used:
+        caption += f"\nРеференс: {used[0]}"
+    caption += "\nОткрой файл в браузере."
+    fname = f"{kind}-{style.slug}-{dstudio.slugify(brief, 24)}.html"
+    tg.send_document(chat_id, fname, page, caption=caption, mime="text/html")
+
+
+def handle_design_choice(tg: Telegram, chat_id: int, data: str) -> None:
+    _, pid, slug = (data.split(":", 2) + ["", ""])[:3]
+    with _PENDING_LOCK:
+        job = _PENDING.pop(pid, None)
+    style = dcatalog.get(slug)
+    if not job or not style:
+        tg.send_message(chat_id, "Этот бриф уже устарел — пришли <b>/design</b> ещё раз.")
+        return
+    _start_render(tg, chat_id, job["brief"], job["kind"], style)
+
+
+# --------------------------------------------------------------------------- #
 # Обработка апдейтов
 # --------------------------------------------------------------------------- #
 HELP = (
     f"Я {NAME}, твой личный кадровик — но, в отличие от заводских, работаю "
     "на <b>тебя</b> 🤝\n\n"
     "<b>/search</b> — гляну, что есть свежего по твоему профилю\n"
+    "<b>/design</b> бриф — позову знакомого дизайнера: лендинг, презентация, резюме\n"
+    "<b>/styles</b> — библиотека стилей для дизайна\n"
     "<b>/help</b> — это сообщение\n\n"
     "Под каждой вакансией будет кнопка <b>✍️ Откликнуться</b> — жми, и я "
     "подготовлю сопроводительное письмо и подгоню резюме под вакансию."
@@ -249,6 +393,10 @@ def handle_message(tg: Telegram, msg: dict[str, Any]) -> None:
 
     if text.startswith("/search"):
         do_search(tg, chat_id)
+    elif text.startswith("/design"):
+        do_design(tg, chat_id, text.partition(" ")[2].strip())
+    elif text.startswith("/styles"):
+        do_styles(tg, chat_id, text.partition(" ")[2].strip())
     elif text.startswith("/help"):
         tg.send_message(chat_id, HELP)
     else:
@@ -265,6 +413,9 @@ def handle_callback(tg: Telegram, cb: dict[str, Any]) -> None:
     if data.startswith("apply:"):
         tg.answer_callback(cb_id, "Принял, оформляю…")
         do_apply(tg, chat_id, data.split(":", 1)[1])
+    elif data.startswith("ds:"):
+        tg.answer_callback(cb_id, "Принял, рисую…")
+        handle_design_choice(tg, chat_id, data)
     else:
         tg.answer_callback(cb_id)
 

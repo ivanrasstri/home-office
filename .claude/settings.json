@@ -1,0 +1,30 @@
+{
+  "enabledMcpjsonServers": ["21st"],
+  "permissions": {
+    "allow": [
+      "mcp__21st__search",
+      "mcp__21st__search_picker",
+      "mcp__21st__get_inspiration",
+      "mcp__21st__get_theme",
+      "mcp__21st__search_logo",
+      "mcp__21st__get_usage",
+      "mcp__21st__list_bookmarks",
+      "mcp__21st__list_bookmark_lists",
+      "mcp__21st__get_bookmark_list"
+    ],
+    "deny": [
+      "mcp__21st__delete_component",
+      "mcp__21st__delete_theme",
+      "mcp__21st__delete_template",
+      "mcp__21st__edit_component",
+      "mcp__21st__edit_theme",
+      "mcp__21st__edit_template",
+      "mcp__21st__edit_profile",
+      "mcp__21st__upload_profile_media",
+      "mcp__21st__submit_component",
+      "mcp__21st__withdraw_component",
+      "mcp__21st__resubmit_component",
+      "mcp__21st__remove_component_from_catalog"
+    ]
+  }
+}

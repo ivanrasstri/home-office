@@ -143,6 +143,66 @@ plugin from manifest…). PDF — растровый рендер, а PPTX со�
 За это отвечает сервис `pitchdeck_server/` — деплоится как второй Railway-
 сервис в этом же проекте, см. `pitchdeck_server/README.md`.
 
+## Дизайнер 🎨
+
+Отдельный инструмент: по брифу собирает готовый HTML-макет (лендинг,
+веб-презентацию, one-pager, резюме, пост/баннер, email-рассылку или экран
+интерфейса) в стиле одной из **84 дизайн-систем**, разобранных с реальных сайтов
+(Linear, Stripe, Apple, Spotify, Tesla…). Библиотека — `designer/library/`
+([VoltAgent/awesome-design-md](https://github.com/VoltAgent/awesome-design-md), MIT):
+у каждого стиля свой `DESIGN.md` с палитрой, типографикой, сеткой, компонентами
+и правилами «можно/нельзя».
+
+Как это работает:
+1. Если стиль не назван, Claude предлагает три подходящих под бриф.
+2. Claude получает полный `DESIGN.md` выбранного стиля и спецификацию формата и
+   собирает один самодостаточный HTML. Бренд клиента берётся из брифа, у
+   референса заимствуется только визуальный язык.
+3. Для лендингов и экранов интерфейса дизайнер подтягивает референс компонента с
+   **21st.dev** (если задан `API_KEY_21ST`): находит компонент под ключевую секцию
+   и переносит его структуру, перекрашивая токенами стиля.
+4. `--polish` — второй проход: арт-директор проверяет черновик по `DESIGN.md` и правит.
+
+```bash
+python -m designer gallery                       # dist/gallery.html — все стили с превью (без ключа)
+python -m designer list "тёмный финтех"          # поиск по стилям
+python -m designer show stripe                   # карточка стиля
+python -m designer make "лендинг для студии моушн-дизайна" --style linear
+python -m designer make "питчдек фестиваля" --kind deck --polish
+python -m designer make "резюме" --kind resume   # факты берутся из resume/resume.md
+python -m designer sync                          # подтянуть свежие DESIGN.md из апстрима
+```
+
+Где ещё работает:
+- **Telegram** — `/design бриф`: бот предлагает три стиля кнопками и присылает HTML
+  файлом. `/styles запрос` ищет по библиотеке.
+- **GitHub Actions** — **Actions → Designer → Run workflow** (бриф, формат, стиль,
+  polish), результат лежит в артефактах запуска.
+- **Claude Code** — скилл `.claude/skills/designer`: «сделай лендинг в стиле Stripe»
+  в сессии с этим репозиторием.
+
+Переменные: `ANTHROPIC_API_KEY` (обязательно), `DESIGNER_MODEL` (по умолчанию
+`claude-opus-5-5`), `DESIGNER_EFFORT` (по умолчанию `high`), `API_KEY_21ST`
+(необязательно), `DESIGNER_21ST_RETRIEVALS` (сколько компонентов 21st брать на
+дизайн, по умолчанию 1: на бесплатном тарифе их 2 в день).
+
+### 21st.dev в Claude Code
+
+В `.mcp.json` подключён MCP-сервер 21st.dev: поиск компонентов, тем и логотипов,
+код компонентов. Ключ в репозиторий не кладётся: конфиг читает его из переменной
+`API_KEY_21ST`.
+
+- Локально: `export API_KEY_21ST=21st_sk_...` перед запуском `claude`. При первом
+  запуске Claude Code спросит, доверять ли серверу из `.mcp.json`.
+- В облачных сессиях Claude Code добавь `API_KEY_21ST` в переменные окружения
+  (environment) на claude.ai.
+- В GitHub Actions: секрет `API_KEY_21ST`.
+
+В `.claude/settings.json` разрешены бесплатные инструменты только для чтения
+(поиск, темы, логотипы, квота), а правка и удаление компонентов, тем, шаблонов и
+профиля на 21st.dev запрещены. `get_component` спрашивает подтверждение, потому
+что тратит дневную квоту.
+
 ## Структура
 
 ```
@@ -162,6 +222,13 @@ figma_export/            # экспорт презентаций Figma в PDF + 
   build.py               # сборка PDF и PPTX из одних и тех же PNG
   __main__.py            # CLI: `python -m figma_export FILE_KEY`
 figma-plugin/            # плагин Figma: экспорт PDF/PPTX + публикация в веб, см. его README
+designer/                # дизайнер: бриф → HTML-макет в стиле одной из 84 дизайн-систем
+  library/               # DESIGN.md всех стилей + catalog.json (индекс)
+  catalog.py             # индекс стилей: тема, палитра, шрифты, поиск
+  studio.py              # Claude: подбор стиля, генерация, polish-проход
+  twentyfirst.py         # клиент MCP 21st.dev: референсы компонентов
+  gallery.py             # HTML-галерея всех стилей
+  __main__.py            # CLI: list / show / suggest / make / gallery / sync
 pitchdeck_server/        # веб-хостинг опубликованных презентаций (ссылка + аналитика)
   storage.py             # SQLite: презентации, просмотры, просмотры по слайдам
   render.py              # HTML-просмотрщик слайдов и дашборд аналитики
