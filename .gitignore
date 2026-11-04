@@ -9,3 +9,12 @@ pitchdeck_data/
 
 # дизайнер: сгенерированные макеты
 dist/
+
+# designer/tunnel3d: зависимости, исходники клиента и результаты рендера
+designer/tunnel3d/node_modules/
+designer/tunnel3d/refs/
+designer/tunnel3d/anim/
+designer/tunnel3d/raw_*
+designer/tunnel3d/n29*
+designer/tunnel3d/cfg_*.json
+designer/tunnel3d/package-lock.json
