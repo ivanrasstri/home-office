@@ -10,11 +10,12 @@ pitchdeck_data/
 # дизайнер: сгенерированные макеты
 dist/
 
-# designer/tunnel3d: зависимости, исходники клиента и результаты рендера
-designer/tunnel3d/node_modules/
+# designer/tunnel3d: исходники клиента и результаты рендера (3D-пакет в export/ коммитится)
 designer/tunnel3d/refs/
-designer/tunnel3d/anim/
 designer/tunnel3d/raw_*
-designer/tunnel3d/n29*
+designer/tunnel3d/fin_*
+designer/tunnel3d/*_dn.png
 designer/tunnel3d/cfg_*.json
-designer/tunnel3d/package-lock.json
+designer/tunnel3d/q_*
+designer/tunnel3d/quick_sheet*.png
+designer/tunnel3d/*.blend1
