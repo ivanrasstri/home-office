@@ -1,32 +1,48 @@
-# Подборка вакансий — 2026-11-04 13:58 UTC
+# Подборка вакансий — 2026-11-05 14:17 UTC
 
-Всего просмотрено: **178**. Новых подходящих: **3**.
+Всего просмотрено: **177**. Новых подходящих: **5**.
 
 > **Как откликнуться:** скопируй `ID` нужной вакансии и запусти workflow
 > **Actions → Apply to job → Run workflow**, вставив ID в поле `job_ids`
 > (можно несколько через запятую). Бот точечно подготовит письмо и
 > адаптированное резюме в папке `applications/`.
 
-## 1. Контент-продюсер в AvitoTech - команда рассказывают о технологиях Авито и делится опытом инженерных команд с профессиона — @forproducer  ·  42/100
+## 1. Supply Chain & Operations Manager - LATAM — Super Speciosa  ·  36/100
+_weworkremotely · Remote_
+
+- 🆔 `a1642acceba48f89`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://weworkremotely.com/remote-jobs/super-speciosa-supply-chain-operations-manager-latam
+- Почему подходит: совпадение в названии: operations manager; доп. сигналы: brand, ai; удалёнка
+- Headquarters: Mexico City, Mexico URL: http://superspeciosa.com Location: Fully remote, based in Colombia, Mexico, or Argentina Compensation: USD $2,500-$4,500 per month ($30,000-$54,000 annually), depending on relevant experience Schedule: Monday-Friday, 9:00 a.m.-5:00 p.m. U.S. Eastern Time, with …
+
+## 2. Резюме: Графический / Digital-дизайнер 🧑‍💻 Худжам Каримов Ник tg: @Hudjamkarimov Email: hudjamkarimov@gmail — @digital_jobster  ·  34/100
 _telegram_
 
-- 🆔 `f9f3da4b5cf7765a`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/forproducer/2061
-- Почему подходит: совпадение в названии: продюсер; совпадение в описании: producer; доп. сигналы: контент, ии; удалёнка
-- Контент-продюсер в AvitoTech - команда рассказывают о технологиях Авито и делится опытом инженерных команд с профессиональным сообществом. Москва, удалённая работа. Описание вакансии .
+- 🆔 `391ac10375c1412e`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/digital_jobster/6581
+- Почему подходит: совпадение в описании: креатив; доп. сигналы: бренд, дизайн, ии, ai, нейросет; удалёнка
+- Резюме: Графический / Digital-дизайнер 🧑‍💻 Худжам Каримов Ник tg: @Hudjamkarimov Email: hudjamkarimov@gmail.com https://www.instagram.com/hudjamka Возраст: 25 Формат/Локация : Бангкок, Таиланд (UTC+7) - Удаленка Привет! Я Худжам, графический / digital-дизайнер с опытом около двух лет: создаю визуаль…
 
-## 2. Marketing Project Manager (100% remote) в Tether : https://www — @evacuatejobs  ·  32/100
+## 3. Reels-продюсер / Сценарист коротких видео в компанию Пельмень Хаус Работодатель: Компания Пельмень Хаус Мы быстрорастуща — @digital_jobster  ·  32/100
 _telegram_
 
-- 🆔 `f4f87dc8645bc52c`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/evacuatejobs/6759
-- Почему подходит: совпадение в названии: project manager; доп. сигналы: marketing; удалёнка
-- Marketing Project Manager (100% remote) в Tether : https://www.remocate.app/jobs/marketing-project-manager-100-remote-tether Можно работать удалённо. Зарплата в валюте. При отклике укажите, что нашли вакансию на Remocate.
+- 🆔 `00d7cb5a5ec6fa2f`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/digital_jobster/6579
+- Почему подходит: совпадение в названии: продюсер; доп. сигналы: бренд, контент, ии
+- Reels-продюсер / Сценарист коротких видео в компанию Пельмень Хаус Работодатель: Компания Пельмень Хаус Мы быстрорастущая федеральная сеть ресторанов русского фастфуда. Мы не стартапчек с идеей, а работающая сеть с понятной моделью. Сейчас мы растем по всей стране, и контенту нужно успевать за нами.…
 
-## 3. ⭐️ #кандидат CMO | Head of Growth | Head of Product Marketing • CMO EdTech на UK, US, CIS рынках с ответственностью за в — @rfoundersjobs  ·  26/100
+## 4. Senior Product Marketing Manager в airSlate 📍 Remote (из ряда стран) 💎 6+ лет опыта в сфере маркетинга потребительских и — @zarubezhom_jobs  ·  30/100
 _telegram_
 
-- 🆔 `ba8cae80addbc31b`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/rfoundersjobs/820
-- Почему подходит: совпадение в описании: креатив; доп. сигналы: маркетинг, marketing, кампани, бюджет, ии, ai
-- ⭐️ #кандидат CMO | Head of Growth | Head of Product Marketing • CMO EdTech на UK, US, CIS рынках с ответственностью за выручку и P&L: revenue ×2 два года подряд при маржинальности 40-47% на кризисном рынке. • Выстроила маркетинг с нуля: команда 10+, модель привлечения, GTM воронки и система запусков…
+- 🆔 `eaf3831de203a549`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/zarubezhom_jobs/4376
+- Почему подходит: совпадение в описании: operations manager; доп. сигналы: маркетинг, marketing, ии, ai; удалёнка
+- Senior Product Marketing Manager в airSlate 📍 Remote (из ряда стран) 💎 6+ лет опыта в сфере маркетинга потребительских и B2B-продуктов, желательно в области ПО, инструментов повышения производительности, документооборота или смежных технологических областей, Excellent English 🚀 Фаундеры — Borys Shak…
+
+## 5. Project Manager / Analyst Microsoft Dynamics NAV Местоположение: Пояс МСК Формат работы: Удаленно Опубликована: 30 — @wntdpm  ·  28/100
+_telegram_
+
+- 🆔 `7945042eebbdb596`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/wntdpm/1542
+- Почему подходит: совпадение в названии: project manager; удалёнка
+- Project Manager / Analyst Microsoft Dynamics NAV Местоположение: Пояс МСК Формат работы: Удаленно Опубликована: 30.10.2026 Требования: • Опыт работы с Microsoft Dynamics NAV/Navision от 2 лет • Понимание архитектуры NAV, кастомизаций и логики доработок • Умение читать C/AL и работать с debugger • Оп…
