@@ -9,6 +9,7 @@
   письмо + адаптированное резюме и присылает их прямо в чат.
   /design — дизайнер: бриф → три стиля на выбор → готовый HTML файлом.
   /styles — поиск по библиотеке стилей (84 DESIGN.md).
+  /video  — видео LTX-2.5 со звуком: из текста или из фото (подпись /video …).
 
 Дополнительно: по будням в заданный час (UTC) бот сам присылает подборку
 подписанным чатам (JOBBOT_AUTO_SEARCH=true).
@@ -20,6 +21,9 @@
                           пусто — доверяет первому, кто напишет /start (TOFU).
   ANTHROPIC_API_KEY     — нужен для откликов (фаза 2) и для дизайнера.
   API_KEY_21ST          — (необязательно) референсы компонентов с 21st.dev.
+  LTXV_API_KEY          — (необязательно) ключ LTX API для /video (console.ltx.io).
+  LTX_MODEL / LTX_RESOLUTION / LTX_DURATION — умолчания для /video (fast, 1080p, 6).
+  LTX_MAX_USD           — потолок цены одного ролика в $ (по умолч. 5).
   JOBBOT_DATA_DIR       — каталог состояния (на Railway укажи Volume, напр. /data).
   JOBBOT_AUTO_SEARCH    — "true"/"false", авто-подборка по расписанию (по умолч. true).
   JOBBOT_DAILY_HOUR_UTC — час UTC для авто-подборки (по умолч. 6 ≈ 11:00 Ташкент).
@@ -33,6 +37,7 @@ import logging
 import os
 import re
 import secrets
+import tempfile
 import threading
 import time
 from collections import Counter
@@ -43,6 +48,7 @@ from typing import Any
 import requests
 
 from designer import catalog as dcatalog
+from designer import ltx
 from designer import studio as dstudio
 from designer import twentyfirst
 
@@ -104,6 +110,30 @@ class Telegram:
             files={"document": (filename, content.encode("utf-8"), mime)},
             _timeout=120,
         )
+
+    def get_file(self, file_id: str, limit: int = 20 * 1024 * 1024) -> bytes | None:
+        """Скачать файл из чата (фото, документ). Bot API отдаёт файлы до 20 МБ."""
+        info = self._call("getFile", json={"file_id": file_id})
+        path = (info.get("result") or {}).get("file_path") if info.get("ok") else None
+        if not path:
+            return None
+        try:
+            r = self.s.get(f"https://api.telegram.org/file/bot{self.token}/{path}", timeout=60)
+            r.raise_for_status()
+            return r.content[:limit]
+        except requests.RequestException as e:
+            log.warning("Telegram getFile не удался: %s", e)
+            return None
+
+    def send_video(self, chat_id: int, path: Path, caption: str = "") -> bool:
+        with open(path, "rb") as f:
+            res = self._call(
+                "sendVideo",
+                data={"chat_id": chat_id, "caption": caption[:1024], "supports_streaming": "true"},
+                files={"video": (path.name, f, "video/mp4")},
+                _timeout=300,
+            )
+        return bool(res.get("ok"))
 
     def answer_callback(self, cb_id: str, text: str = "") -> None:
         self._call("answerCallbackQuery", json={"callback_query_id": cb_id, "text": text[:200]})
@@ -352,6 +382,115 @@ def handle_design_choice(tg: Telegram, chat_id: int, data: str) -> None:
 
 
 # --------------------------------------------------------------------------- #
+# Видео: LTX-2.5 (текст или фото → mp4 со звуком)
+# --------------------------------------------------------------------------- #
+VIDEO_HELP = (
+    "🎬 <b>Видео LTX-2.5</b> — ролик со звуком по описанию или из картинки.\n\n"
+    "<code>/video неоновый тоннель, камера плавно летит вперёд, гул мотора</code>\n"
+    "Пришли <b>фото</b> с подписью <code>/video что происходит</code> или ответь "
+    "<code>/video …</code> на фото — оживлю этот кадр.\n\n"
+    "Настройки — словами в начале: <code>pro</code>, <code>720p</code>/<code>4k</code>, "
+    "<code>9:16</code>, <code>10s</code> или <code>auto</code>, <code>silent</code>, "
+    "камера <code>dolly_in</code>/<code>jib_up</code>/…\n"
+    "Например: <code>/video pro 9:16 8s dolly_in курьер на скутере въезжает в кадр</code>\n"
+    "Пиши лучше по-английски, 4–8 предложений: кадр, действие, камера, свет, звук."
+)
+_VIDEO_WORDS = {"silent": ("sound", False), "mute": ("sound", False), "auto": ("duration", None),
+                "fast": ("model", "ltx-2-5-fast"), "pro": ("model", "ltx-2-5-pro")}
+
+
+def parse_video_args(text: str) -> tuple[dict[str, Any], str]:
+    """Ведущие слова-настройки («pro 9:16 8s dolly_in …») → (параметры, промпт)."""
+    opts: dict[str, Any] = {}
+    words = text.split()
+    while words:
+        lw = words[0].lower()
+        if lw in _VIDEO_WORDS:
+            k, v = _VIDEO_WORDS[lw]
+            opts[k] = v
+        elif lw in ltx.TIERS:
+            opts["tier"] = lw
+        elif lw in ("16:9", "9:16", "1:1", "3:2", "2:3"):
+            opts["aspect"] = lw
+        elif lw in ltx.CAMERA:
+            opts["camera"] = lw
+        elif re.fullmatch(r"\d{1,2}(s|с|сек)", lw):
+            opts["duration"] = int(re.match(r"\d+", lw).group())
+        else:
+            break
+        words.pop(0)
+    return opts, " ".join(words)
+
+
+def _photo_id(msg: dict[str, Any]) -> str | None:
+    for m in (msg, msg.get("reply_to_message") or {}):
+        if m.get("photo"):
+            return m["photo"][-1]["file_id"]  # самое крупное превью
+        doc = m.get("document") or {}
+        if str(doc.get("mime_type", "")).startswith("image/"):
+            return doc["file_id"]
+    return None
+
+
+def do_video(tg: Telegram, chat_id: int, text: str, msg: dict[str, Any]) -> None:
+    photo = _photo_id(msg)
+    opts, prompt = parse_video_args(text)
+    if not prompt and not photo:
+        tg.send_message(chat_id, VIDEO_HELP)
+        return
+    try:
+        model = opts.get("model") or ltx.model_id(os.environ.get("LTX_MODEL", "fast"))
+        res = ltx.resolution(opts.get("tier") or os.environ.get("LTX_RESOLUTION", "1080p"), opts.get("aspect", "16:9"))
+        duration = opts["duration"] if "duration" in opts else int(os.environ.get("LTX_DURATION", "6"))
+        ltx.validate(model, res, duration, 24)
+        price = ltx.estimate(model, res, duration)
+    except (ltx.LTXError, ValueError) as e:
+        tg.send_message(chat_id, f"⚠️ {html.escape(str(e))}")
+        return
+    limit = float(os.environ.get("LTX_MAX_USD", "5"))
+    if price > limit:
+        tg.send_message(chat_id, f"Это ≈${price:.2f}, а потолок ${limit:.2f} (LTX_MAX_USD). Возьми короче или 720p.")
+        return
+    if not ltx.LTX().enabled:
+        tg.send_message(chat_id, "Для видео нужен LTXV_API_KEY на сервере (console.ltx.io → API Keys).")
+        return
+    secs = "длину выберет модель" if duration is None else f"{duration} с"
+    tg.send_message(
+        chat_id,
+        f"🎬 Снимаю {'из твоего кадра' if photo else 'по описанию'}: {res}, {secs}, "
+        f"{model.removeprefix('ltx-2-5-')}, ≈${price:.2f}. Пришлю, как будет готово.",
+    )
+    args = (tg, chat_id, prompt or "Subtle natural motion, the camera slowly pushes in.", photo, model, res,
+            duration, opts.get("sound", True), opts.get("camera"))
+    threading.Thread(target=_shoot, args=args, daemon=True).start()
+
+
+def _shoot(tg: Telegram, chat_id: int, prompt: str, photo: str | None, model: str, res: str,
+           duration: int | None, sound: bool, camera: str | None) -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        image = None
+        if photo:
+            data = tg.get_file(photo)
+            if not data:
+                tg.send_message(chat_id, "⚠️ Не смог скачать фото из чата (Telegram отдаёт файлы до 20 МБ).")
+                return
+            image = str(Path(tmp) / "frame.jpg")
+            Path(image).write_bytes(data)
+        try:
+            path = ltx.LTX().generate(Path(tmp) / "ltx.mp4", prompt, image=image, model=model, res=res,
+                                      duration=duration, sound=sound, camera=camera)
+        except Exception as e:
+            log.exception("Видео не получилось: %s", e)
+            tg.send_message(chat_id, f"⚠️ Не получилось: {html.escape(str(e))[:300]}")
+            return
+        if path.stat().st_size > 49 * 1024 * 1024:
+            tg.send_message(chat_id, "Ролик больше 50 МБ — Telegram не пропустит. Попробуй 1080p или короче.")
+            return
+        if not tg.send_video(chat_id, path, caption=f"LTX-2.5 · {res}\n{prompt[:900]}"):
+            tg.send_message(chat_id, "⚠️ Видео готово, но Telegram его не принял.")
+
+
+# --------------------------------------------------------------------------- #
 # Обработка апдейтов
 # --------------------------------------------------------------------------- #
 HELP = (
@@ -360,6 +499,7 @@ HELP = (
     "<b>/search</b> — гляну, что есть свежего по твоему профилю\n"
     "<b>/design</b> бриф — позову знакомого дизайнера: лендинг, презентация, резюме\n"
     "<b>/styles</b> — библиотека стилей для дизайна\n"
+    "<b>/video</b> описание — сниму ролик со звуком (или оживлю присланное фото)\n"
     "<b>/help</b> — это сообщение\n\n"
     "Под каждой вакансией будет кнопка <b>✍️ Откликнуться</b> — жми, и я "
     "подготовлю сопроводительное письмо и подгоню резюме под вакансию."
@@ -368,7 +508,7 @@ HELP = (
 
 def handle_message(tg: Telegram, msg: dict[str, Any]) -> None:
     chat_id = msg["chat"]["id"]
-    text = (msg.get("text") or "").strip()
+    text = (msg.get("text") or msg.get("caption") or "").strip()  # у фото команда в подписи
 
     if text.startswith("/start"):
         if not _allowed_env():
@@ -397,6 +537,8 @@ def handle_message(tg: Telegram, msg: dict[str, Any]) -> None:
         do_design(tg, chat_id, text.partition(" ")[2].strip())
     elif text.startswith("/styles"):
         do_styles(tg, chat_id, text.partition(" ")[2].strip())
+    elif text.startswith("/video"):
+        do_video(tg, chat_id, text.partition(" ")[2].strip(), msg)
     elif text.startswith("/help"):
         tg.send_message(chat_id, HELP)
     else:

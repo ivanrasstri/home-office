@@ -1,0 +1,101 @@
+name: Video (LTX-2.5)
+
+# Видео со звуком через LTX API: из текста или из кадра по ссылке.
+# Запуск вручную; mp4 лежит в артефактах запуска. Нужен секрет LTXV_API_KEY.
+on:
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: "Что в кадре: действие, камера, свет, звук (лучше по-английски, 4–8 предложений)"
+        required: true
+        type: string
+      image_url:
+        description: "Первый кадр, https-ссылка (пусто — видео из текста)"
+        required: false
+        type: string
+      last_frame_url:
+        description: "Последний кадр, https-ссылка (только вместе с первым)"
+        required: false
+        type: string
+      model:
+        description: "fast — дешевле, до 20 с; pro — качественнее, 6/8/10 с"
+        required: true
+        type: choice
+        default: fast
+        options: [fast, pro]
+      duration:
+        description: "Секунды (auto — по действию в промпте)"
+        required: true
+        type: choice
+        default: "6"
+        options: ["6", "8", "10", "12", "14", "16", "18", "20", auto]
+      resolution:
+        description: "Разрешение"
+        required: true
+        type: choice
+        default: 1080p
+        options: [720p, 1080p, 1440p, 4k]
+      aspect:
+        description: "Пропорции"
+        required: true
+        type: choice
+        default: "16:9"
+        options: ["16:9", "9:16", "1:1", "3:2", "2:3"]
+      camera:
+        description: "Движение камеры"
+        required: false
+        type: choice
+        default: none
+        options: [none, dolly_in, dolly_out, dolly_left, dolly_right, jib_up, jib_down, static, focus_shift]
+      silent:
+        description: "Без звука"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  video:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate video (LTX-2.5)
+        env:
+          LTXV_API_KEY: ${{ secrets.LTXV_API_KEY }}
+          LTX_MAX_USD: ${{ vars.LTX_MAX_USD }}
+          PROMPT: ${{ inputs.prompt }}
+          IMAGE_URL: ${{ inputs.image_url }}
+          LAST_FRAME_URL: ${{ inputs.last_frame_url }}
+          MODEL: ${{ inputs.model }}
+          DURATION: ${{ inputs.duration }}
+          RESOLUTION: ${{ inputs.resolution }}
+          ASPECT: ${{ inputs.aspect }}
+          CAMERA: ${{ inputs.camera }}
+          SILENT: ${{ inputs.silent }}
+        run: |
+          args=(video "$PROMPT" --model "$MODEL" --duration "$DURATION" --res "$RESOLUTION" --aspect "$ASPECT" --out dist)
+          if [ -n "$IMAGE_URL" ]; then args+=(--image "$IMAGE_URL"); fi
+          if [ -n "$LAST_FRAME_URL" ]; then args+=(--last-frame "$LAST_FRAME_URL"); fi
+          if [ "$CAMERA" != "none" ]; then args+=(--camera "$CAMERA"); fi
+          if [ "$SILENT" = "true" ]; then args+=(--silent); fi
+          python -m designer "${args[@]}"
+
+      - name: Upload video
+        uses: actions/upload-artifact@v4
+        with:
+          name: video
+          path: dist/*.mp4

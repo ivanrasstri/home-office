@@ -175,7 +175,7 @@ python -m designer sync                          # подтянуть свежи
 
 Где ещё работает:
 - **Telegram** — `/design бриф`: бот предлагает три стиля кнопками и присылает HTML
-  файлом. `/styles запрос` ищет по библиотеке.
+  файлом. `/styles запрос` ищет по библиотеке. `/video` — ролик LTX-2.5, см. ниже.
 - **GitHub Actions** — **Actions → Designer → Run workflow** (бриф, формат, стиль,
   polish), результат лежит в артефактах запуска.
 - **Claude Code** — скилл `.claude/skills/designer`: «сделай лендинг в стиле Stripe»
@@ -203,6 +203,56 @@ python -m designer sync                          # подтянуть свежи
 профиля на 21st.dev запрещены. `get_component` спрашивает подтверждение, потому
 что тратит дневную квоту.
 
+## Видео: LTX-2.5 🎬
+
+[LTX-2.5](https://ltx.io/model/ltx-2-5) от Lightricks генерирует видео сразу со звуком
+из текста, из кадра (или пары кадров — первого и последнего) и из аудио. Подключено
+через официальный LTX API (`designer/ltx.py`): задача ставится в очередь, клиент ждёт
+готовности и сразу скачивает mp4, потому что ссылка на результат быстро протухает.
+
+```bash
+python -m designer video "Slow push-in through a neon tunnel, light strips streak past; low hum." --estimate
+python -m designer video "The courier turns to camera and smiles; street noise." --image frame.png --res 720p
+python -m designer video "..." --image A.png --last-frame B.png --duration 8 --model pro
+python -m designer video "..." --audio track.mp3 --image cover.png      # клип под трек, 2–20 с
+```
+
+- Модели: `fast` — дешевле, на 720p/1080p при 24/25 fps до 20 с; `pro` — качественнее,
+  6/8/10 с. Обе до 4K, пропорции 16:9, 9:16, 1:1, 3:2, 2:3.
+- Цена за секунду: fast $0.09 (720p) / $0.13 (1080p) / $0.19 (1440p) / $0.30 (4K),
+  pro $0.12 / $0.17 / $0.25 / $0.39. Ролик 6 с 1080p fast стоит $0.78. Оплата —
+  предоплаченные кредиты на console.ltx.io. Бесплатного тарифа нет, попробовать можно
+  в Playground консоли.
+- `--estimate` показывает цену без запроса. `LTX_MAX_USD` — потолок цены одного ролика,
+  по умолчанию $5.
+
+Где ещё работает:
+- **Telegram** — `/video описание`. Чтобы оживить фото, пришли его с подписью
+  `/video …` или ответь этой командой на фото. Настройки — словами в начале:
+  `/video pro 9:16 8s dolly_in …`.
+- **GitHub Actions** — **Actions → Video (LTX-2.5) → Run workflow**. Нужен секрет
+  `LTXV_API_KEY`; mp4 лежит в артефактах запуска.
+- **Claude Code** — скилл `.claude/skills/ltx-video`. Например, «оживи кадр 294,
+  камера летит в тоннель». Скилл помнит правила промптов LTX и цены.
+- **Документация LTX в Claude Code** — официальный MCP-сервер поиска по docs.ltx.io:
+
+  ```bash
+  claude mcp add --transport http ltx-docs https://docs.ltx.io/_mcp/server
+  ```
+
+Ключ: console.ltx.io → API Keys.
+- Локально: `export LTXV_API_KEY=...`.
+- GitHub: секрет `LTXV_API_KEY`.
+- Railway: переменная `LTXV_API_KEY`.
+- Облачные сессии Claude Code: секрет окружения для хоста `api.ltx.io`. Прокси сам
+  подставит заголовок, а в `LTXV_API_KEY` достаточно любой заглушки.
+
+Другие пути, если API не подходит:
+- fal.ai: `lightricks/ltx-2.5/...`, цены те же.
+- Replicate: `lightricks/ltx-2.5-fast` — только fast, но дешевле.
+- Свой GPU: открытые веса `Lightricks/LTX-2.5` на Hugging Face и шаблоны ComfyUI.
+  Нужна NVIDIA от 32 ГБ VRAM. Лицензия бесплатна для компаний с выручкой до $10 млн в год.
+
 ## Структура
 
 ```
@@ -227,8 +277,9 @@ designer/                # дизайнер: бриф → HTML-макет в с�
   catalog.py             # индекс стилей: тема, палитра, шрифты, поиск
   studio.py              # Claude: подбор стиля, генерация, polish-проход
   twentyfirst.py         # клиент MCP 21st.dev: референсы компонентов
+  ltx.py                 # клиент LTX API: видео LTX-2.5 из текста, кадра или аудио
   gallery.py             # HTML-галерея всех стилей
-  __main__.py            # CLI: list / show / suggest / make / gallery / sync
+  __main__.py            # CLI: list / show / suggest / make / gallery / sync / video
 pitchdeck_server/        # веб-хостинг опубликованных презентаций (ссылка + аналитика)
   storage.py             # SQLite: презентации, просмотры, просмотры по слайдам
   render.py              # HTML-просмотрщик слайдов и дашборд аналитики
