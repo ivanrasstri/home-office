@@ -24,6 +24,7 @@
   LTXV_API_KEY          — (необязательно) ключ LTX API для /video (console.ltx.io).
   LTX_MODEL / LTX_RESOLUTION / LTX_DURATION — умолчания для /video (fast, 1080p, 6).
   LTX_MAX_USD           — потолок цены одного ролика в $ (по умолч. 5).
+  LTX_DAILY_USD         — дневной лимит трат на видео в $ (по умолч. 20).
   JOBBOT_DATA_DIR       — каталог состояния (на Railway укажи Volume, напр. /data).
   JOBBOT_AUTO_SEARCH    — "true"/"false", авто-подборка по расписанию (по умолч. true).
   JOBBOT_DAILY_HOUR_UTC — час UTC для авто-подборки (по умолч. 6 ≈ 11:00 Ташкент).
@@ -403,23 +404,29 @@ VIDEO_HELP = (
 )
 _VIDEO_WORDS = {"silent": ("sound", False), "mute": ("sound", False), "auto": ("duration", None),
                 "fast": ("model", "ltx-2-5-fast"), "pro": ("model", "ltx-2-5-pro")}
+SPEND_PATH = config.DATA_DIR / "ltx_spend.json"
+_SPEND_LOCK = threading.Lock()
 
 
 def parse_video_args(text: str) -> tuple[dict[str, Any], str]:
-    """Ведущие слова-настройки («pro 9:16 8s dolly_in …») → (параметры, промпт)."""
+    """Ведущие слова-настройки («pro 9:16 8s dolly_in …») → (параметры, промпт).
+
+    Слова (fast, pro, silent, auto, dolly_in…) считаются настройкой, только если написаны строчными:
+    «Fast cars race…» или «Static shot of…» в начале фразы остаются частью промпта.
+    """
     opts: dict[str, Any] = {}
     words = text.split()
     while words:
-        lw = words[0].lower()
-        if lw in _VIDEO_WORDS:
-            k, v = _VIDEO_WORDS[lw]
+        w, lw = words[0], words[0].lower()
+        if w in _VIDEO_WORDS:
+            k, v = _VIDEO_WORDS[w]
             opts[k] = v
+        elif w in ltx.CAMERA:
+            opts["camera"] = w
         elif lw in ltx.TIERS:
             opts["tier"] = lw
-        elif lw in ("16:9", "9:16", "1:1", "3:2", "2:3"):
+        elif lw in ltx.ASPECTS:
             opts["aspect"] = lw
-        elif lw in ltx.CAMERA:
-            opts["camera"] = lw
         elif re.fullmatch(r"\d{1,2}(s|с|сек)", lw):
             opts["duration"] = int(re.match(r"\d+", lw).group())
         else:
@@ -428,34 +435,61 @@ def parse_video_args(text: str) -> tuple[dict[str, Any], str]:
     return opts, " ".join(words)
 
 
-def _photo_id(msg: dict[str, Any]) -> str | None:
+def _photo(msg: dict[str, Any]) -> dict[str, Any] | None:
+    """Картинка из сообщения или из того, на что ответили: file_id и размеры (у файлов размеры неизвестны)."""
     for m in (msg, msg.get("reply_to_message") or {}):
         if m.get("photo"):
-            return m["photo"][-1]["file_id"]  # самое крупное превью
+            big = m["photo"][-1]  # самое крупное превью
+            return {"file_id": big["file_id"], "width": big.get("width"), "height": big.get("height")}
         doc = m.get("document") or {}
         if str(doc.get("mime_type", "")).startswith("image/"):
-            return doc["file_id"]
+            return {"file_id": doc["file_id"], "width": None, "height": None}
     return None
 
 
+def _spent_today() -> float:
+    day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    return float(_load_json(SPEND_PATH, {}).get(day, 0.0))
+
+
+def _add_spend(usd: float) -> None:
+    """Учёт трат на LTX по дням (UTC): защита от случайной серии дорогих роликов."""
+    day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    with _SPEND_LOCK:
+        book = _load_json(SPEND_PATH, {})
+        book = {d: v for d, v in book.items() if d >= day[:8] + "01"}  # храним только текущий месяц
+        book[day] = round(float(book.get(day, 0.0)) + usd, 2)
+        _save_json(SPEND_PATH, book)
+
+
 def do_video(tg: Telegram, chat_id: int, text: str, msg: dict[str, Any]) -> None:
-    photo = _photo_id(msg)
+    photo = _photo(msg)
     opts, prompt = parse_video_args(text)
     if not prompt and not photo:
         tg.send_message(chat_id, VIDEO_HELP)
         return
+    tier = opts.get("tier") or ltx.env("LTX_RESOLUTION", "1080p")
+    aspect = opts.get("aspect")
+    if not aspect and photo and photo["width"] and photo["height"] and tier.lower() in ltx.TIERS:
+        aspect = ltx.closest_aspect(photo["width"], photo["height"])  # вертикальное фото — вертикальный ролик
     try:
         model = opts.get("model") or ltx.model_id(ltx.env("LTX_MODEL", "fast"))
-        res = ltx.resolution(opts.get("tier") or ltx.env("LTX_RESOLUTION", "1080p"), opts.get("aspect", "16:9"))
+        res = ltx.resolution(tier, aspect)
         duration = opts["duration"] if "duration" in opts else ltx.parse_duration(ltx.env("LTX_DURATION", "6"))
         ltx.validate(model, res, duration, 24)
         price = ltx.estimate(model, res, duration)
         limit = ltx.max_usd()
+        daily = ltx.usd("LTX_DAILY_USD", "20")
     except ltx.LTXError as e:
         tg.send_message(chat_id, f"⚠️ {html.escape(str(e))}")
         return
     if price > limit:
         tg.send_message(chat_id, f"Это ≈${price:.2f}, а потолок ${limit:.2f} (LTX_MAX_USD). Возьми короче или 720p.")
+        return
+    spent = _spent_today()
+    if spent + price > daily:
+        tg.send_message(chat_id, f"Сегодня на видео ушло ≈${spent:.2f}, дневной лимит ${daily:.2f} (LTX_DAILY_USD). "
+                                 "Продолжим завтра или подними лимит.")
         return
     if not ltx.LTX().enabled:
         tg.send_message(chat_id, "Для видео нужен LTXV_API_KEY на сервере (console.ltx.io → API Keys).")
@@ -466,13 +500,18 @@ def do_video(tg: Telegram, chat_id: int, text: str, msg: dict[str, Any]) -> None
         f"🎬 Снимаю {'из твоего кадра' if photo else 'по описанию'}: {res}, {secs}, "
         f"{model.removeprefix('ltx-2-5-')}, ≈${price:.2f}. Пришлю, как будет готово.",
     )
-    args = (tg, chat_id, prompt or "Subtle natural motion, the camera slowly pushes in.", photo, model, res,
-            duration, opts.get("sound", True), opts.get("camera"))
+    reaspect = photo is not None and not opts.get("aspect") and not (photo["width"] and photo["height"]) \
+        and tier.lower() in ltx.TIERS  # у файла размеры узнаем после скачивания
+    args = (tg, chat_id, prompt or "Subtle natural motion, the camera slowly pushes in.",
+            photo["file_id"] if photo else None, model, res, duration, opts.get("sound", True),
+            opts.get("camera"), price, tier if reaspect else None)
     threading.Thread(target=_shoot, args=args, daemon=True).start()
 
 
 def _shoot(tg: Telegram, chat_id: int, prompt: str, photo: str | None, model: str, res: str,
-           duration: int | None, sound: bool, camera: str | None) -> None:
+           duration: int | None, sound: bool, camera: str | None, price: float = 0.0,
+           reaspect_tier: str | None = None) -> None:
+    client = ltx.LTX()
     with tempfile.TemporaryDirectory() as tmp:
         image = None
         if photo:
@@ -480,21 +519,34 @@ def _shoot(tg: Telegram, chat_id: int, prompt: str, photo: str | None, model: st
             if not data:
                 tg.send_message(chat_id, "⚠️ Не смог скачать фото из чата (Telegram отдаёт файлы до 20 МБ).")
                 return
-            image = str(Path(tmp) / "frame.jpg")
+            image = str(Path(tmp) / "frame.img")
             Path(image).write_bytes(data)
+            if reaspect_tier:  # картинку прислали файлом: подгоняем пропорцию ролика под неё
+                try:
+                    from PIL import Image
+
+                    with Image.open(image) as im:
+                        res = ltx.resolution(reaspect_tier, ltx.closest_aspect(*im.size))
+                except Exception:  # не картинка — генерация сама вернёт понятную ошибку
+                    pass
+
+        def on_job(job: ltx.Job) -> None:
+            _add_spend(price)
+            log.info("/video чат %s → задача %s, ≈$%.2f", chat_id, job, price)
+
         try:
-            path = ltx.LTX().generate(Path(tmp) / "ltx.mp4", prompt, image=image, model=model, res=res,
-                                      duration=duration, sound=sound, camera=camera,
-                                      on_job=lambda job: log.info("/video чат %s → задача %s", chat_id, job))
+            path = client.generate(Path(tmp) / "ltx.mp4", prompt, image=image, model=model, res=res,
+                                   duration=duration, sound=sound, camera=camera, on_job=on_job)
         except Exception as e:
             log.exception("Видео не получилось: %s", e)
             tg.send_message(chat_id, f"⚠️ Не получилось: {html.escape(str(e)[:3500])}")  # ссылка на ролик длинная
             return
+        link = f"\nСкачать (ссылка живёт недолго): {html.escape(client.last_url)}" if client.last_url else ""
         if path.stat().st_size > 49 * 1024 * 1024:
-            tg.send_message(chat_id, "Ролик больше 50 МБ — Telegram не пропустит. Попробуй 1080p или короче.")
+            tg.send_message(chat_id, f"Ролик больше 50 МБ — Telegram такой не пропустит.{link}")
             return
         if not tg.send_video(chat_id, path, caption=f"LTX-2.5 · {res}\n{prompt[:900]}"):
-            tg.send_message(chat_id, "⚠️ Видео готово, но Telegram его не принял.")
+            tg.send_message(chat_id, f"⚠️ Видео готово, но Telegram его не принял.{link}")
 
 
 # --------------------------------------------------------------------------- #
@@ -538,14 +590,15 @@ def handle_message(tg: Telegram, msg: dict[str, Any]) -> None:
         )
         return
 
+    arg = text.split(None, 1)[1].strip() if len(text.split(None, 1)) > 1 else ""  # после команды: пробел или перенос
     if text.startswith("/search"):
         do_search(tg, chat_id)
     elif text.startswith("/design"):
-        do_design(tg, chat_id, text.partition(" ")[2].strip())
+        do_design(tg, chat_id, arg)
     elif text.startswith("/styles"):
-        do_styles(tg, chat_id, text.partition(" ")[2].strip())
+        do_styles(tg, chat_id, arg)
     elif text.startswith("/video"):
-        do_video(tg, chat_id, text.partition(" ")[2].strip(), msg)
+        do_video(tg, chat_id, arg, msg)
     elif text.startswith("/help"):
         tg.send_message(chat_id, HELP)
     else:

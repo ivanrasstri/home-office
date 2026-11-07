@@ -12,9 +12,11 @@ from __future__ import annotations
 import base64
 import io
 import logging
+import math
 import os
 import random
 import time
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -36,6 +38,7 @@ SIZES = {
     2160: {"16:9": "3840x2160", "9:16": "2160x3840", "1:1": "2160x2160", "3:2": "3240x2160", "2:3": "2160x3240"},
 }
 TIERS = {"720p": 720, "1080p": 1080, "1440p": 1440, "2k": 1440, "4k": 2160, "2160p": 2160}
+ASPECTS = {"16:9": 16 / 9, "9:16": 9 / 16, "1:1": 1.0, "3:2": 3 / 2, "2:3": 2 / 3}
 ALL_SIZES = {s: side for side, m in SIZES.items() for s in m.values()}
 
 # $ за секунду видео по короткой стороне кадра (docs.ltx.io/pricing); пропорция на цену не влияет
@@ -84,15 +87,18 @@ def parse_duration(value: str | int | None) -> int | None:
     return int(v)
 
 
-def max_usd(override: float | None = None) -> float:
-    """Потолок цены одного ролика: явное значение или LTX_MAX_USD (по умолчанию $5)."""
-    if override is not None:
-        return override
-    raw = env("LTX_MAX_USD", "5")
+def usd(name: str, default: str) -> float:
+    """Денежная настройка из окружения: «5», «2,5»; пустое значение — по умолчанию."""
+    raw = env(name, default)
     try:
         return float(raw.replace(",", "."))
     except ValueError:
-        raise LTXError(f"LTX_MAX_USD={raw!r}: нужно число долларов, например 5") from None
+        raise LTXError(f"{name}={raw!r}: нужно число долларов, например {default}") from None
+
+
+def max_usd(override: float | None = None) -> float:
+    """Потолок цены одного ролика: явное значение или LTX_MAX_USD (по умолчанию $5)."""
+    return override if override is not None else usd("LTX_MAX_USD", "5")
 
 
 def model_id(name: str) -> str:
@@ -104,17 +110,31 @@ def model_id(name: str) -> str:
     return full
 
 
-def resolution(value: str, aspect: str = "16:9") -> str:
-    """«1080p» + «9:16» → «1080x1920»; точный «ШxВ» проверяется по списку LTX."""
+def resolution(value: str, aspect: str | None = None) -> str:
+    """«1080p» + «9:16» → «1080x1920»; точный «ШxВ» проверяется по списку LTX и по пропорции, если она задана."""
     v = value.strip().lower()
     if v in ALL_SIZES:
+        if aspect and SIZES[ALL_SIZES[v]].get(aspect) != v:
+            raise LTXError(f"Размер {v} не в пропорции {aspect}: задай уровень (720p, 1080p, 4k…) вместе с пропорцией")
         return v
     side = TIERS.get(v)
     if side is None:
         raise LTXError(f"Разрешение «{value}»: 720p, 1080p, 1440p, 4k или точный размер, напр. 1920x1080")
+    aspect = aspect or "16:9"
     if aspect not in SIZES[side]:
         raise LTXError(f"Пропорция «{aspect}»: {', '.join(SIZES[side])}")
     return SIZES[side][aspect]
+
+
+def closest_aspect(width: int, height: int) -> str:
+    """Пропорция LTX, ближайшая к картинке (по логарифму отношения сторон)."""
+    r = width / height
+    return min(ASPECTS, key=lambda a: abs(math.log(ASPECTS[a] / r)))
+
+
+def audio_max(model: str, res: str) -> int:
+    """Максимальная длина аудио для audio-to-video: 20 с у fast на 720p/1080p, иначе 10 с (fps не важен)."""
+    return 20 if model == "ltx-2-5-fast" and ALL_SIZES[res] <= 1080 else 10
 
 
 def durations(model: str, res: str, fps: int) -> tuple[int, ...]:
@@ -140,9 +160,9 @@ def validate(model: str, res: str, duration: int | None, fps: int, last_frame: b
         raise LTXError(f"{duration} с: для {model} {res} {fps} fps можно {', '.join(map(str, allowed))} с")
 
 
-def estimate(model: str, res: str, duration: int | None, fps: int = 24) -> float:
-    """Цена в $; для авто-длительности и аудио — по самому длинному варианту."""
-    secs = duration or max(durations(model, res, fps))
+def estimate(model: str, res: str, duration: int | None, fps: int = 24, audio: bool = False) -> float:
+    """Цена в $; для авто-длительности и аудио — по самому длинному допустимому варианту."""
+    secs = audio_max(model, res) if audio else duration or max(durations(model, res, fps))
     return round(PRICE[model][ALL_SIZES[res]] * secs, 2)
 
 
@@ -152,8 +172,14 @@ def _jpeg(path: Path, res: str | None = None) -> bytes:
 
     try:
         im = ImageOps.exif_transpose(Image.open(path))
+    except Image.DecompressionBombError as e:
+        raise LTXError(f"{path.name}: картинка слишком большая — уменьши до 4K") from e
     except (UnidentifiedImageError, OSError) as e:
         raise LTXError(f"{path.name}: не картинка или формат не читается (подойдут PNG, JPEG, WEBP)") from e
+    if im.mode.startswith("I"):  # 16-битные серые (рендеры, маски): ужимаем в 8 бит, а не в белый лист
+        im = im.convert("I").point(lambda v: v * (1 / 256)).convert("L")
+    if max(im.size) > 4096:  # LTX выдаёт максимум 4K — больше слать незачем
+        im.thumbnail((4096, 4096))
     if im.mode in ("RGBA", "LA", "PA") or (im.mode == "P" and "transparency" in im.info):
         rgba = im.convert("RGBA")
         im = Image.new("RGB", rgba.size, (255, 255, 255))
@@ -176,6 +202,7 @@ class LTX:
         self.api_key = key.strip()
         self.timeout = timeout
         self.http = requests.Session()
+        self.last_url: str | None = None  # ссылка на последний готовый ролик (на случай, если файл не дошёл)
 
     @property
     def enabled(self) -> bool:
@@ -184,7 +211,17 @@ class LTX:
     def _headers(self) -> dict[str, str]:
         if not self.api_key:
             raise LTXError("Нужен ключ LTX API: переменная LTXV_API_KEY (console.ltx.io → API Keys)")
+        if any(c.isspace() or ord(c) < 32 for c in self.api_key):  # иначе requests напечатает ключ в ошибке
+            raise LTXError("В LTXV_API_KEY пробелы или переносы строк — скопируй ключ заново одной строкой")
         return {"Authorization": f"Bearer {self.api_key}"}
+
+    def check(self) -> str:
+        """Проверить ключ, ничего не тратя: статус несуществующей задачи → 404, если ключ принят."""
+        r = self.http.get(f"{API}/v2/text-to-video/{uuid.uuid4()}", headers=self._headers(), timeout=self.timeout)
+        if r.status_code == 404:
+            return "Ключ LTX принят, API отвечает"
+        self._raise(r)
+        return f"LTX ответил {r.status_code}"
 
     @staticmethod
     def _raise(r: requests.Response) -> None:
@@ -226,6 +263,8 @@ class LTX:
         аудио и видео — через upload."""
         if src.startswith(("https://", "ltx://", "data:")):
             return src
+        if src.startswith("http://"):
+            raise LTXError("LTX принимает только https-ссылки — скачай файл или возьми https-адрес")
         path = Path(src)
         if not path.is_file():
             raise LTXError(f"Нет файла {src}")
@@ -335,7 +374,7 @@ class LTX:
             raise LTXError(f"Камера «{camera}»: {', '.join(CAMERA)}")
         if last_frame and not image:
             raise LTXError("Последний кадр работает только вместе с первым (--image)")
-        if audio:  # длину задаёт само аудио: 2–20 с у fast на 720p/1080p, иначе до 10 с
+        if audio:  # длину задаёт само аудио: 2–20 с у fast на 720p/1080p, иначе 2–10 с
             validate(model, res, None, fps)
             body: dict = {"audio_uri": self.media(audio, "audio"), "prompt": prompt, "model": model,
                           "resolution": res, "fps": fps}
@@ -359,8 +398,21 @@ class LTX:
         log.info("LTX задача %s (%s) поставлена; если что-то сорвётся: --job %s", job, body["model"], job)
         if on_job:
             on_job(job)
-        return self.download(self.wait(job, on_status=on_status), out)
+        return self._fetch(job, self.wait(job, on_status=on_status), out)
 
     def resume(self, job: Job, out: Path) -> Path:
-        """Дозабрать видео по id задачи (статус хранится 24 ч после завершения)."""
-        return self.download(self.wait(job), out)
+        """Дозабрать видео по id задачи (статус хранится до 24 ч после завершения)."""
+        return self._fetch(job, self.wait(job), out)
+
+    def _fetch(self, job: Job, url: str, out: Path) -> Path:
+        """Скачать результат; если ссылка уже протухла (403/404), взять свежую из статуса задачи."""
+        self.last_url = url
+        log.info("LTX %s готово: %s", job, url)
+        try:
+            return self.download(url, out)
+        except LTXError:
+            fresh = self.wait(job)
+            if fresh == url:
+                raise
+            self.last_url = fresh
+            return self.download(fresh, out)

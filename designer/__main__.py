@@ -128,6 +128,13 @@ def cmd_sync(a: argparse.Namespace) -> int:
 def cmd_video(a: argparse.Namespace) -> int:
     """Видео LTX-2.5: текст → видео, кадр(ы) → видео, аудио (+кадр) → видео. Звук генерируется вместе с картинкой."""
     out = Path(a.out) / f"{datetime.now():%Y%m%d-%H%M%S}-ltx-{studio.slugify(a.prompt or 'video', 30)}.mp4"
+    if a.check:  # проверка ключа без генерации и без трат
+        try:
+            print(ltx.LTX().check())
+        except (ltx.LTXError, OSError) as e:
+            print(e, file=sys.stderr)
+            return 1
+        return 0
     if a.job:  # дозабрать готовое видео по id (статус хранится 24 ч)
         try:
             path = ltx.LTX().resume(ltx.Job.parse(a.job), out)
@@ -149,8 +156,8 @@ def cmd_video(a: argparse.Namespace) -> int:
         duration = ltx.parse_duration(a.duration)
         if a.audio:
             ltx.validate(model, res, None, a.fps)
-            price = ltx.estimate(model, res, None, a.fps)
-            cost = f"до ${price:.2f} (по длине аудио)"
+            price = ltx.estimate(model, res, None, a.fps, audio=True)
+            cost = f"до ${price:.2f} (по длине аудио, максимум {ltx.audio_max(model, res)} с)"
         else:
             ltx.validate(model, res, duration, a.fps, bool(a.last_frame))
             price = ltx.estimate(model, res, duration, a.fps)
@@ -258,13 +265,14 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("prompt", nargs="?", default="", help="что происходит в кадре: действие, камера, свет, звук")
     s.add_argument("--image", help="первый кадр: файл или https-ссылка")
     s.add_argument("--last-frame", help="последний кадр (вместе с --image): переход от кадра к кадру")
-    s.add_argument("--audio", help="звук, под который строится видео (2–20 с): файл или https-ссылка")
+    s.add_argument("--audio", help="звук, под который строится видео: файл или https-ссылка; "
+                                   "2–20 с у fast на 720p/1080p, иначе 2–10 с")
     s.add_argument("--model", default=ltx.env("LTX_MODEL", "fast"), help="fast (по умолч.) или pro")
     s.add_argument("--duration", default=ltx.env("LTX_DURATION", "6"),
                    help="секунды: 6/8/10, у fast на 720p/1080p до 20; auto — по действию в промпте")
     s.add_argument("--res", default=ltx.env("LTX_RESOLUTION", "1080p"),
                    help="720p, 1080p, 1440p, 4k или точный размер (1920x1080)")
-    s.add_argument("--aspect", default="16:9", choices=["16:9", "9:16", "1:1", "3:2", "2:3"])
+    s.add_argument("--aspect", choices=list(ltx.ASPECTS), help="пропорция кадра (по умолч. 16:9)")
     s.add_argument("--fps", type=int, default=24, choices=list(ltx.FPS))
     s.add_argument("--camera", choices=list(ltx.CAMERA), help="движение камеры")
     s.add_argument("--silent", action="store_true", help="без звука")
@@ -275,6 +283,7 @@ def main(argv: list[str] | None = None) -> int:
                         "auto (по умолч.) — api, если есть LTXV_API_KEY, иначе space")
     s.add_argument("--seed", type=int, help="сид для повторяемости (только --via space)")
     s.add_argument("--enhance", action="store_true", help="переписать промпт моделью Gemma (только --via space)")
+    s.add_argument("--check", action="store_true", help="проверить ключ LTX, ничего не генерируя и не тратя")
     s.add_argument("--job", help="забрать готовое видео по задаче <endpoint>/<id> (если скачивание сорвалось)")
     s.add_argument("--out", default="dist")
     s.set_defaults(fn=cmd_video)

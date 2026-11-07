@@ -1,7 +1,8 @@
 name: Video (LTX-2.5)
 
 # Видео со звуком через LTX API: из текста или из кадра по ссылке.
-# Запуск вручную; mp4 лежит в артефактах запуска. Нужен секрет LTXV_API_KEY.
+# Запуск вручную; mp4 лежит в артефактах запуска. С секретом LTXV_API_KEY — платный LTX API,
+# без него — бесплатное демо Lightricks на Hugging Face (до 5 с; секрет HF_TOKEN даёт квоту).
 on:
   workflow_dispatch:
     inputs:
@@ -76,7 +77,8 @@ jobs:
       - name: Generate video (LTX-2.5)
         env:
           LTXV_API_KEY: ${{ secrets.LTXV_API_KEY }}
-          LTX_MAX_USD: ${{ vars.LTX_MAX_USD }}
+          LTX_MAX_USD: ${{ vars.LTX_MAX_USD || '5' }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}  # без LTXV_API_KEY — бесплатное демо на Hugging Face
           PROMPT: ${{ inputs.prompt }}
           IMAGE_URL: ${{ inputs.image_url }}
           LAST_FRAME_URL: ${{ inputs.last_frame_url }}

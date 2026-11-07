@@ -259,8 +259,9 @@ python -m designer sync                          # подтянуть свежи
 python -m designer video "Slow push-in through a neon tunnel, light strips streak past; low hum." --estimate
 python -m designer video "The courier turns to camera and smiles; street noise." --image frame.png --res 720p
 python -m designer video "..." --image A.png --last-frame B.png --duration 8 --model pro
-python -m designer video "..." --audio track.mp3 --image cover.png      # клип под трек, 2–20 с
+python -m designer video "..." --audio track.mp3 --image cover.png      # клип под трек: до 20 с (fast 720p/1080p), иначе до 10 с
 python -m designer video --job image-to-video/<id>                     # дозабрать готовое видео
+python -m designer video --check                                       # проверить ключ, ничего не тратя
 ```
 
 Если ролик сгенерировался, но не скачался (сеть, протухшая ссылка), id задачи есть в логе и
@@ -273,14 +274,16 @@ python -m designer video --job image-to-video/<id>                     # доз�
   предоплаченные кредиты на console.ltx.io. Бесплатного тарифа нет, попробовать можно
   в Playground консоли.
 - `--estimate` показывает цену без запроса. `LTX_MAX_USD` — потолок цены одного ролика,
-  по умолчанию $5.
+  по умолчанию $5. В боте есть ещё дневной лимит `LTX_DAILY_USD`, по умолчанию $20.
 
 Где ещё работает:
 - **Telegram** — `/video описание`. Чтобы оживить фото, пришли его с подписью
   `/video …` или ответь этой командой на фото. Настройки — словами в начале:
   `/video pro 9:16 8s dolly_in …`.
 - **GitHub Actions** — **Actions → Video (LTX-2.5) → Run workflow**. Нужен секрет
-  `LTXV_API_KEY`; mp4 лежит в артефактах запуска.
+  `LTXV_API_KEY`; mp4 лежит в артефактах запуска. Потолок цены можно задать переменной
+  репозитория `LTX_MAX_USD`, по умолчанию $5. Кнопка запуска появляется, когда воркфлоу
+  есть в ветке по умолчанию (`main`).
 - **Claude Code** — скилл `.claude/skills/ltx-video`. Например, «оживи кадр 294,
   камера летит в тоннель». Скилл помнит правила промптов LTX и цены.
 - **Документация LTX в Claude Code** — официальный MCP-сервер поиска по docs.ltx.io:
