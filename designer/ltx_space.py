@@ -43,6 +43,16 @@ CAMERA_WORDS = {
 }
 
 
+def _has_token() -> bool:
+    """Есть ли токен Hugging Face (HF_TOKEN или `hf auth login`); секрет окружения прокси отсюда не виден."""
+    try:
+        from huggingface_hub import get_token
+
+        return bool(get_token())
+    except Exception:
+        return bool(os.environ.get("HF_TOKEN"))
+
+
 def dims(res: str) -> tuple[int, int]:
     """Размер в терминах LTX API («1920x1080») → ближайший допустимый для демо: (высота, ширина)."""
     w, h = (int(x) for x in res.lower().split("x"))
@@ -108,11 +118,17 @@ def generate(
     except Exception as e:  # AppError, сеть, очередь
         msg = str(e)
         if "quota" in msg.lower() or "runs limit" in msg.lower():
+            if _has_token():
+                raise LTXError(
+                    f"Квоты Hugging Face на сегодня не хватает на этот ролик ({msg[:300]}). Возьми короче "
+                    "или меньше (например --res 720p --duration 2) или подожди до завтра; с HF PRO квота "
+                    "в 8 раз больше. Без лимитов — платный LTX API (--via api)."
+                ) from e
             raise LTXError(
-                "Дневная квота Hugging Face на этот Space кончилась. Нужен токен Hugging Face "
-                "(бесплатный аккаунт → Settings → Access Tokens) — переменная HF_TOKEN или секрет "
-                "окружения для lightricks-ltx-2-5.hf.space; с HF PRO квота в 8 раз больше. "
-                "Без лимитов — платный LTX API (--via api)."
+                "Без токена Hugging Face квоты нет. Нужен токен (бесплатный аккаунт → Settings → "
+                "Access Tokens): переменная HF_TOKEN, `hf auth login` или секрет окружения для "
+                "lightricks-ltx-2-5.hf.space. С HF PRO квота в 8 раз больше. Без лимитов — платный "
+                "LTX API (--via api)."
             ) from e
         raise LTXError(f"Space {SPACE}: {msg[:500]}") from e
     src = video if isinstance(video, str) else (video or {}).get("video")
