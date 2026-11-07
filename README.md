@@ -296,7 +296,26 @@ python -m designer video --job image-to-video/<id>                     # доз�
 - Облачные сессии Claude Code: секрет окружения для хоста `api.ltx.io`. Прокси сам
   подставит заголовок, а в `LTXV_API_KEY` достаточно любой заглушки.
 
-Другие пути, если API не подходит:
+**Бесплатно — открытые веса через официальное демо на Hugging Face.** Lightricks держат
+LTX-2.5 в Space [`Lightricks/LTX-2.5`](https://huggingface.co/spaces/Lightricks/LTX-2.5)
+на бесплатных видеокартах Hugging Face. Генератор умеет звать его сам:
+
+```bash
+python -m designer video "A paper boat drifts across a calm pond at sunrise; soft birdsong." --via space --duration 3
+```
+
+- Ограничения демо: 1–5 с (авто — до 15 с), кадр до 832x1472, звук всегда. Нет последнего
+  кадра и аудио на входе.
+- Квота дневная. Нужен токен Hugging Face: бесплатный аккаунт → Settings → Access Tokens,
+  тип Read. Токен кладётся в переменную `HF_TOKEN` или в секрет облачного окружения для
+  хоста `lightricks-ltx-2-5.hf.space`: заголовок `x-hf-authorization`, значение
+  `Bearer <токен>`.
+- С бесплатным аккаунтом выходит несколько коротких роликов в день, с HF PRO — в 8 раз больше.
+- Кадр из `--image` уходит в публичный сервис, поэтому клиентские материалы туда — только
+  с согласия.
+- Без `--via` генератор сам выбирает: платный API, если есть `LTXV_API_KEY`, иначе демо.
+
+Другие пути, если ни API, ни демо не подходят:
 - fal.ai: `lightricks/ltx-2.5/...`, цены те же.
 - Replicate: `lightricks/ltx-2.5-fast` — только fast, но дешевле.
 - Свой GPU: открытые веса `Lightricks/LTX-2.5` на Hugging Face и шаблоны ComfyUI.

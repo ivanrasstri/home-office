@@ -8,6 +8,7 @@
   python -m designer sync                                 обновить библиотеку из апстрима
   python -m designer video "промпт" [--image кадр.png]    видео LTX-2.5 (текст/кадр/аудио → mp4)
   python -m designer video --job image-to-video/<id>      дозабрать готовое видео по id задачи
+  python -m designer video "промпт" --via space            бесплатно: демо LTX-2.5 на Hugging Face (до 5 с)
 
 Для suggest/make нужен ANTHROPIC_API_KEY. С API_KEY_21ST дизайнер подтягивает
 референс компонента с 21st.dev (лендинги и экраны интерфейса). Для video нужен
@@ -25,7 +26,7 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 
-from . import catalog, gallery, ltx, studio, twentyfirst
+from . import catalog, gallery, ltx, ltx_space, studio, twentyfirst
 
 ROOT = Path(__file__).resolve().parent.parent
 RESUME = ROOT / "resume" / "resume.md"
@@ -139,6 +140,9 @@ def cmd_video(a: argparse.Namespace) -> int:
         print("Нужен промпт: что происходит в кадре (или --job <endpoint>/<id>, чтобы забрать готовое).",
               file=sys.stderr)
         return 1
+    via = a.via if a.via != "auto" else ("api" if ltx.LTX().enabled else "space")
+    if via == "space":
+        return _video_space(a, out)
     try:
         model = ltx.model_id(a.model)
         res = ltx.resolution(a.res, a.aspect)
@@ -181,6 +185,34 @@ def cmd_video(a: argparse.Namespace) -> int:
         print(e, file=sys.stderr)
         return 1
     print(f"Готово: {path}")
+    return 0
+
+
+def _video_space(a: argparse.Namespace, out: Path) -> int:
+    """Бесплатно: официальное демо LTX-2.5 на Hugging Face (до 5 с, дневная квота)."""
+    try:
+        res = ltx.resolution(a.res, a.aspect)
+        duration = ltx.parse_duration(a.duration)
+        if a.last_frame or a.audio:
+            raise ltx.LTXError("Последний кадр и аудио на входе — только в платном LTX API (--via api)")
+    except ltx.LTXError as e:
+        print(e, file=sys.stderr)
+        return 1
+    height, width = ltx_space.dims(res)
+    secs, auto = ltx_space.seconds(duration, quiet=True)
+    mode = "кадр → видео" if a.image else "текст → видео"
+    length = "авто ≤15 с" if auto else f"{secs:g} с"
+    print(f"{mode} · LTX-2.5, бесплатное демо Hugging Face ({ltx_space.SPACE}) · {width}x{height} · {length} · "
+          "со звуком · бесплатно, дневная квота", flush=True)
+    if a.estimate:
+        return 0
+    try:
+        path, info = ltx_space.generate(out, a.prompt, image=a.image, res=res, duration=duration, camera=a.camera,
+                                        seed=a.seed, enhance=a.enhance, sound=not a.silent)
+    except ltx.LTXError as e:
+        print(e, file=sys.stderr)
+        return 1
+    print(f"Готово: {path} ({info})")
     return 0
 
 
@@ -238,6 +270,11 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--silent", action="store_true", help="без звука")
     s.add_argument("--estimate", action="store_true", help="только посчитать цену, без запроса")
     s.add_argument("--max-usd", type=float, help="потолок цены за ролик (по умолч. LTX_MAX_USD или 5)")
+    s.add_argument("--via", choices=["auto", "api", "space"], default=ltx.env("LTX_VIA", "auto"),
+                   help="api — платный LTX API; space — бесплатное демо Hugging Face (до 5 с); "
+                        "auto (по умолч.) — api, если есть LTXV_API_KEY, иначе space")
+    s.add_argument("--seed", type=int, help="сид для повторяемости (только --via space)")
+    s.add_argument("--enhance", action="store_true", help="переписать промпт моделью Gemma (только --via space)")
     s.add_argument("--job", help="забрать готовое видео по задаче <endpoint>/<id> (если скачивание сорвалось)")
     s.add_argument("--out", default="dist")
     s.set_defaults(fn=cmd_video)
