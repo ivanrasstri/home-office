@@ -72,6 +72,10 @@ class Telegram:
         self.token = token
         self.s = requests.Session()
 
+    def _redact(self, e: Exception) -> str:
+        """В тексте ошибок requests есть URL с токеном бота — в логи он попадать не должен."""
+        return str(e).replace(self.token, "<token>") if self.token else str(e)
+
     def _call(self, method: str, **kwargs: Any) -> dict[str, Any]:
         url = API.format(token=self.token, method=method)
         try:
@@ -79,16 +83,17 @@ class Telegram:
             r.raise_for_status()
             return r.json()
         except requests.RequestException as e:
-            log.warning("Telegram %s не удался: %s", method, e)
+            log.warning("Telegram %s не удался: %s", method, self._redact(e))
             return {"ok": False}
 
-    def get_updates(self, offset: int | None) -> list[dict[str, Any]]:
+    def get_updates(self, offset: int | None) -> list[dict[str, Any]] | None:
+        """Новые апдейты (long polling до 30 с); None — запрос не удался (сеть, неверный токен)."""
         data = self._call(
             "getUpdates",
             json={"offset": offset, "timeout": 30},
             _timeout=40,
         )
-        return data.get("result", []) if data.get("ok") else []
+        return data.get("result", []) if data.get("ok") else None
 
     def send_message(self, chat_id: int, text: str, buttons: list | None = None) -> None:
         payload: dict[str, Any] = {
@@ -122,7 +127,7 @@ class Telegram:
             r.raise_for_status()
             return r.content
         except requests.RequestException as e:
-            log.warning("Telegram getFile не удался: %s", e)
+            log.warning("Telegram getFile не удался: %s", self._redact(e))
             return None
 
     def send_video(self, chat_id: int, path: Path, caption: str = "") -> bool:
@@ -613,6 +618,9 @@ def main() -> int:
             updates = tg.get_updates(offset)
         except Exception as e:  # на всякий случай: не падаем из-за сети
             log.warning("getUpdates упал: %s", e)
+            time.sleep(5)
+            continue
+        if updates is None:  # сеть или токен: пауза, чтобы не долбить Telegram без остановки
             time.sleep(5)
             continue
         for upd in updates:

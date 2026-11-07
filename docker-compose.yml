@@ -1,0 +1,22 @@
+# Бот на своём сервере. Обычно не трогается руками: всё делает deploy/install.sh.
+# Вручную: положи рядом .env (токены) и запусти docker compose up -d --build.
+name: home-office
+
+services:
+  bot:
+    build: .
+    image: home-office-bot
+    restart: unless-stopped   # переживает падения и перезагрузку сервера
+    env_file: .env
+    environment:
+      JOBBOT_DATA_DIR: /data
+    volumes:
+      - bot-data:/data        # подписчики, состояние, дедуп — не теряются при обновлениях
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  bot-data:

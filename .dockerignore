@@ -1,0 +1,20 @@
+# В образ бота — только код, конфиги, резюме и библиотека стилей.
+.git
+.github
+.claude
+.mcp.json
+.ruff_cache
+**/__pycache__
+**/*.pyc
+.env
+.env.*
+!.env.example
+.venv
+venv
+dist
+data
+designer/tunnel3d
+figma-plugin
+deploy
+Dockerfile
+docker-compose.yml
