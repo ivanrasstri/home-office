@@ -215,7 +215,11 @@ python -m designer video "Slow push-in through a neon tunnel, light strips strea
 python -m designer video "The courier turns to camera and smiles; street noise." --image frame.png --res 720p
 python -m designer video "..." --image A.png --last-frame B.png --duration 8 --model pro
 python -m designer video "..." --audio track.mp3 --image cover.png      # клип под трек, 2–20 с
+python -m designer video --job image-to-video/<id>                     # дозабрать готовое видео
 ```
+
+Если ролик сгенерировался, но не скачался (сеть, протухшая ссылка), id задачи есть в логе и
+в тексте ошибки. Статус хранится 24 ч, видео забирается через `--job`, без повторной оплаты.
 
 - Модели: `fast` — дешевле, на 720p/1080p при 24/25 fps до 20 с; `pro` — качественнее,
   6/8/10 с. Обе до 4K, пропорции 16:9, 9:16, 1:1, 3:2, 2:3.

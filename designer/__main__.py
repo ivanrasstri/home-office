@@ -7,6 +7,7 @@
   python -m designer gallery [--out dist/gallery.html]    HTML-галерея всех стилей
   python -m designer sync                                 обновить библиотеку из апстрима
   python -m designer video "промпт" [--image кадр.png]    видео LTX-2.5 (текст/кадр/аудио → mp4)
+  python -m designer video --job image-to-video/<id>      дозабрать готовое видео по id задачи
 
 Для suggest/make нужен ANTHROPIC_API_KEY. С API_KEY_21ST дизайнер подтягивает
 референс компонента с 21st.dev (лендинги и экраны интерфейса). Для video нужен
@@ -17,7 +18,6 @@ from __future__ import annotations
 
 import argparse
 import logging
-import os
 import shutil
 import subprocess
 import sys
@@ -126,19 +126,37 @@ def cmd_sync(a: argparse.Namespace) -> int:
 
 def cmd_video(a: argparse.Namespace) -> int:
     """Видео LTX-2.5: текст → видео, кадр(ы) → видео, аудио (+кадр) → видео. Звук генерируется вместе с картинкой."""
+    out = Path(a.out) / f"{datetime.now():%Y%m%d-%H%M%S}-ltx-{studio.slugify(a.prompt or 'video', 30)}.mp4"
+    if a.job:  # дозабрать готовое видео по id (статус хранится 24 ч)
+        try:
+            path = ltx.LTX().resume(ltx.Job.parse(a.job), out)
+        except ltx.LTXError as e:
+            print(e, file=sys.stderr)
+            return 1
+        print(f"Готово: {path}")
+        return 0
+    if not a.prompt:
+        print("Нужен промпт: что происходит в кадре (или --job <endpoint>/<id>, чтобы забрать готовое).",
+              file=sys.stderr)
+        return 1
     try:
         model = ltx.model_id(a.model)
         res = ltx.resolution(a.res, a.aspect)
-        duration = None if a.duration == "auto" else int(a.duration)
+        duration = ltx.parse_duration(a.duration)
         if a.audio:
+            ltx.validate(model, res, None, a.fps)
             price = ltx.estimate(model, res, None, a.fps)
             cost = f"до ${price:.2f} (по длине аудио)"
         else:
             ltx.validate(model, res, duration, a.fps, bool(a.last_frame))
             price = ltx.estimate(model, res, duration, a.fps)
             cost = f"${price:.2f}" + (" максимум (длину выберет модель)" if duration is None else "")
-    except (ltx.LTXError, ValueError) as e:
+        limit = ltx.max_usd(a.max_usd)
+    except ltx.LTXError as e:
         print(e, file=sys.stderr)
+        return 1
+    if a.last_frame and not a.image:
+        print("--last-frame работает только вместе с --image.", file=sys.stderr)
         return 1
     mode = "аудио → видео" if a.audio else "кадр → видео" if a.image else "текст → видео"
     if a.last_frame:
@@ -147,7 +165,6 @@ def cmd_video(a: argparse.Namespace) -> int:
     print(f"{mode} · {model} · {res} · {secs} · {a.fps} fps · стоимость {cost}", flush=True)
     if a.estimate:
         return 0
-    limit = a.max_usd if a.max_usd is not None else float(os.environ.get("LTX_MAX_USD", "5"))
     if price > limit:
         print(f"Дороже лимита ${limit:.2f}. Подними --max-usd или LTX_MAX_USD, если так и задумано.", file=sys.stderr)
         return 1
@@ -155,7 +172,6 @@ def cmd_video(a: argparse.Namespace) -> int:
     if not client.enabled:
         print("Нужен LTXV_API_KEY (console.ltx.io → API Keys).", file=sys.stderr)
         return 2
-    out = Path(a.out) / f"{datetime.now():%Y%m%d-%H%M%S}-ltx-{studio.slugify(a.prompt or 'video', 30)}.mp4"
     try:
         path = client.generate(
             out, a.prompt, image=a.image, last_frame=a.last_frame, audio=a.audio, model=model,
@@ -207,14 +223,14 @@ def main(argv: list[str] | None = None) -> int:
     s.set_defaults(fn=cmd_sync)
 
     s = sub.add_parser("video", help="видео LTX-2.5 из текста, кадра или аудио")
-    s.add_argument("prompt", help="что происходит в кадре: действие, камера, свет, звук")
+    s.add_argument("prompt", nargs="?", default="", help="что происходит в кадре: действие, камера, свет, звук")
     s.add_argument("--image", help="первый кадр: файл или https-ссылка")
     s.add_argument("--last-frame", help="последний кадр (вместе с --image): переход от кадра к кадру")
     s.add_argument("--audio", help="звук, под который строится видео (2–20 с): файл или https-ссылка")
-    s.add_argument("--model", default=os.environ.get("LTX_MODEL", "fast"), help="fast (по умолч.) или pro")
-    s.add_argument("--duration", default=os.environ.get("LTX_DURATION", "6"),
+    s.add_argument("--model", default=ltx.env("LTX_MODEL", "fast"), help="fast (по умолч.) или pro")
+    s.add_argument("--duration", default=ltx.env("LTX_DURATION", "6"),
                    help="секунды: 6/8/10, у fast на 720p/1080p до 20; auto — по действию в промпте")
-    s.add_argument("--res", default=os.environ.get("LTX_RESOLUTION", "1080p"),
+    s.add_argument("--res", default=ltx.env("LTX_RESOLUTION", "1080p"),
                    help="720p, 1080p, 1440p, 4k или точный размер (1920x1080)")
     s.add_argument("--aspect", default="16:9", choices=["16:9", "9:16", "1:1", "3:2", "2:3"])
     s.add_argument("--fps", type=int, default=24, choices=list(ltx.FPS))
@@ -222,6 +238,7 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--silent", action="store_true", help="без звука")
     s.add_argument("--estimate", action="store_true", help="только посчитать цену, без запроса")
     s.add_argument("--max-usd", type=float, help="потолок цены за ролик (по умолч. LTX_MAX_USD или 5)")
+    s.add_argument("--job", help="забрать готовое видео по задаче <endpoint>/<id> (если скачивание сорвалось)")
     s.add_argument("--out", default="dist")
     s.set_defaults(fn=cmd_video)
 

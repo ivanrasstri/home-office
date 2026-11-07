@@ -111,7 +111,7 @@ class Telegram:
             _timeout=120,
         )
 
-    def get_file(self, file_id: str, limit: int = 20 * 1024 * 1024) -> bytes | None:
+    def get_file(self, file_id: str) -> bytes | None:
         """Скачать файл из чата (фото, документ). Bot API отдаёт файлы до 20 МБ."""
         info = self._call("getFile", json={"file_id": file_id})
         path = (info.get("result") or {}).get("file_path") if info.get("ok") else None
@@ -120,7 +120,7 @@ class Telegram:
         try:
             r = self.s.get(f"https://api.telegram.org/file/bot{self.token}/{path}", timeout=60)
             r.raise_for_status()
-            return r.content[:limit]
+            return r.content
         except requests.RequestException as e:
             log.warning("Telegram getFile не удался: %s", e)
             return None
@@ -388,7 +388,8 @@ VIDEO_HELP = (
     "🎬 <b>Видео LTX-2.5</b> — ролик со звуком по описанию или из картинки.\n\n"
     "<code>/video неоновый тоннель, камера плавно летит вперёд, гул мотора</code>\n"
     "Пришли <b>фото</b> с подписью <code>/video что происходит</code> или ответь "
-    "<code>/video …</code> на фото — оживлю этот кадр.\n\n"
+    "<code>/video …</code> на фото — оживлю этот кадр. Для полного качества шли картинку "
+    "<b>файлом</b>: фото Telegram пережимает.\n\n"
     "Настройки — словами в начале: <code>pro</code>, <code>720p</code>/<code>4k</code>, "
     "<code>9:16</code>, <code>10s</code> или <code>auto</code>, <code>silent</code>, "
     "камера <code>dolly_in</code>/<code>jib_up</code>/…\n"
@@ -439,15 +440,15 @@ def do_video(tg: Telegram, chat_id: int, text: str, msg: dict[str, Any]) -> None
         tg.send_message(chat_id, VIDEO_HELP)
         return
     try:
-        model = opts.get("model") or ltx.model_id(os.environ.get("LTX_MODEL", "fast"))
-        res = ltx.resolution(opts.get("tier") or os.environ.get("LTX_RESOLUTION", "1080p"), opts.get("aspect", "16:9"))
-        duration = opts["duration"] if "duration" in opts else int(os.environ.get("LTX_DURATION", "6"))
+        model = opts.get("model") or ltx.model_id(ltx.env("LTX_MODEL", "fast"))
+        res = ltx.resolution(opts.get("tier") or ltx.env("LTX_RESOLUTION", "1080p"), opts.get("aspect", "16:9"))
+        duration = opts["duration"] if "duration" in opts else ltx.parse_duration(ltx.env("LTX_DURATION", "6"))
         ltx.validate(model, res, duration, 24)
         price = ltx.estimate(model, res, duration)
-    except (ltx.LTXError, ValueError) as e:
+        limit = ltx.max_usd()
+    except ltx.LTXError as e:
         tg.send_message(chat_id, f"⚠️ {html.escape(str(e))}")
         return
-    limit = float(os.environ.get("LTX_MAX_USD", "5"))
     if price > limit:
         tg.send_message(chat_id, f"Это ≈${price:.2f}, а потолок ${limit:.2f} (LTX_MAX_USD). Возьми короче или 720p.")
         return
@@ -478,10 +479,11 @@ def _shoot(tg: Telegram, chat_id: int, prompt: str, photo: str | None, model: st
             Path(image).write_bytes(data)
         try:
             path = ltx.LTX().generate(Path(tmp) / "ltx.mp4", prompt, image=image, model=model, res=res,
-                                      duration=duration, sound=sound, camera=camera)
+                                      duration=duration, sound=sound, camera=camera,
+                                      on_job=lambda job: log.info("/video чат %s → задача %s", chat_id, job))
         except Exception as e:
             log.exception("Видео не получилось: %s", e)
-            tg.send_message(chat_id, f"⚠️ Не получилось: {html.escape(str(e))[:300]}")
+            tg.send_message(chat_id, f"⚠️ Не получилось: {html.escape(str(e)[:3500])}")  # ссылка на ролик длинная
             return
         if path.stat().st_size > 49 * 1024 * 1024:
             tg.send_message(chat_id, "Ролик больше 50 МБ — Telegram не пропустит. Попробуй 1080p или короче.")
