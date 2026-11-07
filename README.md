@@ -318,6 +318,25 @@ python -m designer video "A paper boat drifts across a calm pond at sunrise; sof
   с согласия.
 - Без `--via` генератор сам выбирает: платный API, если есть `LTXV_API_KEY`, иначе демо.
 
+**Аниматик из раскадровки.** `python -m designer animatic shots.yaml` собирает ролик из
+кадров по шотам. Шоты описываются в YAML: кадры, длина, промпт, `engine: ai` или `local`,
+формат — в начале `designer/animatic.py`.
+
+```bash
+python -m designer animatic shots.yaml                              # всё локально: наезды и переходы через ffmpeg
+python -m designer animatic shots.yaml --engine ai --estimate       # сколько стоят ИИ-шоты
+python -m designer animatic shots.yaml --engine ai --via api        # ИИ: переход от первого кадра к последнему
+python -m designer animatic shots.yaml --engine ai --only burger    # перегенерировать один шот
+```
+
+- **Локально.** Медленный наезд и мягкие переходы между кадрами шота. Бесплатно, кадры
+  никуда не уходят.
+- **ИИ через платный API.** Каждая пара соседних кадров — клип от первого кадра к
+  последнему, поэтому движение попадает точно в раскадровку.
+- **ИИ через бесплатное демо.** Последнего кадра там нет: анимируется первый кадр по промпту.
+- Текст, промокоды, QR и логотипы лучше оставлять `local`, чтобы они не поплыли.
+- Готовые ИИ-клипы кэшируются, поэтому повторная сборка за них не платит.
+
 Другие пути, если ни API, ни демо не подходят:
 - fal.ai: `lightricks/ltx-2.5/...`, цены те же.
 - Replicate: `lightricks/ltx-2.5-fast` — только fast, но дешевле.

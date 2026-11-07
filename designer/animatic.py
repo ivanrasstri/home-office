@@ -1,0 +1,236 @@
+"""Аниматик из раскадровки: кадры → ролик (локально через ffmpeg или с ИИ-анимацией LTX-2.5).
+
+Описание ролика — YAML:
+
+    frames: storyboard/          # каталог с кадрами (291.png …), путь относительно YAML
+    size: 1920x1080
+    fps: 25
+    shots:
+      - id: bag
+        frames: [291, 292]       # один кадр — оживить его; два и больше — переходы между соседними
+        seconds: 2.5             # сколько шот длится в ролике
+        engine: ai               # ai — LTX; local — только ffmpeg (текст, QR, логотипы не плывут)
+        prompt: "The camera pushes in toward the logo on the bag..."
+        camera: dolly_in         # необязательно
+
+    python -m designer animatic shots.yaml                  # всё локально: бесплатно, кадры никуда не уходят
+    python -m designer animatic shots.yaml --engine ai      # шоты engine: ai — через LTX (--via api|space|auto)
+
+Готовые ИИ-клипы кэшируются в <out>/animatic-cache: повторная сборка за них не платит. В платном API
+каждый переход — отдельный клип с первым и последним кадром (точно попадает в раскадровку). В
+бесплатном демо Hugging Face последнего кадра нет: анимируется первый кадр по промпту.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import logging
+import shutil
+import subprocess
+import tempfile
+from dataclasses import dataclass, field
+from pathlib import Path
+
+import yaml
+
+from . import ltx, ltx_space
+
+log = logging.getLogger("designer.animatic")
+
+
+class AnimaticError(RuntimeError):
+    pass
+
+
+@dataclass
+class Shot:
+    id: str
+    frames: list[Path]
+    seconds: float
+    engine: str = "local"
+    prompt: str = ""
+    camera: str | None = None
+    zoom: float = 0.04
+
+
+@dataclass
+class Plan:
+    shots: list[Shot]
+    width: int = 1920
+    height: int = 1080
+    fps: int = 25
+    source: Path = field(default_factory=Path)
+
+
+def load(path: str | Path) -> Plan:
+    path = Path(path)
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    except (OSError, yaml.YAMLError) as e:
+        raise AnimaticError(f"Не читается {path}: {e}") from e
+    base = (path.parent / str(data.get("frames", "."))).resolve()
+    w, h = (int(x) for x in str(data.get("size", "1920x1080")).lower().split("x"))
+    shots = []
+    for i, s in enumerate(data.get("shots") or [], 1):
+        names = s.get("frames") or []
+        if not names:
+            raise AnimaticError(f"Шот {s.get('id', i)}: нет кадров")
+        frames = []
+        for n in names:
+            f = base / (str(n) if Path(str(n)).suffix else f"{n}.png")
+            if not f.is_file():
+                raise AnimaticError(f"Шот {s.get('id', i)}: нет файла {f}")
+            frames.append(f)
+        engine = str(s.get("engine", "local"))
+        if engine not in ("local", "ai"):
+            raise AnimaticError(f"Шот {s.get('id', i)}: engine — local или ai")
+        shots.append(Shot(id=str(s.get("id", i)), frames=frames, seconds=float(s.get("seconds", 2)),
+                          engine=engine, prompt=str(s.get("prompt", "")).strip(), camera=s.get("camera"),
+                          zoom=float(s.get("zoom", 0.04))))
+    if not shots:
+        raise AnimaticError(f"В {path} нет шотов")
+    return Plan(shots=shots, width=w, height=h, fps=int(data.get("fps", 25)), source=path)
+
+
+# -- ffmpeg ------------------------------------------------------------------
+def _ffmpeg(*args: str) -> None:
+    if not shutil.which("ffmpeg"):
+        raise AnimaticError("Нужен ffmpeg (apt install ffmpeg)")
+    r = subprocess.run(["ffmpeg", "-v", "error", "-y", *args], capture_output=True, text=True)
+    if r.returncode != 0:
+        raise AnimaticError(f"ffmpeg: {r.stderr.strip()[-800:]}")
+
+
+def duration(path: Path) -> float:
+    r = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(path)],
+                       capture_output=True, text=True)
+    try:
+        return float(r.stdout.strip())
+    except ValueError as e:
+        raise AnimaticError(f"Не читается длина {path}: {r.stderr.strip()}") from e
+
+
+def _encode(w: int, h: int, fps: int) -> list[str]:
+    return ["-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p", "-r", str(fps), "-an"]
+
+
+def local_clip(frames: list[Path], seconds: float, out: Path, w: int, h: int, fps: int, zoom: float = 0.04) -> Path:
+    """Без ИИ: медленный наезд на каждый кадр и мягкие переходы между кадрами шота."""
+    n = len(frames)
+    fade = min(0.5, seconds / (2 * n)) if n > 1 else 0.0
+    seg = (seconds + fade * (n - 1)) / n  # длина куска на кадр с учётом наложения переходов
+    total = max(2, round(seconds * fps))
+    args: list[str] = []
+    chains = []
+    for i, f in enumerate(frames):
+        args += ["-framerate", str(fps), "-loop", "1", "-t", f"{seg:.3f}", "-i", str(f)]
+        start = round(i * (seg - fade) * fps)  # наезд сквозной на весь шот: в переходе кадры совпадают по масштабу
+        chains.append(
+            f"[{i}:v]scale={w * 2}:{h * 2}:force_original_aspect_ratio=increase,crop={w * 2}:{h * 2},"
+            f"zoompan=z='1+{zoom}*({start}+on)/{total}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:"
+            f"s={w}x{h}:fps={fps},setsar=1,format=yuv420p[v{i}]"
+        )
+    last = "v0"
+    for i in range(1, n):
+        chains.append(f"[{last}][v{i}]xfade=transition=fade:duration={fade:.3f}:offset={i * (seg - fade):.3f}[x{i}]")
+        last = f"x{i}"
+    _ffmpeg(*args, "-filter_complex", ";".join(chains), "-map", f"[{last}]", "-t", f"{seconds:.3f}",
+            *_encode(w, h, fps), str(out))
+    return out
+
+
+def retime(src: Path, seconds: float, out: Path, w: int, h: int, fps: int) -> Path:
+    """Подогнать ИИ-клип под длину шота (ускорить или замедлить), размер и fps ролика; звук убрать."""
+    factor = seconds / duration(src)
+    _ffmpeg("-i", str(src), "-vf",
+            f"setpts={factor:.5f}*PTS,fps={fps},scale={w}:{h}:force_original_aspect_ratio=increase,"
+            f"crop={w}:{h},setsar=1,format=yuv420p",
+            "-t", f"{seconds:.3f}", *_encode(w, h, fps), str(out))
+    return out
+
+
+def concat(clips: list[Path], out: Path, music: Path | None = None) -> Path:
+    """Склейка шотов встык (все уже одного размера и fps); музыка — по длине ролика с затуханием в конце."""
+    with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False) as lst:
+        for c in clips:
+            lst.write(f"file '{c.resolve()}'\n")
+    try:
+        if not music:
+            _ffmpeg("-f", "concat", "-safe", "0", "-i", lst.name, "-c", "copy", str(out))
+            return out
+        total = sum(duration(c) for c in clips)
+        _ffmpeg("-f", "concat", "-safe", "0", "-i", lst.name, "-i", str(music), "-map", "0:v", "-map", "1:a",
+                "-c:v", "copy", "-af", f"afade=t=out:st={max(0.0, total - 1.0):.2f}:d=1", "-c:a", "aac",
+                "-t", f"{total:.3f}", str(out))
+        return out
+    finally:
+        Path(lst.name).unlink(missing_ok=True)
+
+
+# -- ИИ ----------------------------------------------------------------------
+def _key(*parts: object) -> str:
+    h = hashlib.sha1()
+    for p in parts:
+        h.update(p.read_bytes() if isinstance(p, Path) else json.dumps(p, ensure_ascii=False).encode())
+    return h.hexdigest()[:12]
+
+
+def ai_steps(shot: Shot) -> list[tuple[Path, Path | None]]:
+    """Переходы шота: пары соседних кадров; один кадр — оживить его самого."""
+    return list(zip(shot.frames, shot.frames[1:], strict=False)) or [(shot.frames[0], None)]
+
+
+def estimate(plan: Plan, via: str, model: str, res: str) -> tuple[float, int]:
+    """Цена ИИ-шотов в платном API ($) и число генераций."""
+    runs = sum(len(ai_steps(s)) for s in plan.shots if s.engine == "ai")
+    if via != "api":
+        return 0.0, runs
+    return round(runs * ltx.estimate(model, res, 6), 2), runs  # в API минимум 6 с на клип
+
+
+def ai_clip(shot: Shot, plan: Plan, cache: Path, via: str, model: str, res: str, work: Path) -> Path:
+    steps = ai_steps(shot)
+    part = shot.seconds / len(steps)
+    pieces = []
+    for k, (first, last) in enumerate(steps):
+        use_last = last if via == "api" else None  # в бесплатном демо последнего кадра нет
+        raw = cache / f"{shot.id}-{k}-{via}-{_key(via, model, res, shot.prompt, shot.camera, first, use_last or '')}.mp4"
+        if not raw.exists():
+            log.info("ИИ-шот %s, переход %d/%d (%s) …", shot.id, k + 1, len(steps), via)
+            tmp = raw.with_name(raw.name + ".tmp.mp4")
+            if via == "api":
+                ltx.LTX().generate(tmp, shot.prompt, image=str(first), last_frame=str(last) if last else None,
+                                   model=model, duration=6, res=res, fps=24, sound=False, camera=shot.camera)
+            else:
+                ltx_space.generate(tmp, shot.prompt, image=str(first), res=res,
+                                   duration=min(ltx_space.MAX_SECONDS, max(2.0, part * 1.5)), camera=shot.camera)
+            tmp.replace(raw)
+        else:
+            log.info("ИИ-шот %s, переход %d/%d — из кэша", shot.id, k + 1, len(steps))
+        pieces.append(retime(raw, part, work / f"{shot.id}-{k}.mp4", plan.width, plan.height, plan.fps))
+    if len(pieces) == 1:
+        return pieces[0]
+    return concat(pieces, work / f"{shot.id}.mp4")
+
+
+def build(plan: Plan, out: Path, engine: str = "local", via: str = "auto", model: str = "ltx-2-5-fast",
+          res: str = "1920x1080", only: set[str] | None = None, music: Path | None = None) -> Path:
+    """Собрать ролик. engine=local — все шоты через ffmpeg; engine=ai — шоты engine: ai через LTX."""
+    if via == "auto":
+        via = "api" if ltx.LTX().enabled else "space"
+    cache = out.parent / "animatic-cache"
+    cache.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory() as tmp:
+        work = Path(tmp)
+        clips = []
+        for i, s in enumerate(plan.shots, 1):
+            use_ai = engine == "ai" and s.engine == "ai" and (not only or s.id in only)
+            log.info("[%d/%d] %s · %.1f с · %s", i, len(plan.shots), s.id, s.seconds, f"ИИ ({via})" if use_ai else "локально")
+            if use_ai:
+                clips.append(ai_clip(s, plan, cache, via, model, res, work))
+            else:
+                clips.append(local_clip(s.frames, s.seconds, work / f"{i:02d}-{s.id}.mp4", plan.width, plan.height,
+                                        plan.fps, s.zoom))
+        out.parent.mkdir(parents=True, exist_ok=True)
+        return concat(clips, out, music)

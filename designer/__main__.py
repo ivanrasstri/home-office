@@ -9,6 +9,7 @@
   python -m designer video "промпт" [--image кадр.png]    видео LTX-2.5 (текст/кадр/аудио → mp4)
   python -m designer video --job image-to-video/<id>      дозабрать готовое видео по id задачи
   python -m designer video "промпт" --via space            бесплатно: демо LTX-2.5 на Hugging Face (до 5 с)
+  python -m designer animatic shots.yaml [--engine ai]    аниматик из раскадровки (ffmpeg или LTX по шотам)
 
 Для suggest/make нужен ANTHROPIC_API_KEY. С API_KEY_21ST дизайнер подтягивает
 референс компонента с 21st.dev (лендинги и экраны интерфейса). Для video нужен
@@ -26,7 +27,7 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 
-from . import catalog, gallery, ltx, ltx_space, studio, twentyfirst
+from . import animatic, catalog, gallery, ltx, ltx_space, studio, twentyfirst
 
 ROOT = Path(__file__).resolve().parent.parent
 RESUME = ROOT / "resume" / "resume.md"
@@ -223,6 +224,41 @@ def _video_space(a: argparse.Namespace, out: Path) -> int:
     return 0
 
 
+def cmd_animatic(a: argparse.Namespace) -> int:
+    """Раскадровка → ролик: шоты локально (ffmpeg) или с ИИ-анимацией LTX-2.5."""
+    try:
+        plan = animatic.load(a.plan)
+        model = ltx.model_id(a.model)
+        res = ltx.resolution(a.res)
+        via = a.via if a.via != "auto" else ("api" if ltx.LTX().enabled else "space")
+        only = {x.strip() for x in a.only.split(",")} if a.only else None
+        total = sum(s.seconds for s in plan.shots)
+        print(f"{plan.source.name}: {len(plan.shots)} шотов, {total:.1f} с, {plan.width}x{plan.height} {plan.fps} fps",
+              flush=True)
+        if a.engine == "ai":
+            sub = animatic.Plan([s for s in plan.shots if not only or s.id in only], plan.width, plan.height,
+                                plan.fps, plan.source)
+            cost, runs = animatic.estimate(sub, via, model, res)
+            price = f"≈${cost:.2f} (без учёта кэша)" if via == "api" else "бесплатно, дневная квота Hugging Face"
+            print(f"ИИ ({via}): генераций {runs} · {price}", flush=True)
+            if a.estimate:
+                return 0
+            limit = a.max_total_usd if a.max_total_usd is not None else ltx.usd("LTX_DAILY_USD", "20")
+            if via == "api" and cost > limit:
+                print(f"Дороже лимита ${limit:.2f} — подними --max-total-usd, если так и задумано.", file=sys.stderr)
+                return 1
+        elif a.estimate:
+            return 0
+        out = Path(a.out) / f"{datetime.now():%Y%m%d-%H%M%S}-{plan.source.stem}-{a.engine}.mp4"
+        path = animatic.build(plan, out, engine=a.engine, via=via, model=model, res=res, only=only,
+                              music=Path(a.music) if a.music else None)
+    except (animatic.AnimaticError, ltx.LTXError) as e:
+        print(e, file=sys.stderr)
+        return 1
+    print(f"Готово: {path}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
     p = argparse.ArgumentParser(prog="python -m designer", description="Дизайнер на DESIGN.md + Claude")
@@ -287,6 +323,22 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--job", help="забрать готовое видео по задаче <endpoint>/<id> (если скачивание сорвалось)")
     s.add_argument("--out", default="dist")
     s.set_defaults(fn=cmd_video)
+
+    s = sub.add_parser("animatic", help="аниматик из раскадровки: шоты через ffmpeg или LTX-2.5")
+    s.add_argument("plan", help="YAML с шотами (см. designer/animatic.py)")
+    s.add_argument("--engine", choices=["local", "ai"], default="local",
+                   help="local (по умолч.) — всё через ffmpeg, бесплатно и без отправки кадров; "
+                        "ai — шоты с engine: ai через LTX")
+    s.add_argument("--via", choices=["auto", "api", "space"], default=ltx.env("LTX_VIA", "auto"),
+                   help="для --engine ai: api — платный LTX (первый+последний кадр); space — бесплатное демо")
+    s.add_argument("--model", default=ltx.env("LTX_MODEL", "fast"), help="fast или pro (только api)")
+    s.add_argument("--res", default=ltx.env("LTX_RESOLUTION", "1080p"), help="разрешение генерации ИИ-шотов")
+    s.add_argument("--only", help="ИИ только для этих шотов: id через запятую (остальные локально)")
+    s.add_argument("--music", help="звуковая дорожка под весь ролик")
+    s.add_argument("--max-total-usd", type=float, help="потолок цены всех ИИ-шотов (по умолч. LTX_DAILY_USD или 20)")
+    s.add_argument("--estimate", action="store_true", help="только показать план и цену")
+    s.add_argument("--out", default="dist")
+    s.set_defaults(fn=cmd_animatic)
 
     a = p.parse_args(argv)
     return a.fn(a)
