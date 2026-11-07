@@ -250,12 +250,16 @@ def cmd_animatic(a: argparse.Namespace) -> int:
         elif a.estimate:
             return 0
         out = Path(a.out) / f"{datetime.now():%Y%m%d-%H%M%S}-{plan.source.stem}-{a.engine}.mp4"
+        pending: list[str] = []
         path = animatic.build(plan, out, engine=a.engine, via=via, model=model, res=res, only=only,
-                              music=Path(a.music) if a.music else None)
+                              music=Path(a.music) if a.music else None, pending=pending)
     except (animatic.AnimaticError, ltx.LTXError) as e:
         print(e, file=sys.stderr)
         return 1
     print(f"Готово: {path}")
+    if pending:
+        print(f"Пока без ИИ: {', '.join(pending)}. Повтори ту же команду позже (например, завтра, когда обновится "
+              "квота) — готовые шоты возьмутся из кэша, догенерируются только эти.")
     return 0
 
 

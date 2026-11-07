@@ -189,13 +189,22 @@ def estimate(plan: Plan, via: str, model: str, res: str) -> tuple[float, int]:
     return round(runs * ltx.estimate(model, res, 6), 2), runs  # в API минимум 6 с на клип
 
 
+def _raw_path(shot: Shot, k: int, first: Path, last: Path | None, cache: Path, via: str, model: str, res: str) -> Path:
+    use_last = last if via == "api" else None  # в бесплатном демо последнего кадра нет
+    return cache / f"{shot.id}-{k}-{via}-{_key(via, model, res, shot.prompt, shot.camera, first, use_last or '')}.mp4"
+
+
+def _cached(shot: Shot, cache: Path, via: str, model: str, res: str) -> bool:
+    return all(_raw_path(shot, k, f, last, cache, via, model, res).exists()
+               for k, (f, last) in enumerate(ai_steps(shot)))
+
+
 def ai_clip(shot: Shot, plan: Plan, cache: Path, via: str, model: str, res: str, work: Path) -> Path:
     steps = ai_steps(shot)
     part = shot.seconds / len(steps)
     pieces = []
     for k, (first, last) in enumerate(steps):
-        use_last = last if via == "api" else None  # в бесплатном демо последнего кадра нет
-        raw = cache / f"{shot.id}-{k}-{via}-{_key(via, model, res, shot.prompt, shot.camera, first, use_last or '')}.mp4"
+        raw = _raw_path(shot, k, first, last, cache, via, model, res)
         if not raw.exists():
             log.info("ИИ-шот %s, переход %d/%d (%s) …", shot.id, k + 1, len(steps), via)
             tmp = raw.with_name(raw.name + ".tmp.mp4")
@@ -203,8 +212,8 @@ def ai_clip(shot: Shot, plan: Plan, cache: Path, via: str, model: str, res: str,
                 ltx.LTX().generate(tmp, shot.prompt, image=str(first), last_frame=str(last) if last else None,
                                    model=model, duration=6, res=res, fps=24, sound=False, camera=shot.camera)
             else:
-                ltx_space.generate(tmp, shot.prompt, image=str(first), res=res,
-                                   duration=min(ltx_space.MAX_SECONDS, max(2.0, part * 1.5)), camera=shot.camera)
+                ltx_space.generate(tmp, shot.prompt, image=str(first), res=res,  # короче — экономнее квота
+                                   duration=min(ltx_space.MAX_SECONDS, max(2.0, part)), camera=shot.camera)
             tmp.replace(raw)
         else:
             log.info("ИИ-шот %s, переход %d/%d — из кэша", shot.id, k + 1, len(steps))
@@ -215,8 +224,13 @@ def ai_clip(shot: Shot, plan: Plan, cache: Path, via: str, model: str, res: str,
 
 
 def build(plan: Plan, out: Path, engine: str = "local", via: str = "auto", model: str = "ltx-2-5-fast",
-          res: str = "1920x1080", only: set[str] | None = None, music: Path | None = None) -> Path:
-    """Собрать ролик. engine=local — все шоты через ffmpeg; engine=ai — шоты engine: ai через LTX."""
+          res: str = "1920x1080", only: set[str] | None = None, music: Path | None = None,
+          pending: list[str] | None = None) -> Path:
+    """Собрать ролик. engine=local — все шоты через ffmpeg; engine=ai — шоты engine: ai через LTX.
+
+    Если ИИ-шот не вышел (кончилась квота, сеть), он собирается локально, а его id попадает в pending:
+    следующий запуск возьмёт готовое из кэша и догенерирует только недостающее.
+    """
     if via == "auto":
         via = "api" if ltx.LTX().enabled else "space"
     cache = out.parent / "animatic-cache"
@@ -224,13 +238,23 @@ def build(plan: Plan, out: Path, engine: str = "local", via: str = "auto", model
     with tempfile.TemporaryDirectory() as tmp:
         work = Path(tmp)
         clips = []
+        quota_out = False
         for i, s in enumerate(plan.shots, 1):
-            use_ai = engine == "ai" and s.engine == "ai" and (not only or s.id in only)
+            use_ai = engine == "ai" and s.engine == "ai" and (
+                not only or s.id in only or _cached(s, cache, via, model, res))  # готовое из кэша — бесплатно
             log.info("[%d/%d] %s · %.1f с · %s", i, len(plan.shots), s.id, s.seconds, f"ИИ ({via})" if use_ai else "локально")
             if use_ai:
-                clips.append(ai_clip(s, plan, cache, via, model, res, work))
-            else:
-                clips.append(local_clip(s.frames, s.seconds, work / f"{i:02d}-{s.id}.mp4", plan.width, plan.height,
-                                        plan.fps, s.zoom))
+                try:
+                    if quota_out and not _cached(s, cache, via, model, res):
+                        raise ltx.LTXError("квота на сегодня уже кончилась")
+                    clips.append(ai_clip(s, plan, cache, via, model, res, work))
+                    continue
+                except ltx.LTXError as e:
+                    quota_out = quota_out or "квот" in str(e).lower()
+                    log.warning("ИИ-шот %s не вышел (%s) — пока собираю его локально", s.id, str(e)[:200])
+                    if pending is not None:
+                        pending.append(s.id)
+            clips.append(local_clip(s.frames, s.seconds, work / f"{i:02d}-{s.id}.mp4", plan.width, plan.height,
+                                    plan.fps, s.zoom))
         out.parent.mkdir(parents=True, exist_ok=True)
         return concat(clips, out, music)
