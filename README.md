@@ -93,15 +93,22 @@ python -m jobbot.telegram_bot
 
 ### Деплой на Railway
 1. Создай бота у **@BotFather**, получи `TELEGRAM_BOT_TOKEN`.
-2. На Railway: **New Project → Deploy from GitHub repo** (этот репозиторий).
-   Railway сам поставит зависимости из `requirements.txt` и запустит процесс
-   `worker` из `Procfile` (`python -m jobbot.telegram_bot`).
-3. **Variables:** `TELEGRAM_BOT_TOKEN`, `ANTHROPIC_API_KEY`, и (рекомендуется)
-   `TELEGRAM_CHAT_ID` — твой chat_id (бот покажет его в ответ на `/start`), чтобы
-   ботом не мог пользоваться кто-то ещё.
-4. **Volume:** добавь Volume и смонтируй, например, в `/data`, затем поставь
-   переменную `JOBBOT_DATA_DIR=/data` — так дедуп и подборка переживут перезапуски.
-5. (Необязательно) `JOBBOT_AUTO_SEARCH=true`, `JOBBOT_DAILY_HOUR_UTC=6`.
+2. На Railway: **New Project → Deploy from GitHub repo** (этот репозиторий, нужная ветка).
+   Railway соберёт образ по `Dockerfile` (Python 3.12, бот работает не от root) и запустит
+   бота. Перезапуск при падении задан в `railway.json`.
+3. **Variables:**
+   - `TELEGRAM_BOT_TOKEN`;
+   - `TELEGRAM_CHAT_ID` — твой chat_id, бот покажет его в ответ на `/start`, чтобы ботом не
+     пользовался кто-то ещё;
+   - `ANTHROPIC_API_KEY` — нужен для откликов и `/design`;
+   - для `/video`: `LTXV_API_KEY` (платный LTX) или `HF_TOKEN` (бесплатное демо, до 5 с).
+4. **Volume:** смонтируй в `/data`. Переменная `JOBBOT_DATA_DIR=/data` уже задана в образе,
+   так что подписчики, дедуп и учёт трат переживают перезапуски.
+5. Необязательно: `JOBBOT_AUTO_SEARCH=true`, `JOBBOT_DAILY_HOUR_UTC=6`.
+
+Деплоить можно и из Claude: подключи коннектор Railway
+(claude.ai/directory/connectors/railway). Тогда Claude сам создаёт сервис, задаёт переменные,
+деплоит и смотрит логи. Токены лучше вписывать в Railway самому, не через чат.
 
 > Заметка: профиль/резюме/источники (`config/*.yaml`, `resume/resume.md`) бот
 > читает из репозитория. Поменял — сделай commit, Railway передеплоит.

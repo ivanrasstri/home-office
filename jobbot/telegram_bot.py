@@ -25,6 +25,8 @@
   LTX_MODEL / LTX_RESOLUTION / LTX_DURATION — умолчания для /video (fast, 1080p, 6).
   LTX_MAX_USD           — потолок цены одного ролика в $ (по умолч. 5).
   LTX_DAILY_USD         — дневной лимит трат на видео в $ (по умолч. 20).
+  HF_TOKEN              — (необязательно) без LTXV_API_KEY /video идёт бесплатно через демо LTX-2.5
+                          на Hugging Face: до 5 с, по умолчанию 720p и 3 с, дневная квота.
   JOBBOT_DATA_DIR       — каталог состояния (на Railway укажи Volume, напр. /data).
   JOBBOT_AUTO_SEARCH    — "true"/"false", авто-подборка по расписанию (по умолч. true).
   JOBBOT_DAILY_HOUR_UTC — час UTC для авто-подборки (по умолч. 6 ≈ 11:00 Ташкент).
@@ -49,7 +51,7 @@ from typing import Any
 import requests
 
 from designer import catalog as dcatalog
-from designer import ltx
+from designer import ltx, ltx_space
 from designer import studio as dstudio
 from designer import twentyfirst
 
@@ -468,49 +470,62 @@ def do_video(tg: Telegram, chat_id: int, text: str, msg: dict[str, Any]) -> None
     if not prompt and not photo:
         tg.send_message(chat_id, VIDEO_HELP)
         return
-    tier = opts.get("tier") or ltx.env("LTX_RESOLUTION", "1080p")
+    paid = ltx.LTX().enabled
+    free = not paid and ltx_space._has_token()  # без ключа LTX — бесплатное демо на Hugging Face
+    if not paid and not free:
+        tg.send_message(chat_id, "Для видео нужен ключ на сервере: LTXV_API_KEY (платный LTX, console.ltx.io) "
+                                 "или HF_TOKEN (бесплатно, до 5 с, huggingface.co → Settings → Access Tokens).")
+        return
+    # в бесплатном демо квота дневная: по умолчанию 720p и 3 с, чтобы ролик в неё влез
+    tier = opts.get("tier") or ("720p" if free else ltx.env("LTX_RESOLUTION", "1080p"))
     aspect = opts.get("aspect")
     if not aspect and photo and photo["width"] and photo["height"] and tier.lower() in ltx.TIERS:
         aspect = ltx.closest_aspect(photo["width"], photo["height"])  # вертикальное фото — вертикальный ролик
     try:
         model = opts.get("model") or ltx.model_id(ltx.env("LTX_MODEL", "fast"))
         res = ltx.resolution(tier, aspect)
-        duration = opts["duration"] if "duration" in opts else ltx.parse_duration(ltx.env("LTX_DURATION", "6"))
-        ltx.validate(model, res, duration, 24)
-        price = ltx.estimate(model, res, duration)
-        limit = ltx.max_usd()
-        daily = ltx.usd("LTX_DAILY_USD", "20")
+        if "duration" in opts:
+            duration = opts["duration"]
+        else:
+            duration = 3 if free else ltx.parse_duration(ltx.env("LTX_DURATION", "6"))
+        price = 0.0
+        if paid:
+            ltx.validate(model, res, duration, 24)
+            price = ltx.estimate(model, res, duration)
+            limit = ltx.max_usd()
+            daily = ltx.usd("LTX_DAILY_USD", "20")
     except ltx.LTXError as e:
         tg.send_message(chat_id, f"⚠️ {html.escape(str(e))}")
         return
-    if price > limit:
-        tg.send_message(chat_id, f"Это ≈${price:.2f}, а потолок ${limit:.2f} (LTX_MAX_USD). Возьми короче или 720p.")
-        return
-    spent = _spent_today()
-    if spent + price > daily:
-        tg.send_message(chat_id, f"Сегодня на видео ушло ≈${spent:.2f}, дневной лимит ${daily:.2f} (LTX_DAILY_USD). "
-                                 "Продолжим завтра или подними лимит.")
-        return
-    if not ltx.LTX().enabled:
-        tg.send_message(chat_id, "Для видео нужен LTXV_API_KEY на сервере (console.ltx.io → API Keys).")
-        return
-    secs = "длину выберет модель" if duration is None else f"{duration} с"
-    tg.send_message(
-        chat_id,
-        f"🎬 Снимаю {'из твоего кадра' if photo else 'по описанию'}: {res}, {secs}, "
-        f"{model.removeprefix('ltx-2-5-')}, ≈${price:.2f}. Пришлю, как будет готово.",
-    )
+    what = "из твоего кадра" if photo else "по описанию"
+    if free:
+        h, w = ltx_space.dims(res)
+        secs, auto = ltx_space.seconds(duration, quiet=True)
+        tg.send_message(chat_id, f"🎬 Снимаю {what} бесплатно (демо LTX-2.5 на Hugging Face, дневная квота): "
+                                 f"{w}x{h}, {'длину выберет модель' if auto else f'{secs:g} с'}. Пришлю, как будет готово.")
+    else:
+        if price > limit:
+            tg.send_message(chat_id, f"Это ≈${price:.2f}, а потолок ${limit:.2f} (LTX_MAX_USD). Возьми короче или 720p.")
+            return
+        spent = _spent_today()
+        if spent + price > daily:
+            tg.send_message(chat_id, f"Сегодня на видео ушло ≈${spent:.2f}, дневной лимит ${daily:.2f} "
+                                     "(LTX_DAILY_USD). Продолжим завтра или подними лимит.")
+            return
+        secs = "длину выберет модель" if duration is None else f"{duration} с"
+        tg.send_message(chat_id, f"🎬 Снимаю {what}: {res}, {secs}, {model.removeprefix('ltx-2-5-')}, ≈${price:.2f}. "
+                                 "Пришлю, как будет готово.")
     reaspect = photo is not None and not opts.get("aspect") and not (photo["width"] and photo["height"]) \
         and tier.lower() in ltx.TIERS  # у файла размеры узнаем после скачивания
     args = (tg, chat_id, prompt or "Subtle natural motion, the camera slowly pushes in.",
             photo["file_id"] if photo else None, model, res, duration, opts.get("sound", True),
-            opts.get("camera"), price, tier if reaspect else None)
+            opts.get("camera"), price, tier if reaspect else None, free)
     threading.Thread(target=_shoot, args=args, daemon=True).start()
 
 
 def _shoot(tg: Telegram, chat_id: int, prompt: str, photo: str | None, model: str, res: str,
            duration: int | None, sound: bool, camera: str | None, price: float = 0.0,
-           reaspect_tier: str | None = None) -> None:
+           reaspect_tier: str | None = None, free: bool = False) -> None:
     client = ltx.LTX()
     with tempfile.TemporaryDirectory() as tmp:
         image = None
@@ -535,8 +550,12 @@ def _shoot(tg: Telegram, chat_id: int, prompt: str, photo: str | None, model: st
             log.info("/video чат %s → задача %s, ≈$%.2f", chat_id, job, price)
 
         try:
-            path = client.generate(Path(tmp) / "ltx.mp4", prompt, image=image, model=model, res=res,
-                                   duration=duration, sound=sound, camera=camera, on_job=on_job)
+            if free:
+                path, _ = ltx_space.generate(Path(tmp) / "ltx.mp4", prompt, image=image, res=res,
+                                             duration=duration, camera=camera)
+            else:
+                path = client.generate(Path(tmp) / "ltx.mp4", prompt, image=image, model=model, res=res,
+                                       duration=duration, sound=sound, camera=camera, on_job=on_job)
         except Exception as e:
             log.exception("Видео не получилось: %s", e)
             tg.send_message(chat_id, f"⚠️ Не получилось: {html.escape(str(e)[:3500])}")  # ссылка на ролик длинная
