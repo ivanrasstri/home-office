@@ -12,9 +12,11 @@
         engine: ai               # ai — LTX; local — только ffmpeg (текст, QR, логотипы не плывут)
         prompt: "The camera pushes in toward the logo on the bag..."
         camera: dolly_in         # необязательно
+        gen_seconds: 3           # длина генерации в бесплатном демо (по умолч. = длине шота, не меньше 2 с)
 
     python -m designer animatic shots.yaml                  # всё локально: бесплатно, кадры никуда не уходят
     python -m designer animatic shots.yaml --engine ai      # шоты engine: ai — через LTX (--via api|space|auto)
+    python -m designer animatic shots.yaml --engine ai --only bag,flowers   # ИИ только эти, в этом порядке
 
 Готовые ИИ-клипы кэшируются в <out>/animatic-cache: повторная сборка за них не платит. В платном API
 каждый переход — отдельный клип с первым и последним кадром (точно попадает в раскадровку). В
@@ -52,6 +54,8 @@ class Shot:
     prompt: str = ""
     camera: str | None = None
     zoom: float = 0.04
+    gen_seconds: float | None = None
+    inputs: list[Path] | None = None  # кадры после очистки краёв — их видит модель; ключ кэша — по исходным
 
 
 @dataclass
@@ -87,7 +91,8 @@ def load(path: str | Path) -> Plan:
             raise AnimaticError(f"Шот {s.get('id', i)}: engine — local или ai")
         shots.append(Shot(id=str(s.get("id", i)), frames=frames, seconds=float(s.get("seconds", 2)),
                           engine=engine, prompt=str(s.get("prompt", "")).strip(), camera=s.get("camera"),
-                          zoom=float(s.get("zoom", 0.04))))
+                          zoom=float(s.get("zoom", 0.04)),
+                          gen_seconds=float(s["gen_seconds"]) if s.get("gen_seconds") else None))
     if not shots:
         raise AnimaticError(f"В {path} нет шотов")
     return Plan(shots=shots, width=w, height=h, fps=int(data.get("fps", 25)), source=path)
@@ -168,6 +173,42 @@ def concat(clips: list[Path], out: Path, music: Path | None = None) -> Path:
         Path(lst.name).unlink(missing_ok=True)
 
 
+def clean_edges(src: Path, dst_dir: Path, max_lines: int = 8) -> Path:
+    """Убрать тёмные служебные линии по краям кадра (рамки из раскладки раскадровки): модель приняла бы их
+    за часть сцены. Линии заменяются соседней строкой или столбцом картинки; чистый кадр возвращается как есть."""
+    from PIL import Image, ImageStat
+
+    im = Image.open(src).convert("RGB")
+    w, h = im.size
+
+    def mean(box: tuple[int, int, int, int]) -> float:
+        return sum(ImageStat.Stat(im.crop(box)).mean) / 3
+
+    sides = {
+        "top": lambda i: (0, i, w, i + 1), "bottom": lambda i: (0, h - 1 - i, w, h - i),
+        "left": lambda i: (i, 0, i + 1, h), "right": lambda i: (w - 1 - i, 0, w - i, h),
+    }
+    dark = {}
+    for side, box in sides.items():
+        n = 0
+        while n < max_lines and mean(box(n)) < 25:
+            n += 1
+        if 0 < n < max_lines and mean(box(n)) > 40:  # тёмная полоса у края, а дальше обычная картинка
+            dark[side] = n
+    if not dark:
+        return src
+    for side, n in dark.items():
+        strip = im.crop(sides[side](n))
+        for i in range(n):
+            im.paste(strip, sides[side](i)[:2])
+    dst_dir.mkdir(parents=True, exist_ok=True)
+    out = dst_dir / f"{src.stem}-{_key(src)}.png"
+    if not out.exists():
+        im.save(out)
+    log.info("%s: убраны тёмные линии по краям (%s)", src.name, ", ".join(f"{k} {v}px" for k, v in dark.items()))
+    return out
+
+
 # -- ИИ ----------------------------------------------------------------------
 def _key(*parts: object) -> str:
     h = hashlib.sha1()
@@ -199,12 +240,15 @@ def _cached(shot: Shot, cache: Path, via: str, model: str, res: str) -> bool:
                for k, (f, last) in enumerate(ai_steps(shot)))
 
 
-def ai_clip(shot: Shot, plan: Plan, cache: Path, via: str, model: str, res: str, work: Path) -> Path:
+def generate_raw(shot: Shot, cache: Path, via: str, model: str, res: str) -> list[Path]:
+    """Сгенерировать (или взять из кэша) сырые ИИ-клипы шота — по одному на переход."""
     steps = ai_steps(shot)
     part = shot.seconds / len(steps)
-    pieces = []
-    for k, (first, last) in enumerate(steps):
-        raw = _raw_path(shot, k, first, last, cache, via, model, res)
+    clean = dict(zip(shot.frames, shot.inputs or shot.frames, strict=True))
+    raws = []
+    for k, (src_first, src_last) in enumerate(steps):
+        raw = _raw_path(shot, k, src_first, src_last, cache, via, model, res)
+        first, last = clean[src_first], clean[src_last] if src_last else None
         if not raw.exists():
             log.info("ИИ-шот %s, переход %d/%d (%s) …", shot.id, k + 1, len(steps), via)
             tmp = raw.with_name(raw.name + ".tmp.mp4")
@@ -212,19 +256,28 @@ def ai_clip(shot: Shot, plan: Plan, cache: Path, via: str, model: str, res: str,
                 ltx.LTX().generate(tmp, shot.prompt, image=str(first), last_frame=str(last) if last else None,
                                    model=model, duration=6, res=res, fps=24, sound=False, camera=shot.camera)
             else:
-                ltx_space.generate(tmp, shot.prompt, image=str(first), res=res,  # короче — экономнее квота
-                                   duration=min(ltx_space.MAX_SECONDS, max(2.0, part)), camera=shot.camera)
+                secs = shot.gen_seconds or max(2.0, part)  # короче — экономнее квота
+                ltx_space.generate(tmp, shot.prompt, image=str(first), res=res,
+                                   duration=min(ltx_space.MAX_SECONDS, secs), camera=shot.camera)
             tmp.replace(raw)
         else:
             log.info("ИИ-шот %s, переход %d/%d — из кэша", shot.id, k + 1, len(steps))
-        pieces.append(retime(raw, part, work / f"{shot.id}-{k}.mp4", plan.width, plan.height, plan.fps))
+        raws.append(raw)
+    return raws
+
+
+def ai_clip(shot: Shot, plan: Plan, cache: Path, via: str, model: str, res: str, work: Path) -> Path:
+    raws = generate_raw(shot, cache, via, model, res)
+    part = shot.seconds / len(raws)
+    pieces = [retime(raw, part, work / f"{shot.id}-{k}.mp4", plan.width, plan.height, plan.fps)
+              for k, raw in enumerate(raws)]
     if len(pieces) == 1:
         return pieces[0]
     return concat(pieces, work / f"{shot.id}.mp4")
 
 
 def build(plan: Plan, out: Path, engine: str = "local", via: str = "auto", model: str = "ltx-2-5-fast",
-          res: str = "1920x1080", only: set[str] | None = None, music: Path | None = None,
+          res: str = "1920x1080", only: list[str] | set[str] | None = None, music: Path | None = None,
           pending: list[str] | None = None) -> Path:
     """Собрать ролик. engine=local — все шоты через ffmpeg; engine=ai — шоты engine: ai через LTX.
 
@@ -235,26 +288,44 @@ def build(plan: Plan, out: Path, engine: str = "local", via: str = "auto", model
         via = "api" if ltx.LTX().enabled else "space"
     cache = out.parent / "animatic-cache"
     cache.mkdir(parents=True, exist_ok=True)
+    for s in plan.shots:
+        s.inputs = [clean_edges(f, cache / "frames") for f in s.frames]
+    order = list(only) if only else []
+    pending = pending if pending is not None else []
+    quota_out = False
+    if engine == "ai" and order:  # сначала ИИ в заданном порядке: важное — пока есть квота
+        byid = {s.id: s for s in plan.shots}
+        for sid in order:
+            s = byid.get(sid)
+            if not s or s.engine != "ai" or _cached(s, cache, via, model, res):
+                continue
+            if quota_out:
+                pending.append(sid)
+                continue
+            try:
+                generate_raw(s, cache, via, model, res)
+            except ltx.LTXError as e:
+                quota_out = "квот" in str(e).lower()
+                log.warning("ИИ-шот %s не вышел (%s) — пока будет локально", sid, str(e)[:200])
+                pending.append(sid)
     with tempfile.TemporaryDirectory() as tmp:
         work = Path(tmp)
         clips = []
-        quota_out = False
         for i, s in enumerate(plan.shots, 1):
-            use_ai = engine == "ai" and s.engine == "ai" and (
-                not only or s.id in only or _cached(s, cache, via, model, res))  # готовое из кэша — бесплатно
+            cached = engine == "ai" and s.engine == "ai" and _cached(s, cache, via, model, res)
+            use_ai = cached or (engine == "ai" and s.engine == "ai" and not order)  # с --only генерация уже была выше
             log.info("[%d/%d] %s · %.1f с · %s", i, len(plan.shots), s.id, s.seconds, f"ИИ ({via})" if use_ai else "локально")
             if use_ai:
                 try:
-                    if quota_out and not _cached(s, cache, via, model, res):
+                    if quota_out and not cached:
                         raise ltx.LTXError("квота на сегодня уже кончилась")
                     clips.append(ai_clip(s, plan, cache, via, model, res, work))
                     continue
                 except ltx.LTXError as e:
                     quota_out = quota_out or "квот" in str(e).lower()
                     log.warning("ИИ-шот %s не вышел (%s) — пока собираю его локально", s.id, str(e)[:200])
-                    if pending is not None:
-                        pending.append(s.id)
-            clips.append(local_clip(s.frames, s.seconds, work / f"{i:02d}-{s.id}.mp4", plan.width, plan.height,
-                                    plan.fps, s.zoom))
+                    pending.append(s.id)
+            clips.append(local_clip(s.inputs or s.frames, s.seconds, work / f"{i:02d}-{s.id}.mp4", plan.width,
+                                    plan.height, plan.fps, s.zoom))
         out.parent.mkdir(parents=True, exist_ok=True)
         return concat(clips, out, music)

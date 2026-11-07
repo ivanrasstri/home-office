@@ -231,7 +231,7 @@ def cmd_animatic(a: argparse.Namespace) -> int:
         model = ltx.model_id(a.model)
         res = ltx.resolution(a.res)
         via = a.via if a.via != "auto" else ("api" if ltx.LTX().enabled else "space")
-        only = {x.strip() for x in a.only.split(",")} if a.only else None
+        only = [x.strip() for x in a.only.split(",") if x.strip()] if a.only else None  # порядок важен
         total = sum(s.seconds for s in plan.shots)
         print(f"{plan.source.name}: {len(plan.shots)} шотов, {total:.1f} с, {plan.width}x{plan.height} {plan.fps} fps",
               flush=True)
@@ -337,7 +337,8 @@ def main(argv: list[str] | None = None) -> int:
                    help="для --engine ai: api — платный LTX (первый+последний кадр); space — бесплатное демо")
     s.add_argument("--model", default=ltx.env("LTX_MODEL", "fast"), help="fast или pro (только api)")
     s.add_argument("--res", default=ltx.env("LTX_RESOLUTION", "1080p"), help="разрешение генерации ИИ-шотов")
-    s.add_argument("--only", help="ИИ только для этих шотов: id через запятую (остальные локально)")
+    s.add_argument("--only", help="ИИ только для этих шотов, по порядку важности: id через запятую "
+                                  "(уже готовые ИИ-шоты берутся из кэша, остальные — локально)")
     s.add_argument("--music", help="звуковая дорожка под весь ролик")
     s.add_argument("--max-total-usd", type=float, help="потолок цены всех ИИ-шотов (по умолч. LTX_DAILY_USD или 20)")
     s.add_argument("--estimate", action="store_true", help="только показать план и цену")
