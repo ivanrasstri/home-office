@@ -27,7 +27,7 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 
-from . import animatic, catalog, gallery, ltx, ltx_space, studio, twentyfirst
+from . import animatic, catalog, gallery, ltx, ltx_space, studio, twentyfirst, wan_space
 
 ROOT = Path(__file__).resolve().parent.parent
 RESUME = ROOT / "resume" / "resume.md"
@@ -151,6 +151,8 @@ def cmd_video(a: argparse.Namespace) -> int:
     via = a.via if a.via != "auto" else ("api" if ltx.LTX().enabled else "space")
     if via == "space":
         return _video_space(a, out)
+    if via == "wan":
+        return _video_wan(a, out)
     try:
         model = ltx.model_id(a.model)
         res = ltx.resolution(a.res, a.aspect)
@@ -196,6 +198,35 @@ def cmd_video(a: argparse.Namespace) -> int:
     return 0
 
 
+def _video_wan(a: argparse.Namespace, out: Path) -> int:
+    """Бесплатно: Wan 2.2 в демо на Hugging Face — от кадра, с последним кадром — переход между ними."""
+    if not a.image:
+        print("Wan работает от кадра: добавь --image (и --last-frame для перехода кадр→кадр).", file=sys.stderr)
+        return 1
+    if a.audio:
+        print("Аудио на входе у Wan нет — это есть в платном LTX API (--via api).", file=sys.stderr)
+        return 1
+    try:
+        duration = ltx.parse_duration(a.duration)
+    except ltx.LTXError as e:
+        print(e, file=sys.stderr)
+        return 1
+    secs = wan_space.clamp_seconds(duration)
+    mode = "переход кадр → кадр" if a.last_frame else "кадр → видео"
+    print(f"{mode} · Wan 2.2, бесплатное демо Hugging Face · ~832×480, 16 к/с · {secs:g} с · без звука · "
+          f"запрос квоты ≈{wan_space.quota_seconds(secs)} с из 300 в день", flush=True)
+    if a.estimate:
+        return 0
+    try:
+        path, info = wan_space.generate(out, a.prompt, image=a.image, last_frame=a.last_frame, duration=secs,
+                                        camera=a.camera, seed=a.seed)
+    except ltx.LTXError as e:
+        print(e, file=sys.stderr)
+        return 1
+    print(f"Готово: {path} ({info})")
+    return 0
+
+
 def _video_space(a: argparse.Namespace, out: Path) -> int:
     """Бесплатно: официальное демо LTX-2.5 на Hugging Face (до 5 с, дневная квота)."""
     try:
@@ -235,12 +266,18 @@ def cmd_animatic(a: argparse.Namespace) -> int:
         total = sum(s.seconds for s in plan.shots)
         print(f"{plan.source.name}: {len(plan.shots)} шотов, {total:.1f} с, {plan.width}x{plan.height} {plan.fps} fps",
               flush=True)
+        if a.backend:  # принудительно один движок для всех ИИ-шотов
+            for s in plan.shots:
+                s.backend = a.backend
         if a.engine == "ai":
             sub = animatic.Plan([s for s in plan.shots if not only or s.id in only], plan.width, plan.height,
                                 plan.fps, plan.source)
             cost, runs = animatic.estimate(sub, via, model, res)
             price = f"≈${cost:.2f} (без учёта кэша)" if via == "api" else "бесплатно, дневная квота Hugging Face"
             print(f"ИИ ({via}): генераций {runs} · {price}", flush=True)
+            wq = animatic.wan_quota(sub)
+            if wq:
+                print(f"Wan: запрос квоты ≈{wq} с из 300 в день (бесплатный аккаунт)", flush=True)
             if a.estimate:
                 return 0
             limit = a.max_total_usd if a.max_total_usd is not None else ltx.usd("LTX_DAILY_USD", "20")
@@ -318,10 +355,11 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--silent", action="store_true", help="без звука")
     s.add_argument("--estimate", action="store_true", help="только посчитать цену, без запроса")
     s.add_argument("--max-usd", type=float, help="потолок цены за ролик (по умолч. LTX_MAX_USD или 5)")
-    s.add_argument("--via", choices=["auto", "api", "space"], default=ltx.env("LTX_VIA", "auto"),
-                   help="api — платный LTX API; space — бесплатное демо Hugging Face (до 5 с); "
+    s.add_argument("--via", choices=["auto", "api", "space", "wan"], default=ltx.env("LTX_VIA", "auto"),
+                   help="api — платный LTX API; space — бесплатное демо LTX на Hugging Face (до 5 с); "
+                        "wan — бесплатный Wan 2.2 (от кадра, переход кадр→кадр, без звука); "
                         "auto (по умолч.) — api, если есть LTXV_API_KEY, иначе space")
-    s.add_argument("--seed", type=int, help="сид для повторяемости (только --via space)")
+    s.add_argument("--seed", type=int, help="сид для повторяемости (--via space и wan)")
     s.add_argument("--enhance", action="store_true", help="переписать промпт моделью Gemma (только --via space)")
     s.add_argument("--check", action="store_true", help="проверить ключ LTX, ничего не генерируя и не тратя")
     s.add_argument("--job", help="забрать готовое видео по задаче <endpoint>/<id> (если скачивание сорвалось)")
@@ -337,6 +375,8 @@ def main(argv: list[str] | None = None) -> int:
                    help="для --engine ai: api — платный LTX (первый+последний кадр); space — бесплатное демо")
     s.add_argument("--model", default=ltx.env("LTX_MODEL", "fast"), help="fast или pro (только api)")
     s.add_argument("--res", default=ltx.env("LTX_RESOLUTION", "1080p"), help="разрешение генерации ИИ-шотов")
+    s.add_argument("--backend", choices=["ltx", "wan"],
+                   help="чем анимировать все ИИ-шоты (по умолч. — как в YAML у каждого шота, иначе ltx)")
     s.add_argument("--only", help="ИИ только для этих шотов, по порядку важности: id через запятую "
                                   "(уже готовые ИИ-шоты берутся из кэша, остальные — локально)")
     s.add_argument("--music", help="звуковая дорожка под весь ролик")

@@ -27,10 +27,12 @@ sys.path.insert(0, str(ROOT))
 
 import gradio as gr  # noqa: E402
 
-from designer import ltx, ltx_space  # noqa: E402
+from designer import ltx, ltx_space, wan_space  # noqa: E402
 
 log = logging.getLogger("studio")
 
+LTX = "LTX-2.5 · со звуком"
+WAN = "Wan 2.2 · бесплатно, переход кадр→кадр, без звука"
 FREE = "Бесплатно · Hugging Face"
 PAID = "Платно · LTX API"
 NO_CAMERA = "без движения камеры"
@@ -40,8 +42,12 @@ INTRO = """# 🎬 Студия LTX-2.5
 Видео со звуком из описания или из кадра. Пиши по-английски, 4–8 предложений:
 кадр, действие по шагам, камера, свет, звук.
 
-- **Бесплатно** — демо Lightricks на Hugging Face: до 5 с, кадр до 832×1472, несколько роликов в день.
-- **Платно** — LTX API: 6–20 с, до 4K, переход от первого кадра к последнему.
+- **LTX-2.5** — со звуком. Бесплатно (демо Lightricks на Hugging Face): до 5 с, кадр до 832×1472.
+  Платно (LTX API): 6–20 с, до 4K, переход от первого кадра к последнему.
+- **Wan 2.2** — бесплатно и с переходом от первого кадра к последнему. Без звука, ~832×480, до 5 с,
+  квоты тратит втрое меньше. Нужен первый кадр.
+
+Квота Hugging Face общая: около 300 с в день, ролик LTX берёт 130–190 с, ролик Wan — 40–60 с.
 """
 
 
@@ -51,12 +57,23 @@ def paid_seconds(model: str, res: str, seconds: float) -> int:
     return min(allowed, key=lambda d: (abs(d - seconds), d))
 
 
-def make_video(prompt: str, image: str | None, last_frame: str | None, mode: str, seconds: float,
-               aspect: str, quality: str, camera: str, enhance: bool) -> tuple[str, str]:
+def make_video(model_name: str, prompt: str, image: str | None, last_frame: str | None, mode: str,
+               seconds: float, aspect: str, quality: str, camera: str, enhance: bool) -> tuple[str, str]:
     prompt = (prompt or "").strip()
     if not prompt and not image:
         raise gr.Error("Опиши, что происходит в кадре, или загрузи первый кадр.")
     cam = None if camera == NO_CAMERA else camera
+    if model_name == WAN:
+        if not image:
+            raise gr.Error("Wan работает от кадра: загрузи первый кадр (и последний — для перехода).")
+        try:
+            out = Path(tempfile.mkdtemp(prefix="studio-")) / "wan.mp4"
+            path, info = wan_space.generate(out, prompt, image=image, last_frame=last_frame, duration=seconds,
+                                            camera=cam)
+        except ltx.LTXError as e:
+            raise gr.Error(str(e)) from e
+        log.info("готово: %s", info)
+        return str(path), info
     try:
         res = ltx.resolution(quality, aspect)
         out = Path(tempfile.mkdtemp(prefix="studio-")) / "ltx.mp4"
@@ -92,11 +109,13 @@ def build() -> gr.Blocks:
         gr.Markdown(INTRO)
         with gr.Row():
             with gr.Column():
+                model = gr.Radio([LTX, WAN], value=LTX, label="Модель")
                 prompt = gr.Textbox(label="Что происходит в кадре", lines=6,
                                     placeholder="A paper boat drifts across a calm pond at sunrise...")
                 with gr.Row():
                     image = gr.Image(label="Первый кадр (необязательно)", type="filepath")
-                    last_frame = gr.Image(label="Последний кадр (только платно)", type="filepath")
+                    last_frame = gr.Image(label="Последний кадр (Wan — бесплатно, LTX — только платно)",
+                                          type="filepath")
                 mode = gr.Radio([FREE, PAID], value=PAID if ltx.LTX().enabled else FREE, label="Где считать")
                 seconds = gr.Slider(2, 20, value=3, step=0.5, label="Длина, секунд (бесплатно — до 5)")
                 with gr.Row():
@@ -108,7 +127,9 @@ def build() -> gr.Blocks:
             with gr.Column():
                 video = gr.Video(label="Результат", autoplay=True)
                 info = gr.Markdown()
-        go.click(make_video, [prompt, image, last_frame, mode, seconds, aspect, quality, camera, enhance],
+        # у Wan размер берётся от кадра, звука и платного режима нет — лишние поля прячем
+        model.change(lambda m: [gr.update(visible=m == LTX)] * 4, model, [mode, aspect, quality, enhance])
+        go.click(make_video, [model, prompt, image, last_frame, mode, seconds, aspect, quality, camera, enhance],
                  [video, info], concurrency_limit=1, api_name="make_video", api_visibility="undocumented")
     return demo
 

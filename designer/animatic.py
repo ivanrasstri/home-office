@@ -13,6 +13,7 @@
         prompt: "The camera pushes in toward the logo on the bag..."
         camera: dolly_in         # необязательно
         gen_seconds: 3           # длина генерации в бесплатном демо (по умолч. = длине шота, не меньше 2 с)
+        backend: wan             # чем анимировать: ltx (по умолч., со звуком) или wan (переход кадр→кадр бесплатно)
 
     python -m designer animatic shots.yaml                  # всё локально: бесплатно, кадры никуда не уходят
     python -m designer animatic shots.yaml --engine ai      # шоты engine: ai — через LTX (--via api|space|auto)
@@ -36,7 +37,7 @@ from pathlib import Path
 
 import yaml
 
-from . import ltx, ltx_space
+from . import ltx, ltx_space, wan_space
 
 log = logging.getLogger("designer.animatic")
 
@@ -55,6 +56,7 @@ class Shot:
     camera: str | None = None
     zoom: float = 0.04
     gen_seconds: float | None = None
+    backend: str = "ltx"  # ltx — LTX-2.5 (API или демо); wan — Wan 2.2 в бесплатном демо, с последним кадром
     inputs: list[Path] | None = None  # кадры после очистки краёв — их видит модель; ключ кэша — по исходным
 
 
@@ -87,12 +89,16 @@ def load(path: str | Path) -> Plan:
                 raise AnimaticError(f"Шот {s.get('id', i)}: нет файла {f}")
             frames.append(f)
         engine = str(s.get("engine", "local"))
+        backend = str(s.get("backend", "ltx"))
+        if backend not in ("ltx", "wan"):
+            raise AnimaticError(f"Шот {s.get('id', i)}: backend — ltx или wan")
         if engine not in ("local", "ai"):
             raise AnimaticError(f"Шот {s.get('id', i)}: engine — local или ai")
         shots.append(Shot(id=str(s.get("id", i)), frames=frames, seconds=float(s.get("seconds", 2)),
                           engine=engine, prompt=str(s.get("prompt", "")).strip(), camera=s.get("camera"),
                           zoom=float(s.get("zoom", 0.04)),
-                          gen_seconds=float(s["gen_seconds"]) if s.get("gen_seconds") else None))
+                          gen_seconds=float(s["gen_seconds"]) if s.get("gen_seconds") else None,
+                          backend=backend))
     if not shots:
         raise AnimaticError(f"В {path} нет шотов")
     return Plan(shots=shots, width=w, height=h, fps=int(data.get("fps", 25)), source=path)
@@ -222,16 +228,32 @@ def ai_steps(shot: Shot) -> list[tuple[Path, Path | None]]:
     return list(zip(shot.frames, shot.frames[1:], strict=False)) or [(shot.frames[0], None)]
 
 
+def _wan_seconds(shot: Shot) -> float:
+    part = shot.seconds / len(ai_steps(shot))
+    return wan_space.clamp_seconds(shot.gen_seconds or max(2.0, part))
+
+
 def estimate(plan: Plan, via: str, model: str, res: str) -> tuple[float, int]:
-    """Цена ИИ-шотов в платном API ($) и число генераций."""
+    """Цена LTX-шотов в платном API ($) и число генераций (вместе с Wan)."""
     runs = sum(len(ai_steps(s)) for s in plan.shots if s.engine == "ai")
+    ltx_runs = sum(len(ai_steps(s)) for s in plan.shots if s.engine == "ai" and s.backend == "ltx")
     if via != "api":
         return 0.0, runs
-    return round(runs * ltx.estimate(model, res, 6), 2), runs  # в API минимум 6 с на клип
+    return round(ltx_runs * ltx.estimate(model, res, 6), 2), runs  # в API минимум 6 с на клип
+
+
+def wan_quota(plan: Plan) -> int:
+    """Сколько квоты ZeroGPU запросят Wan-шоты (из 300 в день у бесплатного аккаунта)."""
+    return sum(wan_space.quota_seconds(_wan_seconds(s)) * len(ai_steps(s))
+               for s in plan.shots if s.engine == "ai" and s.backend == "wan")
 
 
 def _raw_path(shot: Shot, k: int, first: Path, last: Path | None, cache: Path, via: str, model: str, res: str) -> Path:
-    use_last = last if via == "api" else None  # в бесплатном демо последнего кадра нет
+    if shot.backend == "wan":  # у Wan свой ключ кэша: демо, промпт, камера, оба кадра, длина
+        space = wan_space.SPACE_FLF if last else wan_space.SPACE_I2V
+        key = _key("wan", space, shot.prompt, shot.camera, first, last or "", _wan_seconds(shot), wan_space.STEPS)
+        return cache / f"{shot.id}-{k}-wan-{key}.mp4"
+    use_last = last if via == "api" else None  # в бесплатном демо LTX последнего кадра нет
     return cache / f"{shot.id}-{k}-{via}-{_key(via, model, res, shot.prompt, shot.camera, first, use_last or '')}.mp4"
 
 
@@ -250,9 +272,13 @@ def generate_raw(shot: Shot, cache: Path, via: str, model: str, res: str) -> lis
         raw = _raw_path(shot, k, src_first, src_last, cache, via, model, res)
         first, last = clean[src_first], clean[src_last] if src_last else None
         if not raw.exists():
-            log.info("ИИ-шот %s, переход %d/%d (%s) …", shot.id, k + 1, len(steps), via)
+            log.info("ИИ-шот %s, переход %d/%d (%s) …", shot.id, k + 1, len(steps),
+                     "wan" if shot.backend == "wan" else via)
             tmp = raw.with_name(raw.name + ".tmp.mp4")
-            if via == "api":
+            if shot.backend == "wan":
+                wan_space.generate(tmp, shot.prompt, image=str(first), last_frame=str(last) if last else None,
+                                   duration=_wan_seconds(shot), camera=shot.camera)
+            elif via == "api":
                 ltx.LTX().generate(tmp, shot.prompt, image=str(first), last_frame=str(last) if last else None,
                                    model=model, duration=6, res=res, fps=24, sound=False, camera=shot.camera)
             else:
