@@ -1,5 +1,6 @@
 # Студия LTX-2.5: веб-страница с паролем (видео из текста или кадра). Считает Hugging Face или LTX API,
-# поэтому серверу не нужна видеокарта. Railway: Dockerfile path = studio/Dockerfile.
+# поэтому серверу не нужна видеокарта. Railway: Dockerfile path = studio/Dockerfile,
+# переменные STUDIO_PASSWORD, STUDIO_USER, HF_TOKEN (и по желанию LTXV_API_KEY), Serverless включён.
 FROM python:3.12-slim
 
 ENV PYTHONUNBUFFERED=1 \
