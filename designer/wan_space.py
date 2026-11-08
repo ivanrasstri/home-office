@@ -1,8 +1,9 @@
 """Wan 2.2 бесплатно: демо на Hugging Face (ZeroGPU) — кадр → видео и переход «первый кадр → последний».
 
-- Переход между двумя кадрами: Upsampler/wan-2-2-14b-image-to-video (WAN_SPACE). Это форк быстрого
-  Wan 2.2 от команды Hugging Face с параметром end_image.
-- Один кадр: zerogpu-aoti/wan2-2-fp8da-aoti-faster (WAN_SPACE_I2V), сборка команды Hugging Face.
+- Основное демо: Upsampler/wan-2-2-14b-image-to-video (WAN_SPACE). Это форк быстрого Wan 2.2 от команды
+  Hugging Face с параметром end_image: с ним — переход между двумя кадрами, без него — оживление одного кадра.
+- Запасное для одного кадра: zerogpu-aoti/wan2-2-fp8da-aoti-faster (WAN_SPACE_I2V), исходная сборка команды
+  Hugging Face. В ноябре 2026 она падала с ошибкой ещё до генерации, поэтому идёт второй.
 
 Внутри Wan2.2-I2V-A14B (fp8, дистилляция lightx2v, 6 шагов).
 
@@ -68,10 +69,20 @@ def frames(seconds: float) -> int:
 
 
 def quota_seconds(seconds: float, steps: int = STEPS, size: tuple[int, int] = (832, 480)) -> int:
-    """Сколько квоты ZeroGPU запросит демо (формула из app.py ×1,5 для GPU Blackwell)."""
+    """Сколько квоты ZeroGPU запросит демо: формула из app.py (с его рамками 20–150 с) ×1,5 для GPU Blackwell."""
     w, h = size
     work = frames(seconds) * w * h / (81 * 832 * 624)
-    return round(int(10 + steps * 15 * work ** 1.5) * 1.5)
+    return round(int(min(max(10 + steps * 15 * work ** 1.5, 20), 150)) * 1.5)
+
+
+def spaces_for(last_frame: bool) -> list[str]:
+    """Демо в порядке попыток: переход — только форк с end_image; один кадр — он же, запасное — сборка HF."""
+    return [SPACE_FLF] if last_frame else list(dict.fromkeys([SPACE_FLF, SPACE_I2V]))
+
+
+def _is_quota(msg: str) -> bool:
+    low = msg.lower()
+    return "quota" in low or "runs limit" in low
 
 
 def clamp_seconds(duration: float | None) -> float:
@@ -110,8 +121,8 @@ def generate(
     text = (prompt or DEFAULT_PROMPT).strip()
     if camera:
         text = f"{text} {CAMERA_WORDS.get(camera, '')}".strip()
-    space = SPACE_FLF if last_frame else SPACE_I2V
-    log.info("Wan %s: %dx%d, %g с, запрос квоты ≈%d с", space, *size, secs, quota_seconds(secs, steps, size))
+    spaces = spaces_for(bool(last_frame))
+    errors: list[str] = []
     with tempfile.TemporaryDirectory() as tmp:
         first = prep(image, size, Path(tmp))
         args = dict(input_image=handle_file(str(first)), prompt=text, steps=steps, duration_seconds=secs,
@@ -119,19 +130,25 @@ def generate(
                     randomize_seed=seed is None)
         if last_frame:
             args["end_image"] = handle_file(str(prep(last_frame, size, Path(tmp))))
-        try:
-            client = Client(space, token=os.environ.get("HF_TOKEN") or None, verbose=False)
-            video, used_seed = client.predict(**args, api_name="/generate_video")
-        except Exception as e:  # квота, очередь, сеть, изменившийся API демо
-            msg = str(e)
-            if "quota" in msg.lower() or "runs limit" in msg.lower():
-                raise LTXError(f"Квоты Hugging Face на сегодня не хватает на ролик Wan ({msg[:300]}). Возьми "
-                               "короче или подожди до завтра; с HF PRO квота в 8 раз больше.") from e
-            raise LTXError(f"Wan ({space}): {msg[:500]}") from e
-    src = video if isinstance(video, str) else (video or {}).get("video")
-    if not src or not Path(src).is_file():
-        raise LTXError(f"Wan ({space}) не вернул видео: {video!r}")
-    out.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(src, out)
-    info = f"Wan 2.2 · {size[0]}×{size[1]} · {secs:g} с · 16 к/с · без звука · сид {int(used_seed)}"
-    return out, info
+        for i, space in enumerate(spaces):
+            log.info("Wan %s: %dx%d, %g с, запрос квоты ≈%d с", space, *size, secs, quota_seconds(secs, steps, size))
+            try:
+                client = Client(space, token=os.environ.get("HF_TOKEN") or None, verbose=False)
+                video, used_seed = client.predict(**args, api_name="/generate_video")
+            except Exception as e:  # квота, очередь, сеть, изменившийся или сломанный API демо
+                msg = str(e)
+                if _is_quota(msg):  # квота общая на аккаунт — запасное демо не поможет
+                    raise LTXError(f"Квоты Hugging Face на сегодня не хватает на ролик Wan ({msg[:300]}). Возьми "
+                                   "короче или подожди до завтра; с HF PRO квота в 8 раз больше.") from e
+                errors.append(f"{space}: {msg[:300]}")
+            else:
+                src = video if isinstance(video, str) else (video or {}).get("video")
+                if src and Path(src).is_file():
+                    out.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copyfile(src, out)
+                    seed_note = f" · сид {int(used_seed)}" if used_seed is not None else ""
+                    return out, f"Wan 2.2 · {size[0]}×{size[1]} · {secs:g} с · 16 к/с · без звука{seed_note}"
+                errors.append(f"{space} не вернул видео: {video!r}"[:300])
+            if i + 1 < len(spaces):
+                log.warning("Wan: демо %s не сработало (%s) — пробую %s", space, errors[-1][:200], spaces[i + 1])
+    raise LTXError("Wan: " + "; ".join(errors))

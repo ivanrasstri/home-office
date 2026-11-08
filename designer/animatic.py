@@ -250,7 +250,7 @@ def wan_quota(plan: Plan) -> int:
 
 def _raw_path(shot: Shot, k: int, first: Path, last: Path | None, cache: Path, via: str, model: str, res: str) -> Path:
     if shot.backend == "wan":  # у Wan свой ключ кэша: демо, промпт, камера, оба кадра, длина
-        space = wan_space.SPACE_FLF if last else wan_space.SPACE_I2V
+        space = wan_space.spaces_for(bool(last))[0]
         key = _key("wan", space, shot.prompt, shot.camera, first, last or "", _wan_seconds(shot), wan_space.STEPS)
         return cache / f"{shot.id}-{k}-wan-{key}.mp4"
     use_last = last if via == "api" else None  # в бесплатном демо LTX последнего кадра нет
