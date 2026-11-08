@@ -325,6 +325,16 @@ python -m designer video "A paper boat drifts across a calm pond at sunrise; sof
   с согласия.
 - Без `--via` генератор сам выбирает: платный API, если есть `LTXV_API_KEY`, иначе демо.
 
+**Веб-студия с паролем** (`studio/`) — страница в браузере для видео из текста или кадра.
+Открывается с телефона или ноутбука. Считает Hugging Face (бесплатно, по `HF_TOKEN`) или
+платный LTX API, поэтому серверу видеокарта не нужна: хватает Railway или любого маленького
+VPS.
+- Railway: сервис из этого репозитория, Dockerfile path `studio/Dockerfile`.
+  - Переменные: `STUDIO_PASSWORD` (без него студия не запустится), `STUDIO_USER`,
+    `HF_TOKEN`; по желанию `LTXV_API_KEY`.
+  - Включи Serverless: без посетителей сервис засыпает, и простой ничего не стоит.
+- Локально: `pip install -r studio/requirements.txt && STUDIO_PASSWORD=... python studio/app.py`.
+
 **Аниматик из раскадровки.** `python -m designer animatic shots.yaml` собирает ролик из
 кадров по шотам. Шоты описываются в YAML: кадры, длина, промпт, `engine: ai` или `local`,
 формат — в начале `designer/animatic.py`.
@@ -385,6 +395,7 @@ Procfile                 # запуск воркера на Railway
 Dockerfile               # образ бота для своего сервера
 docker-compose.yml       # бот + том с данными, автоперезапуск
 deploy/install.sh        # установка на сервер одной командой и команда home-office
+studio/                  # веб-студия LTX-2.5 с паролем (Gradio): для Railway или маленького сервера
 data/seen.json           # дедуп (генерируется)
 data/shortlist.json      # полные данные подборки для отклика по ID (генерируется)
 reports/                 # отчёты подборки (генерируются)
