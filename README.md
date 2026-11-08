@@ -95,7 +95,7 @@ python -m jobbot.telegram_bot
 1. Создай бота у **@BotFather**, получи `TELEGRAM_BOT_TOKEN`.
 2. На Railway: **New Project → Deploy from GitHub repo** (этот репозиторий, нужная ветка).
    Railway соберёт образ по `Dockerfile` (Python 3.12, бот работает не от root) и запустит
-   бота. Перезапуск при падении задан в `railway.json`.
+   бота. В настройках сервиса включи перезапуск при падении (Restart policy → On failure).
 3. **Variables:**
    - `TELEGRAM_BOT_TOKEN`;
    - `TELEGRAM_CHAT_ID` — твой chat_id, бот покажет его в ответ на `/start`, чтобы ботом не
