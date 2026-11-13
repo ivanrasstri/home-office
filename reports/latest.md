@@ -1,31 +1,62 @@
-# Подборка вакансий — 2026-11-12 14:50 UTC
+# Подборка вакансий — 2026-11-13 14:12 UTC
 
-Всего просмотрено: **178**. Новых подходящих: **3**.
+Всего просмотрено: **175**. Новых подходящих: **7**.
 
 > **Как откликнуться:** скопируй `ID` нужной вакансии и запусти workflow
 > **Actions → Apply to job → Run workflow**, вставив ID в поле `job_ids`
 > (можно несколько через запятую). Бот точечно подготовит письмо и
 > адаптированное резюме в папке `applications/`.
 
-## 1. Vehicle Sourcing & Import Operations Manager — Smart Suites  ·  32/100
-_weworkremotely · Remote_
-
-- 🆔 `1f7f6be5a61ebd3f`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://weworkremotely.com/remote-jobs/smart-suites-vehicle-sourcing-import-operations-manager
-- Почему подходит: совпадение в названии: operations manager; доп. сигналы: ai; удалёнка
-- Headquarters: National Capital District, Philippines URL: https://smartsuites.com.au About the Company Smart Suites manages a portfolio of over 100 rooms for short-term vacation rentals across Rocklea, Sunnybank, Acacia Ridge, Carina, and Kuraby in Queensland, Australia. Guided by our core values of…
-
-## 2. Staff Revenue Operations Manager - EMEA в Chainguard : https://www — @evacuatejobs  ·  32/100
+## 1. Креативный директор / креативный продюсер в Ryze AI от 3 000 до 4 000$ Удалённо (Мир) Нам нужен человек, который будет п — @marketing_rabota_jobs  ·  74/100
 _telegram_
 
-- 🆔 `e92410cc589c6145`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/evacuatejobs/6800
-- Почему подходит: совпадение в названии: operations manager; доп. сигналы: ai; удалёнка
-- Staff Revenue Operations Manager - EMEA в Chainguard : https://www.remocate.app/jobs/staff-revenue-operations-manager-emea-chainguard Можно работать удалённо. Зарплата в валюте. При отклике укажите, что нашли вакансию на Remocate.
+- 🆔 `87dbf7ec041f5859`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/marketing_rabota_jobs/837
+- Почему подходит: совпадение в названии: продюсер, креатив; совпадение в описании: creative; доп. сигналы: маркетинг, marketing, контент, ии, ai, нейросет; удалёнка
+- Креативный директор / креативный продюсер в Ryze AI от 3 000 до 4 000$ Удалённо (Мир) Нам нужен человек, который будет придумывать для Ryze сильную и необычную рекламу и писать по ней детальные сценарии. Роль на стыке креативного директора, продюсера и стратега (Creative Director / Creative Strategi…
 
-## 3. Проектный менеджер по инновационным проектам — AgroVentures  ·  32/100
+## 2. Креативный Директор / Продюссер в Ryze AI : https://ryze-creative-director-ru — @evacuatejobs  ·  52/100
+_telegram_
+
+- 🆔 `2327283ed5e8b153`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/evacuatejobs/6806
+- Почему подходит: совпадение в названии: креатив, creative; доп. сигналы: ai; удалёнка
+- Креативный Директор / Продюссер в Ryze AI : https://ryze-creative-director-ru.vercel.app/ Можно работать удалённо. Зарплата в долларах. Есть прямой контакт для откликов: @irab138 При отклике укажите, что нашли вакансию на Remocate.
+
+## 3. IT Project Manager Местоположение: Весь мир Формат работы: Удаленно Опубликована: 10 — @wntdpm  ·  36/100
+_telegram_
+
+- 🆔 `f904d4fac214c727`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/wntdpm/1584
+- Почему подходит: совпадение в названии: project manager; доп. сигналы: jira, ии; удалёнка
+- IT Project Manager Местоположение: Весь мир Формат работы: Удаленно Опубликована: 10.11.2026 Требования: • Опыт работы IT Project Manager от 3 лет • Опыт управления проектами в разработке программного обеспечения • Практический опыт взаимодействия с Backend-, Frontend-разработчиками и QA-командами •…
+
+## 4. ⚡️ Проджект менеджер в Omnius — @careerstation_pm  ·  36/100
+_telegram_
+
+- 🆔 `155d3342ae344801`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/careerstation_pm/1595
+- Почему подходит: совпадение в названии: проджект; доп. сигналы: ии, ai; удалёнка
+- ⚡️ Проджект менеджер в Omnius.team Задачи: • вести несколько параллельных AI-проектов для Заказчиков уровня forbes top20 • собирать единый план, сроки, ресурсы и зависимости • координировать нашу команду, заказчика и подрядчиков • организовывать проектный ритм и добиваться своевременных решений • за…
+
+## 5. Media Project Manager — SATashkent College Prep Company  ·  32/100
 _linkedin · Ташкент, Ташкент, Узбекистан_
 
-- 🆔 `62049027db4f3b54`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://uz.linkedin.com/jobs/view/%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D0%BD%D1%8B%D0%B9-%D0%BC%D0%B5%D0%BD%D0%B5%D0%B4%D0%B6%D0%B5%D1%80-%D0%BF%D0%BE-%D0%B8%D0%BD%D0%BD%D0%BE%D0%B2%D0%B0%D1%86%D0%B8%D0%BE%D0%BD%D0%BD%D1%8B%D0%BC-%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D0%B0%D0%BC-at-agroventures-4488524452
-- Почему подходит: совпадение в названии: проектный менеджер; локация: Ташкент
+- 🆔 `278d3beb3bce086d`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://uz.linkedin.com/jobs/view/media-project-manager-at-satashkent-college-prep-company-4488588942
+- Почему подходит: совпадение в названии: project manager; локация: Ташкент
+
+## 6. Project Manager (Central Asia) — GAME COMPANY  ·  32/100
+_linkedin · Ташкент, Узбекистан_
+
+- 🆔 `17229da125b32465`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://uz.linkedin.com/jobs/view/project-manager-central-asia-at-game-company-4488308294
+- Почему подходит: совпадение в названии: project manager; локация: Ташкент
+
+## 7. Креативный директор в клинику превентивной медицины Олега Абакумова 📍️ ️️️️️Формат/ Локация: Гибрид, Москва Работодатель — @digital_jobster  ·  28/100
+_telegram_
+
+- 🆔 `a0d74434a2fefd5b`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/digital_jobster/6621
+- Почему подходит: совпадение в названии: креатив; доп. сигналы: бренд, ии
+- Креативный директор в клинику превентивной медицины Олега Абакумова 📍️ ️️️️️Формат/ Локация: Гибрид, Москва Работодатель: Клиника превентивной медицины, Москва https://abakumovclinic.com Ищем человека, после идей которого о клинике говорят. Нам не нужны публикации ради отчёта. Нужны истории, которые…
