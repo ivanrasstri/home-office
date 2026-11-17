@@ -1,4 +1,21 @@
 {
+  "f496bd2377335a8c": {
+    "source": "telegram",
+    "title": "Junior Project Manager / Scrum Master ТОО «QAMQOR KAZAKHSTAN» Местоположение: Алматы Формат работы: Офис Опубликована: 1",
+    "company": "@wntdpm",
+    "url": "https://t.me/wntdpm/1606",
+    "description": "Junior Project Manager / Scrum Master ТОО «QAMQOR KAZAKHSTAN» Местоположение: Алматы Формат работы: Офис Опубликована: 17.11.2026 Требования: • Понимание принципов Agile (Scrum, Kanban) • Базовый опыт работы с таск-трекерами (Jira, Trello) • Высокая самоорганизация, коммуникабельность, желание учиться • Плюс: понимание SDLC и профильные курсы (PM/Scrum) О компании: Инновационный healthcare-стартап из Казахстана; команда работает над масштабным продуктом в MedTech. Контакт: @alpamys_777 Вакансия опубликована в @itvacancykz",
+    "location": "",
+    "salary": "",
+    "posted": "",
+    "score": 28,
+    "score_reasons": [
+      "совпадение в названии: project manager",
+      "доп. сигналы: jira, ии"
+    ],
+    "id": "f496bd2377335a8c",
+    "shortlisted_at": "2026-11-17 15:41:12Z"
+  },
   "8467676b108c09b6": {
     "source": "telegram",
     "title": "Креативный директор / Креативный продюсер в команию Ryze AI 📍️ ️️️️️Формат/ Локация: Удаленка, онлайн Работодатель: Комп",
@@ -5280,23 +5297,5 @@
     ],
     "id": "9b2214d048dc67c5",
     "shortlisted_at": "2026-09-08 10:53:11Z"
-  },
-  "b8f50f4bc58d2f53": {
-    "source": "weworkremotely",
-    "title": "Advertising Operations Manager",
-    "company": "Discord",
-    "url": "https://weworkremotely.com/remote-jobs/discord-advertising-operations-manager",
-    "description": "Headquarters: San Francisco Bay Area or New York (Remote) Discord has a highly engaged community of millions of daily active users who use the platform for many different reasons, but there’s one thing that nearly everyone does: play video games. Discord plays a uniquely important role in the future of gaming, and we are focused on making it easier and more fun for people to hang out before, during, and after playing games. Ad Operations and Sales Analytics support Discord's ads business, partnering with Sales, Product, Engineering, Data Science, and other cross-functional teams to deliver high-quality campaign executions, impactful data insights, and go-to-market strategy across our advertising products. As an Ad Operations Manager, you will play a crucial part in scaling our Ads business",
-    "location": "Remote",
-    "salary": "",
-    "posted": "Sat, 05 Sep 2026 07:31:07 +0000",
-    "score": 36,
-    "score_reasons": [
-      "совпадение в названии: operations manager",
-      "доп. сигналы: campaign, ai",
-      "удалёнка"
-    ],
-    "id": "b8f50f4bc58d2f53",
-    "shortlisted_at": "2026-09-07 11:57:25Z"
   }
 }
