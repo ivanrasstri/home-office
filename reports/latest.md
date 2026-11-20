@@ -1,64 +1,48 @@
-# Подборка вакансий — 2026-11-19 15:27 UTC
+# Подборка вакансий — 2026-11-20 15:03 UTC
 
-Всего просмотрено: **167**. Новых подходящих: **7**.
+Всего просмотрено: **172**. Новых подходящих: **5**.
 
 > **Как откликнуться:** скопируй `ID` нужной вакансии и запусти workflow
 > **Actions → Apply to job → Run workflow**, вставив ID в поле `job_ids`
 > (можно несколько через запятую). Бот точечно подготовит письмо и
 > адаптированное резюме в папке `applications/`.
 
-## 1. Creative Producer в Newmindstart Ребята активно ищут 🔥 📍 Remote (вне РФ и РБ) 💎 Опыт запуска рекламных кампаний (Meta ad — @zarubezhom_jobs  ·  56/100
+## 1. ⚡️ AI-native Проджект менеджер в Surf Задачи: • Вести проект от бизнес-задачи до работающего решения в production • Глуб — @careerstation_pm  ·  64/100
 _telegram_
 
-- 🆔 `0ae56b95e24817f9`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/zarubezhom_jobs/4421
-- Почему подходит: совпадение в названии: producer, creative; доп. сигналы: кампани, ии; удалёнка
-- Creative Producer в Newmindstart Ребята активно ищут 🔥 📍 Remote (вне РФ и РБ) 💎 Опыт запуска рекламных кампаний (Meta ads) с прибылью в размере $10k+ в месяц, English B2+ 🚀 Фаундер — Павел Мяков Newmindstart — платформа, которая предлагает подписки на курсы, помогающие заботиться о физическом и мент…
+- 🆔 `0590931165b23827`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/careerstation_pm/1615
+- Почему подходит: совпадение в названии: production, проджект; доп. сигналы: ии, ai, chatgpt, gpt; удалёнка
+- ⚡️ AI-native Проджект менеджер в Surf Задачи: • Вести проект от бизнес-задачи до работающего решения в production • Глубоко понимать техническое решение (архитектура, API, данные, интеграции) • Замечать избыточные решения и находить более простой путь • Активно использовать coding agents (Claude Cod…
 
-## 2. Дайджест резюме На расхват у HR — 🔢 кандидатов! 📍 HR 😄 Анастасия Senior HR (Fullstack) Ex — @marketing_rabota_jobs  ·  34/100
+## 2. Creative Producer Местоположение: Россия или вне РФ Формат работы: Удаленно Опубликована: 18 — @wntdpm  ·  58/100
 _telegram_
 
-- 🆔 `8968af51ce75e35c`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/marketing_rabota_jobs/843
-- Почему подходит: совпадение в описании: project manager; доп. сигналы: маркетинг, marketing, content, дизайн, design, ai; удалёнка
-- Дайджест резюме На расхват у HR — 🔢 кандидатов! 📍 HR 😄 Анастасия Senior HR (Fullstack) Ex. Transsion Holdings, OZON Fresh Москва, гибрид 🤣 Елена Senior+ HRBP Ex. COFIX GLOBAL Москва, гибрид 😄 Анастасия Middle HRBP Удалённо 📍 Разработка 🙃 Иван Team Lead в Maxbitsolution Удалённо (вне РФ) 😝 Айман Midd…
+- 🆔 `2fca07cbc6153838`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/wntdpm/1620
+- Почему подходит: совпадение в названии: producer, creative; совпадение в описании: креатив; доп. сигналы: ai; удалёнка
+- Creative Producer Местоположение: Россия или вне РФ Формат работы: Удаленно Опубликована: 18.11.2026 Требования: • Статичные и видео-креативы для Paid Social Ads • Глубокое понимание paid метрик и работа с ними • Английский B2+ • Интересны преимущественно сложные продукты Контакт: Albina Galko Пост …
 
-## 3. Product Marketing Operations Manager | Ireland | Remote в Grafana Labs : https://www — @evacuatejobs  ·  32/100
+## 3. Инфлюенс-менеджер / Креативный редактор UGC-контента в Профиматику 📍️ ️️️️️ Формат/ Локация: Удаленка, Онлайн Работодате — @digital_jobster  ·  36/100
 _telegram_
 
-- 🆔 `504bdee151781e62`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/evacuatejobs/6838
-- Почему подходит: совпадение в названии: operations manager; доп. сигналы: marketing; удалёнка
-- Product Marketing Operations Manager | Ireland | Remote в Grafana Labs : https://www.remocate.app/jobs/product-marketing-operations-manager-ireland-remote-grafana-labs Можно работать удалённо. Зарплата в валюте. При отклике укажите, что нашли вакансию на Remocate.
+- 🆔 `86688d60b3325d17`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/digital_jobster/6656
+- Почему подходит: совпадение в названии: креатив; доп. сигналы: контент, ии; удалёнка
+- Инфлюенс-менеджер / Креативный редактор UGC-контента в Профиматику 📍️ ️️️️️ Формат/ Локация: Удаленка, Онлайн Работодатель: В онлайн-школу «Профиматика» ищем креативного редактора, который будет работать со штатными UGC-креаторами. Вместе с ними ты будешь придумывать короткие видео, смотреть чернови…
 
-## 4. Креативный маркетолог в компанию Leokid 📍️ ️️️️️Формат/ Локация: Гибрид , Санкт-Петербург Работодатель: Компания Leokid  — @digital_jobster  ·  28/100
+## 4. ⚡️ Senior Проджект менеджер Задачи: • Строить систему Project / Delivery Management • Управлять Scope, Budget, Timeline, — @careerstation_pm  ·  36/100
 _telegram_
 
-- 🆔 `db8cc5e21d72af71`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/digital_jobster/6648
-- Почему подходит: совпадение в названии: креатив; доп. сигналы: бренд, ии
-- Креативный маркетолог в компанию Leokid 📍️ ️️️️️Формат/ Локация: Гибрид , Санкт-Петербург Работодатель: Компания Leokid — самый «теплый» бренд детской одежды и аксессуаров с которым родительство становится приятнее, а детство — беззаботнее. Мы создаем вещи, которые упрощают жизнь родителям и дарят у…
+- 🆔 `9a254aa47f621e41`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/careerstation_pm/1616
+- Почему подходит: совпадение в названии: проджект; доп. сигналы: jira, confluence, бюджет, budget
+- ⚡️ Senior Проджект менеджер Задачи: • Строить систему Project / Delivery Management • Управлять Scope, Budget, Timeline, Risks, Dependencies, ресурсами, качеством и распределёнными командами • Настраивать Jira и Confluence, отчётность, Delivery KPI и метрики потока • Налаживать Stakeholder Managemen…
 
-## 5. Regional Operations Manager EMEA - Pharma Meetings & Events в BCD Travel : https://www — @evacuatejobs  ·  28/100
-_telegram_
+## 5. Project Manager — Syner-G  ·  28/100
+_remoteok · Remote_
 
-- 🆔 `0aeff3276cbbbff7`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/evacuatejobs/6839
-- Почему подходит: совпадение в названии: operations manager; удалёнка
-- Regional Operations Manager EMEA - Pharma Meetings & Events в BCD Travel : https://www.remocate.app/jobs/regional-operations-manager-emea-pharma-meetings-events-bcd-travel Можно работать удалённо. Зарплата в валюте. При отклике укажите, что нашли вакансию на Remocate.
-
-## 6. Middle Media Buyer / User Acquisition Manager (Meta Ads) от 1к$ Удалённо Kelpie — международный B2C fintech-стартап, кот — @marketing_rabota_jobs  ·  26/100
-_telegram_
-
-- 🆔 `96831b706a7d55f2`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/marketing_rabota_jobs/842
-- Почему подходит: совпадение в описании: креатив; доп. сигналы: marketing, кампани, ии; удалёнка
-- Middle Media Buyer / User Acquisition Manager (Meta Ads) от 1к$ Удалённо Kelpie — международный B2C fintech-стартап, который разрабатывает сервис для австралийского рынка. Помогаем пользователям находить ненужные подписки, контролировать регулярные списания и сокращать расходы. Ищем сильного hands-o…
-
-## 7. Ещё 5 вакансий дня · Продакт · 18 — @wntdpm  ·  26/100
-_telegram_
-
-- 🆔 `5d9e1e7a929c6e66`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/wntdpm/1614
-- Почему подходит: совпадение в описании: project manager; доп. сигналы: jira, ии, ai; удалёнка
-- Ещё 5 вакансий дня · Продакт · 18.11 Весь мир 1. Monitoring Product Manager — iGaming-компания Весь мир · Удаленно · опыт 5+ лет Навыки: Английский, iGaming, API, Agile, Scrum, AML/KYC, BI Вакансия · Контакт 2. Product Manager (HRtech, Edtech) Весь мир · Удаленно Навыки: Английский B1, product strat…
+- 🆔 `a3a050ce37785012`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://remoteOK.com/remote-jobs/remote-project-manager-syner-g-1137806
+- Почему подходит: совпадение в названии: project manager; удалёнка
+- COMPANY DESCRIPTION: A career here is life-enhancing. At Syner-G, we enable our people to build careers that impact positively on their quality of life. Through our expertise, insight, consulting and management skills, we accelerate breakthrough science and delivery of life-enhancing therapies to mo…
