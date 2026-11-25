@@ -45,6 +45,19 @@ canvas#c { position: fixed; inset: 0; width: 100%; height: 100%; display: block;
 #hitmark { position: absolute; left: 50%; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; opacity: 0; transition: opacity .15s; }
 #hitmark::before, #hitmark::after { content: ""; position: absolute; left: 8px; top: 0; width: 2px; height: 18px; background: #fff; transform: rotate(45deg); }
 #hitmark::after { transform: rotate(-45deg); }
+#event { position: absolute; top: 22%; left: 0; right: 0; text-align: center; font-size: 15px; letter-spacing: .22em; color: var(--bone); opacity: 0; transition: opacity .35s; }
+#event.hot { color: #ff5a3c; }
+#objective { color: var(--brass); margin-top: 4px; }
+#blood { margin-bottom: 4px; }
+#blood .bm { display: inline-block; width: 8px; height: 8px; margin-left: 4px; border-radius: 50%; outline: 1px solid rgba(242,242,234,.4); vertical-align: 0; }
+#blood .bm.on { background: #b3231b; outline-color: #ff6a50; }
+#nades { margin-bottom: 4px; }
+.missions { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 6px; }
+.mission { font: inherit; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; background: rgba(20,17,15,.85); color: var(--ash); border: 1px solid #3a322b; padding: 8px 14px; cursor: pointer; }
+.mission:hover, .mission:focus-visible { color: var(--bone); border-color: #5a4d40; outline: none; }
+.mission[aria-pressed="true"] { color: var(--bone); border-color: var(--brass); background: rgba(184,149,90,.12); }
+.mission-brief { margin: 0 0 18px; font-size: 12.5px; color: var(--ash); min-height: 1.5em; }
+#dead-title.won { color: var(--brass); }
 
 /* ---------- Экраны ---------- */
 .screen { position: fixed; inset: 0; display: grid; place-items: center; overflow-y: auto; padding-block: 24px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); background: radial-gradient(ellipse at 50% 120%, rgba(120,30,14,.55), rgba(11,10,9,.92) 60%), rgba(11,10,9,.6); }
@@ -118,10 +131,12 @@ h1 { font-family: var(--display); font-weight: 400; font-size: clamp(54px, 10vw,
   <div class="tr">
     <div id="wave">ВОЛНА 1</div>
     <div id="kills" style="opacity:.75">УБИТО 0</div>
+    <div id="objective"></div>
   </div>
-  <div class="bl" id="torch-ind">ФОНАРЬ ВКЛ · F</div>
+  <div class="bl"><div id="blood"></div><div id="nades"></div><div id="torch-ind">ФОНАРЬ ВКЛ · F</div></div>
   <div class="br"><span id="ammo"></span><span id="reserve"></span></div>
   <div id="center-msg"></div>
+  <div id="event"></div>
   <div id="prompt"></div>
   <div id="dot"></div>
   <div id="hitmark"></div>
@@ -143,18 +158,24 @@ h1 { font-family: var(--display); font-weight: 400; font-size: clamp(54px, 10vw,
   <div class="panel">
     <div class="eyebrow">Плёнка №07 · Ничейная земля · 1914</div>
     <h1>Окопная хроника</h1>
-    <p class="lede">Сотый год Священной войны. Окопы тянутся от Иерусалима до моря, и по ночам из тумана приходят те, кому здесь не место. Камера на груди пишет всё. Выберите, на чьей вы стороне, и продержитесь как можно дольше.</p>
+    <p class="lede">Восемь веков Церковь ведёт крестовый поход за Иерусалим, ставший ямой, через которую Ад сочится на Землю. Идёт 1914 год. Фронт застыл в грязи, и бои на Ничьей земле идут по ночам. Камера на груди пишет всё. Выберите задание и сторону.</p>
+    <div class="missions" role="group" aria-label="Задание">
+      <button class="mission" data-m="hold" type="button" aria-pressed="true">Удержать до рассвета</button>
+      <button class="mission" data-m="raid" type="button" aria-pressed="false">Ночной рейд</button>
+      <button class="mission" data-m="endless" type="button" aria-pressed="false">Бесконечная ночь</button>
+    </div>
+    <p class="mission-brief" id="mission-brief"></p>
     <div class="factions">
       <button class="faction loyal" id="pick-loyal" type="button">
         <span class="sub">Верные · Новый Антиох</span>
-        <span class="fname">Пилигрим окопов</span>
-        <p>Мосинка со штыком, пять патронов в обойме и молитва. Против вас рогатые гули, которые бегут в рукопашную, и еретики-легионеры в воронёной броне.</p>
+        <span class="fname">Окопный пилигрим</span>
+        <p>Винтовка со скользящим затвором, штык и две святые гранаты. Против вас Легионы Еретиков: пехотинцы, Отверженные в железных масках, бесы Двора в намордниках, пулемётчики и ветераны в броне Кобара.</p>
         <span class="go">Начать →</span>
       </button>
       <button class="faction heretic" id="pick-heretic" type="button">
-        <span class="sub">Еретики · Легион Ада</span>
-        <span class="fname">Легионер-еретик</span>
-        <p>Трофейная мосинка с игольчатым штыком. Против вас кающиеся фанатики в железных масках и стрелки Нового Антиоха в противогазах и касках.</p>
+        <span class="sub">Еретики · Легионы Ада</span>
+        <span class="fname">Еретик-пехотинец</span>
+        <p>Полуавтоматическая винтовка Марбаса на десять патронов и граната демонической ауры. Против вас Новый Антиох: йомены, бичеватели, смертники-узники, штурмовики, снайперы-священники и Коммуниканты.</p>
         <span class="go">Начать →</span>
       </button>
     </div>
@@ -166,6 +187,9 @@ h1 { font-family: var(--display); font-weight: 400; font-size: clamp(54px, 10vw,
         <dt>ПКМ</dt><dd>вскинуть винтовку</dd>
         <dt>R</dt><dd>перезарядка</dd>
         <dt>V</dt><dd>удар штыком</dd>
+        <dt>G</dt><dd>граната</dd>
+        <dt>Q</dt><dd>перевязка (снимает маркер крови)</dd>
+        <dt>X</dt><dd>противогаз</dd>
         <dt>Shift / C</dt><dd>бег / присесть</dd>
         <dt>F</dt><dd>фонарь</dd>
         <dt>Esc</dt><dd>пауза</dd>
@@ -180,7 +204,7 @@ h1 { font-family: var(--display); font-weight: 400; font-size: clamp(54px, 10vw,
         <label for="showdot"><input id="showdot" type="checkbox"> Точка в центре экрана</label>
       </div>
     </div>
-    <p class="note">Фанатский прототип по мотивам вселенной Trench Crusade, только для личного использования. Фотосканы: Poly Haven (CC0). Персонажи: примеры three.js (Mixamo). Звук синтезирован кодом.</p>
+    <p class="note">Фанатский прототип по мотивам вселенной Trench Crusade, только для личного использования. Фотосканы: Poly Haven (CC0). Персонажи: примеры three.js (Mixamo). Звук синтезирован кодом. Лор, отряды и правила — по официальной книге правил Trench Crusade.</p>
   </div>
 </div>
 
@@ -211,8 +235,8 @@ h1 { font-family: var(--display); font-weight: 400; font-size: clamp(54px, 10vw,
 
 <div id="dead" class="screen" hidden>
   <div class="panel center">
-    <div class="eyebrow">Сигнал потерян</div>
-    <h1>Конец записи</h1>
+    <div class="eyebrow" id="dead-eyebrow">Сигнал потерян</div>
+    <h1 id="dead-title">Конец записи</h1>
     <div class="stats" id="stats"></div>
     <blockquote class="tip" id="dead-tip"></blockquote>
     <button class="big-btn" id="again" type="button">Ещё раз</button>

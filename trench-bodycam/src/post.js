@@ -189,7 +189,10 @@ uniform sampler2D tLum, tPrev; uniform float uDt, uKey, uMin, uMax, uUp, uDown, 
 void main(){
   vec4 a = textureLod(tLum, vec2(0.5), 10.0);
   float avg = exp2(a.r / max(a.g, 1e-4));
-  float target = clamp(uKey / max(avg, 1e-5), uMin, uMax);
+  // защита светов: центральное пятно (то, что под фонарём) не должно уходить в белое
+  vec4 c = textureLod(tLum, vec2(0.5), 4.0);
+  float cavg = exp2(c.r / max(c.g, 1e-4));
+  float target = clamp(min(uKey / max(avg, 1e-5), uKey * 4.0 / max(cavg, 1e-5)), uMin, uMax);
   float prev = texture2D(tPrev, vec2(0.5)).r;
   if (uReset > 0.5 || prev <= 0.0) prev = target;
   float sp = target > prev ? uUp : uDown;
@@ -198,7 +201,8 @@ void main(){
 }`;
 const FINAL_FS = /* glsl */`
 uniform sampler2D tComp, tBloom, tExp, tPrev; uniform vec2 uRes; uniform float uTime;
-uniform vec2 uVel; uniform float uDist, uCA, uDmg, uGlitch, uFlash, uDead, uLowHP, uBloom, uHist, uRain;
+uniform vec2 uVel; uniform float uDist, uCA, uDmg, uGlitch, uFlash, uDead, uLowHP, uBloom, uHist, uRain, uBlood, uGas;
+float vnoise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f); return mix(mix(hash12(i), hash12(i+vec2(1,0)), f.x), mix(hash12(i+vec2(0,1)), hash12(i+vec2(1,1)), f.x), f.y); }
 vec3 aces(vec3 x){ return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0); }
 vec2 barrel(vec2 uv){ vec2 c = uv * 2.0 - 1.0; float r2 = dot(c, c); c *= (1.0 + uDist * r2 + uDist * 0.35 * r2 * r2) / (1.0 + uDist * 1.25); return c * 0.5 + 0.5; }
 vec3 hdr(vec2 uv){ return texture2D(tComp, uv).rgb; }
@@ -281,6 +285,14 @@ void main(){
   float r = length((vUv - 0.5) * vec2(1.1, 1.0));
   col *= mix(0.3, 1.0, smoothstep(0.8, 0.28, r));
   col = mix(col, col * vec3(1.4, 0.3, 0.25) + vec3(0.12, 0.0, 0.0), clamp(uDmg, 0.0, 1.0) * smoothstep(0.15, 0.7, r + uDmg * 0.2));
+  // газ: жёлто-зелёная муть
+  col = mix(col, col * vec3(0.92, 1.02, 0.6) + vec3(0.025, 0.035, 0.0), uGas * 0.6);
+  // кровь и грязь на объективе: каждый маркер крови оставляет след по краям кадра
+  if (uBlood > 0.0) {
+    float er = length((vUv - 0.5) * vec2(1.3, 1.0)) + (vnoise(vUv * 7.0) - 0.5) * 0.4 + (vnoise(vUv * 23.0 + 5.0) - 0.5) * 0.14;
+    float smear = smoothstep(0.78 - uBlood * 0.32, 1.0, er);
+    col = mix(col, col * vec3(0.5, 0.1, 0.08) + vec3(0.05, 0.0, 0.0), smear * 0.9);
+  }
   if (uDead > 0.0) col = mix(col, vec3(hash12(gl_FragCoord.xy + uTime * 60.0)) * 0.6, uDead * 0.75);
   vec3 prev = texture2D(tPrev, vUv).rgb;
   col = mix(clamp(col, 0.0, 1.0), prev, uHist * dark);
@@ -324,7 +336,7 @@ export class Post {
     this.mFinal = mat(FINAL_FS, {
       tComp: { value: null }, tBloom: { value: null }, tExp: { value: null }, tPrev: { value: null }, uRes: { value: new THREE.Vector2() }, uTime: { value: 0 },
       uVel: { value: new THREE.Vector2() }, uDist: { value: 0.32 }, uCA: { value: 0.005 }, uDmg: { value: 0 }, uGlitch: { value: 0 }, uFlash: { value: 0 },
-      uDead: { value: 0 }, uLowHP: { value: 0 }, uBloom: { value: quality.bloom ? 1 : 0 }, uHist: { value: 0.18 }, uRain: { value: 1 },
+      uDead: { value: 0 }, uLowHP: { value: 0 }, uBloom: { value: quality.bloom ? 1 : 0 }, uHist: { value: 0.18 }, uRain: { value: 1 }, uBlood: { value: 0 }, uGas: { value: 0 },
     });
     this.mCopy = mat(COPY_FS, { tSrc: { value: null } });
     this.rtLum = rt(128, 128, { mip: true });
@@ -450,7 +462,7 @@ export class Post {
       const out = this.rtOut[this.outIdx], prev = this.rtOut[1 - this.outIdx];
       u.tComp.value = this.rtComp.texture; u.tBloom.value = this.bloom[0].texture; u.tExp.value = expTex; u.tPrev.value = prev.texture;
       u.uTime.value = p.time; u.uVel.value.copy(p.vel);
-      u.uDmg.value = p.dmg; u.uGlitch.value = p.glitch; u.uFlash.value = p.flash; u.uDead.value = p.dead; u.uLowHP.value = p.lowhp; u.uRain.value = p.rain;
+      u.uDmg.value = p.dmg; u.uGlitch.value = p.glitch; u.uFlash.value = p.flash; u.uDead.value = p.dead; u.uLowHP.value = p.lowhp; u.uRain.value = p.rain; u.uBlood.value = p.blood || 0; u.uGas.value = p.gas || 0;
       this.pass(this.mFinal, out);
       this.mCopy.uniforms.tSrc.value = out.texture;
       this.pass(this.mCopy, null);

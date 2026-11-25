@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { CELL, GW, GH, WALL_H } from './config.js';
 import { solid, idx, cellCenter, DIRS, edgeType, map, heightAt, sdfAt } from './trenchmap.js';
-import { pbr, patchWet, patchInstUv, cloneModel, modelParts, MODELS } from './assets.js';
+import { pbr, patchWet, patchInstUv, cloneModel, modelParts, MODELS, TEX, addPatch } from './assets.js';
 import { mulberry32, lerp } from './util.js';
 
 export const dressing = { lanterns: [], crates: [], colliders: [], fires: [], rats: [] };
@@ -37,18 +37,22 @@ function place(geo, x, y, z, yaw, tiltX = 0, roll = 0) {
 }
 // Мешок с песком: сплющенный эллипсоид с неровностями
 function sandbagGeo() {
-  const g = new THREE.SphereGeometry(0.5, 10, 7);
+  // мешок-«подушка»: плоский, с продольным швом, перетянутыми углами и складками ткани
+  const g = new THREE.SphereGeometry(0.5, 20, 12);
   const p = g.attributes.position;
   for (let i = 0; i < p.count; i++) {
     let x = p.getX(i), y = p.getY(i), z = p.getZ(i);
     y = Math.sign(y) * Math.min(Math.abs(y), 0.33) * 1.2;           // плоский верх и низ
-    const r = Math.hypot(x, z);
-    const k = 1 + 0.06 * Math.sin(x * 9) * Math.cos(z * 7) + 0.04 * Math.sin(y * 12);
-    p.setXYZ(i, x * 0.62 * k, y * 0.3, z * 0.34 * k * (1 - 0.08 * Math.abs(y)));
+    const end = Math.abs(x) / 0.5;
+    const pinch = 1 - 0.35 * Math.pow(end, 6);                       // завязанные концы
+    const fold = 0.05 * Math.sin(x * 23 + z * 5) * Math.cos(z * 17) + 0.03 * Math.sin(x * 41 - y * 9);
+    const seam = 0.025 * Math.exp(-Math.pow(z / 0.04, 2)) * Math.sign(y);
+    const k = (1 + fold) * pinch;
+    p.setXYZ(i, x * 0.62 * (1 + fold * 0.3), (y * 0.3 + seam) * (1 + fold), z * 0.34 * k * (1 - 0.08 * Math.abs(y)));
   }
   g.computeVertexNormals();
   const uv = g.attributes.uv;
-  for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * 3, uv.getY(i) * 1.5);
+  for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * 7, uv.getY(i) * 3.5);   // плетение мешковины крупно
   return g;
 }
 
@@ -256,7 +260,20 @@ export function buildDressing(scene, quality) {
 
   // --------------------------------------------------- мешки (один InstancedMesh на всё)
   const bagGeo = sandbagGeo();
-  const bagMat = patchWet(pbr('hessian', { color: 0xa79a80, env: 0.2, normalScale: 1.2 }), 0.7, 1.2);
+  const bagMat = patchWet(pbr('hessian', { color: 0x9a8c72, env: 0.2, normalScale: 2.0 }), 0.7, 1.2);
+  // грязь на мешках: пятна снизу и в стыках, крупное плетение ткани, швы
+  addPatch(bagMat, 'bagdirt', (s) => {
+    s.uniforms.tMud = { value: TEX.mud.d };
+    s.fragmentShader = s.fragmentShader
+      .replace('#include <common>', '#include <common>\nuniform sampler2D tMud;\nfloat bh(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }\nfloat bn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f); return mix(mix(bh(i), bh(i+vec2(1,0)), f.x), mix(bh(i+vec2(0,1)), bh(i+vec2(1,1)), f.x), f.y); }')
+      .replace('#include <map_fragment>', `#include <map_fragment>
+        vec3 mudC = texture2D(tMud, vWPosW.xz * 0.45 + vWPosW.y * 0.3).rgb;
+        float stain = bn(vWPosW.xz * 2.3 + vWPosW.y * 1.7) * 0.6 + bn(vWPosW.xz * 7.0 - vWPosW.y * 3.0) * 0.4;
+        stain = smoothstep(0.42, 0.78, stain + (1.0 - clamp(vWPosW.y / 2.2, 0.0, 1.0)) * 0.25);
+        diffuseColor.rgb = mix(diffuseColor.rgb, mudC * 0.55, stain * 0.7);
+        float weave = 0.5 + 0.5 * sin(vMapUv.x * 260.0) * sin(vMapUv.y * 260.0);
+        diffuseColor.rgb *= 0.86 + 0.14 * weave;`);
+  });
   for (const shadowPass of [false, true]) {
     const list = bags.filter((b) => b[8] === shadowPass);
     if (!list.length) continue;

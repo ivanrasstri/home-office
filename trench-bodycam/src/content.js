@@ -1,6 +1,7 @@
 // Необязательный приватный контент (арты из книги правил, музыка). В публичном репозитории его нет:
 // игра работает и без него, просто без иллюстраций и с генеративной музыкой.
 import { LORE } from './lore-data.js';
+import { FACTIONS } from './config.js';
 import { $ } from './util.js';
 
 export const CONTENT = { base: (window.TRENCH_PRIVATE_BASE || 'assets-private/'), art: new Set(), music: null };
@@ -35,10 +36,25 @@ export function setLoadingArt() {
 export function tipText() { return pick(LORE.loading_tips).text; }
 
 // ------------------------------------------------------------ архив (кодекс)
-const GROUPS = [['world', 'Мир'], ['faithful', 'Верные'], ['heretic', 'Еретики'], ['other', 'Прочие силы'], ['arms', 'Арсенал']];
+const GROUPS = [['foes', 'Противник в игре'], ['world', 'Мир'], ['faithful', 'Верные'], ['heretic', 'Еретики'], ['other', 'Прочие силы'], ['arms', 'Арсенал']];
+// карточки врагов из ростера: что это за отряд по книге и как с ним воевать
+const FOE_ART = { trooper: 'p043_81', wretched: 'p006_20', fiend: 'p111_126', castigator: 'p021_38', sniper: 'p008_25', yeoman: 'p148_136', veteran: 'p148_136' };
+const AI_RU = { shooter: 'стрелок', rusher: 'рукопашник', heavy: 'тяжёлое оружие', sniper: 'снайпер', bomber: 'смертник' };
+function foeEntries() {
+  const out = [];
+  for (const [side, label] of [['loyal', 'против Верных'], ['heretic', 'против Еретиков']]) {
+    for (const [key, u] of Object.entries(FACTIONS[side].units)) {
+      const armour = u.armour ? `броня ${String(u.armour).replace('-', '−')}` : 'без брони';
+      out.push({ id: 'foe_' + key, group: 'foes', title: u.name, art: FOE_ART[key] || '', source_pages: u.pages,
+        text: `${u.desc}\n\nВ игре: ${AI_RU[u.ai] || u.ai}, ${armour}, ${label}.` });
+    }
+  }
+  return out;
+}
 export function buildCodex() {
   const list = $('codex-list'); if (!list) return;
   list.innerHTML = '';
+  if (!LORE.codex.some((c) => c.group === 'foes')) LORE.codex.push(...foeEntries());
   for (const [g, title] of GROUPS) {
     const items = LORE.codex.filter((c) => c.group === g);
     if (!items.length) continue;
@@ -50,7 +66,7 @@ export function buildCodex() {
       list.append(b);
     }
   }
-  showEntry(LORE.codex[0].id);
+  showEntry(LORE.codex.find((c) => c.group === 'world').id);
 }
 function showEntry(id) {
   const c = LORE.codex.find((x) => x.id === id); if (!c) return;

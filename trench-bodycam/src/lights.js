@@ -74,6 +74,7 @@ export function createLights(scene, camera, quality) {
   }
   L.muzzle = new THREE.PointLight(0xffb468, 0, 20, 2); scene.add(L.muzzle);
   L.enemyMuzzle = new THREE.PointLight(0xffa858, 0, 20, 2); scene.add(L.enemyMuzzle);
+  L.blast = new THREE.PointLight(0xffa050, 0, 40, 2); scene.add(L.blast);
   L.state = { poolT: 0, flareT: 7, flare: null, artT: 3, artFlash: 0, enemyFlashT: 0, sources: [], frame: 0, moonAt: new THREE.Vector3(1e9, 0, 0) };
   return L;
 }
@@ -163,9 +164,17 @@ export function updateLights(dt, player, audio) {
   // вспышки выстрелов
   L.muzzle.intensity = Math.max(0, L.muzzle.intensity - dt * 9000);
   if (S.enemyFlashT > 0) { S.enemyFlashT -= dt; if (S.enemyFlashT <= 0) L.enemyMuzzle.intensity = 0; }
+  L.blast.intensity = Math.max(0, L.blast.intensity * Math.pow(0.004, dt) - dt * 200);
   skyUniforms.uTime.value = t;
 }
 
+// вспышка взрыва: короткая, яркая, с цветом заряда
+export function blastFlash(pos, color = [1, 0.62, 0.3], power = 1) {
+  L.blast.position.copy(pos); L.blast.position.y += 0.6;
+  L.blast.color.setRGB(color[0], color[1], color[2]);
+  L.blast.intensity = 9000 * power;
+  L.state.artFlash = Math.max(L.state.artFlash, 0.5 * power);
+}
 export function muzzleFlash(pos, enemy = false) {
   if (enemy) { L.enemyMuzzle.position.copy(pos); L.enemyMuzzle.intensity = 400; L.state.enemyFlashT = 0.05; }
   else { L.muzzle.position.copy(pos); L.muzzle.intensity = 450; }

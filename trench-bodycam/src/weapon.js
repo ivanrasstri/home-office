@@ -154,6 +154,16 @@ export class Viewmodel {
       const th = m < 0.3 ? m / 0.3 : 1 - (m - 0.3) / 0.7;
       z -= th * 0.38; y += th * 0.03; x -= th * 0.08; ry -= th * 0.12; rx -= th * 0.05;
     }
+    // бросок гранаты: винтовка уходит вниз, освобождая руку
+    if (p.throwT > 0) {
+      const th = Math.sin(clamp(1 - p.throwT / 0.65, 0, 1) * Math.PI);
+      y -= th * 0.24; x += th * 0.1; rx -= th * 0.55; rz -= th * 0.3;
+    }
+    // перевязка: винтовка опущена к бедру
+    if (p.treat > 0) {
+      const tk = clamp(Math.min(p.treat, 2.0 - p.treat) / 0.35, 0, 1);
+      y -= tk * 0.2; x += tk * 0.06; rx -= tk * 0.45; ry += tk * 0.5;
+    }
     this.gun.position.set(x, y, z);
     this.gun.rotation.set(rx, ry, rz);
   }

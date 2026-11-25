@@ -16,7 +16,7 @@ export const SFX = {
     const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 110;
     const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 9500;
     this.master = ctx.createGain(); this.master.gain.value = this.vol;
-    this.master.connect(comp); comp.connect(shaper); shaper.connect(hp); hp.connect(lp); lp.connect(ctx.destination);
+    this.master.connect(comp); this.compIn = comp; comp.connect(shaper); shaper.connect(hp); hp.connect(lp); lp.connect(ctx.destination);
     const len = ctx.sampleRate * 2, b = ctx.createBuffer(1, len, ctx.sampleRate), d = b.getChannelData(0);
     for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
     this.noise = b;
@@ -81,9 +81,9 @@ export const SFX = {
     this.tone({ f: 160, f1: 30, dur: 0.38, vol: 1.0 });
     this.tone({ f: 60, f1: 25, dur: 0.6, vol: 0.6, rev: 0.4 });
   },
-  enemyShot(x, z) {
+  enemyShot(x, z, k = 1) {
     const dist = this.distOf(x, z), pan = this.panOf(x, z);
-    const v = 0.9 / (1 + dist * 0.1), f = 5000 / (1 + dist * 0.06);
+    const v = 0.9 * Math.min(1.4, k) / (1 + dist * 0.1), f = 5000 / (1 + dist * 0.06);
     this.noiseB({ dur: 0.55, f, f1: f * 0.2, vol: v, pan, rev: 1.4 });
     this.tone({ f: 110, f1: 28, dur: 0.35, vol: v * 0.7, pan });
   },
@@ -148,5 +148,45 @@ export const SFX = {
     this.noiseB({ dur: 1.4, type: 'bandpass', f: 2600, f1: 900, q: 1.5, vol: 0.12, pan, rev: 0.8, delay: 0.05 });
     this.noiseB({ dur: 0.25, f: 1500, vol: 0.15, pan, delay: 1.6, rev: 1 });
   },
+  // взрыв: близко — удар и звон, далеко — глухой раскат с задержкой звука
+  explosion(x, z, size = 1) {
+    const d = this.distOf(x, z), pan = this.panOf(x, z), v = Math.min(1.2, 1.4 * size / (1 + d * 0.06));
+    const delay = Math.min(0.6, d / 340);
+    this.noiseB({ dur: 1.6 + size, f: 3000 / (1 + d * 0.03), f1: 60, vol: v, pan, rev: 1.6, delay });
+    this.tone({ f: 70, f1: 22, dur: 1.4, vol: v * 0.9, pan, delay });
+    this.noiseB({ dur: 2.5, type: 'bandpass', f: 600, f1: 200, q: 0.8, vol: v * 0.25, pan, rev: 1.2, delay: delay + 0.15 });   // осыпается земля
+    if (d < 7) this.tone({ f: 3600, dur: 3.5, vol: 0.06 * (1 - d / 7), attack: 0.05 });          // звон в ушах
+  },
+  // свист подлетающего снаряда
+  whistle(x, z, dur = 1.1) {
+    const pan = this.panOf(x, z);
+    this.tone({ type: 'sine', f: 1900, f1: 520, dur, vol: 0.09, pan, rev: 0.6, attack: 0.2 });
+    this.tone({ type: 'sine', f: 1960, f1: 540, dur, vol: 0.05, pan, rev: 0.6, attack: 0.25 });
+  },
+  // газовая тревога: колокол и крики «Газ!»
+  gasAlarm() {
+    for (let i = 0; i < 6; i++) {
+      this.tone({ type: 'triangle', f: 820, f1: 800, dur: 0.6, vol: 0.12, pan: -0.5, rev: 1.2, delay: i * 0.32 });
+      this.tone({ type: 'sine', f: 2240, dur: 0.4, vol: 0.04, pan: -0.5, rev: 1.2, delay: i * 0.32 });
+    }
+    this.tone({ type: 'sawtooth', f: 240, f1: 170, dur: 0.45, vol: 0.12, pan: 0.4, rev: 0.9, lp: 1500, delay: 0.5 });
+    this.tone({ type: 'sawtooth', f: 260, f1: 180, dur: 0.45, vol: 0.1, pan: 0.6, rev: 0.9, lp: 1500, delay: 1.3 });
+  },
+  cough() { for (let i = 0; i < 3; i++) this.noiseB({ dur: 0.16, type: 'bandpass', f: rr(500, 800), q: 1.2, vol: 0.4, delay: i * 0.22, rev: 0.1 }); },
+  // вдох-выдох через фильтр противогаза
+  breath(phase) {
+    if (phase) this.noiseB({ dur: 0.9, type: 'bandpass', f: 1100, f1: 700, q: 1.5, vol: 0.09, attack: 0.3, rev: 0 });
+    else this.noiseB({ dur: 1.1, type: 'bandpass', f: 600, f1: 420, q: 1.2, vol: 0.07, attack: 0.15, rev: 0 });
+  },
+  maskOn() { this.noiseB({ dur: 0.35, type: 'bandpass', f: 400, q: 1, vol: 0.35 }); this.noiseB({ dur: 0.12, type: 'bandpass', f: 1600, q: 3, vol: 0.2, delay: 0.4 }); },
+  // противогаз приглушает звуки снаружи
+  muffle(on) {
+    if (!this.ctx) return;
+    if (!this.mf) { this.mf = this.ctx.createBiquadFilter(); this.mf.type = 'lowpass'; this.mf.frequency.value = 20000; this.master.disconnect(); this.master.connect(this.mf); this.mf.connect(this.compIn); }
+    this.mf.frequency.setTargetAtTime(on ? 1800 : 20000, this.ctx.currentTime, 0.15);
+  },
+  bandage() { this.noiseB({ dur: 0.5, type: 'bandpass', f: 3000, f1: 2000, q: 1.5, vol: 0.12 }); this.noiseB({ dur: 0.4, type: 'bandpass', f: 2500, q: 1.5, vol: 0.1, delay: 0.7 }); },
+  pin() { this.noiseB({ dur: 0.05, type: 'bandpass', f: 4200, q: 6, vol: 0.25 }); this.tone({ f: 3200, f1: 2600, dur: 0.12, vol: 0.05, delay: 0.05 }); },
+  thud(x, z) { const pan = this.panOf(x, z); this.noiseB({ dur: 0.12, f: 500, vol: 0.25, pan }); },
   pickup() { this.noiseB({ dur: 0.08, type: 'bandpass', f: 2000, q: 3, vol: 0.25 }); this.noiseB({ dur: 0.08, type: 'bandpass', f: 2600, q: 3, vol: 0.2, delay: 0.1 }); },
 };
