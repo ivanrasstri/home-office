@@ -1,0 +1,24 @@
+{
+  "name": "okopnaya-hronika",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Бодикам-шутер в окопах (прототип, личное использование)",
+  "type": "module",
+  "scripts": {
+    "assets": "node tools/fetch-assets.mjs",
+    "build": "node tools/build.mjs",
+    "dev": "node tools/build.mjs --watch",
+    "serve": "node tools/serve.mjs"
+  },
+  "dependencies": {
+    "three": "0.160.0"
+  },
+  "devDependencies": {
+    "@gltf-transform/core": "^4.0.0",
+    "@gltf-transform/extensions": "^4.0.0",
+    "@gltf-transform/functions": "^4.0.0",
+    "esbuild": "^0.24.0",
+    "meshoptimizer": "^0.22.0",
+    "sharp": "^0.33.0"
+  }
+}

@@ -1,0 +1,38 @@
+Все текстуры, модели и HDRI: Poly Haven (polyhaven.com), лицензия CC0.
+
+mud: brown_mud_03
+earth: brown_mud_02
+scorched: burned_ground_01
+planks: weathered_planks
+boards: old_planks_02
+iron: rusty_corrugated_iron
+hessian: hessian_380
+wool: caban
+leather: brown_leather
+helmet: green_metal_rust
+rust: rusty_metal_02
+bark: bark_brown_02
+rifle: bolt_action_rifle_7_62
+gasmask: old_gas_mask
+crate_mil: wooden_military_crate
+ammo_box: ammo_box
+lantern: Lantern_01
+spade: rusted_spade_01
+dead_tree: dead_tree_trunk_02
+log: dead_tree_trunk
+stump: tree_stump_01
+ladder: wooden_ladder_02
+barrel: Barrel_01
+bucket: wooden_bucket_01
+can: can_rusted
+root: single_root
+rock: rock_07
+rat: street_rat
+stove: barrel_stove
+crate: wooden_crate_01
+branches: dry_branches_medium_01
+grenade: stick_grenade
+night: rogland_moonlit_night
+
+Персонажи soldier.glb и xbot.glb: примеры three.js (исходно Mixamo, Adobe) — только для личного прототипа.
+Движок three.js (MIT, © 2010-2023 three.js authors) встроен в dist/game.js.
