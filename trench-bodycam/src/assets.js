@@ -11,6 +11,21 @@ export const ENV = { hdr: null, pmrem: null };
 const TEXSETS = ['mud', 'earth', 'scorched', 'planks', 'boards', 'iron', 'hessian', 'wool', 'leather', 'helmet', 'rust', 'bark'];
 const MODELSET = ['rifle', 'gasmask', 'crate_mil', 'ammo_box', 'lantern', 'spade', 'dead_tree', 'log', 'stump', 'barrel', 'bucket', 'can', 'root', 'rock', 'rat', 'stove', 'crate', 'branches', 'grenade', 'soldier', 'xbot'];
 
+// Бинарные файлы: обычный fetch, а в сборке для артефакта — base64-текст рядом (хостинг не отдаёт .glb/.hdr)
+async function fetchBinary(url) {
+  if (!window.TRENCH_B64) {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(`${r.status} ${url}`);
+    return r.arrayBuffer();
+  }
+  const r = await fetch(url + '.txt');
+  if (!r.ok) throw new Error(`${r.status} ${url}.txt`);
+  const bin = atob((await r.text()).trim());
+  const u8 = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+  return u8.buffer;
+}
+
 export async function loadAll(renderer, onProgress) {
   const total = TEXSETS.length * 3 + MODELSET.length + 1;
   let done = 0;
@@ -34,12 +49,17 @@ export async function loadAll(renderer, onProgress) {
     }
   }
   for (const name of MODELSET) {
-    jobs.push(gl.loadAsync(`${BASE}models/${name}.glb`).then((g) => {
-      g.scene.traverse((o) => { if (o.isMesh && o.material) { o.material.envMapIntensity = 0.6; if (o.material.map) o.material.map.anisotropy = aniso; } });
-      MODELS[name] = g; tick(name);
-    }));
+    jobs.push(fetchBinary(`${BASE}models/${name}.glb`)
+      .then((buf) => new Promise((res, rej) => gl.parse(buf, `${BASE}models/`, res, rej)))
+      .then((g) => {
+        g.scene.traverse((o) => { if (o.isMesh && o.material) { o.material.envMapIntensity = 0.6; if (o.material.map) o.material.map.anisotropy = aniso; } });
+        MODELS[name] = g; tick(name);
+      }));
   }
-  jobs.push(new RGBELoader().loadAsync(`${BASE}hdri/night.hdr`).then((t) => {
+  jobs.push(fetchBinary(`${BASE}hdri/night.hdr`).then((buf) => {
+    const d = new RGBELoader().parse(buf);
+    const t = new THREE.DataTexture(d.data, d.width, d.height, THREE.RGBAFormat, d.type);
+    t.colorSpace = THREE.LinearSRGBColorSpace; t.minFilter = t.magFilter = THREE.LinearFilter; t.generateMipmaps = false; t.flipY = true; t.needsUpdate = true;
     t.mapping = THREE.EquirectangularReflectionMapping;
     ENV.hdr = t;
     const pm = new THREE.PMREMGenerator(renderer);

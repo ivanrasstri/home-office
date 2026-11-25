@@ -3,3 +3,5 @@ tools/.cache/
 dist/artifact.html
 dist/artifact-files.json
 _art.html
+dist/b64/
+!dist/thumb.jpg
