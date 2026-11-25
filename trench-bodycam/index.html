@@ -79,6 +79,30 @@ h1 { font-family: var(--display); font-weight: 400; font-size: clamp(54px, 10vw,
 .big-btn:hover, .big-btn:focus-visible { background: rgba(184,149,90,.15); outline: none; }
 #dead h1 { color: var(--ember); }
 .stats { font-size: 14px; color: var(--bone); line-height: 1.8; margin: 8px 0 20px; font-variant-numeric: tabular-nums; }
+.art-bg { position: absolute; inset: 0; background: center / cover no-repeat; opacity: 0; transition: opacity 1.2s; filter: saturate(.85) contrast(1.05); }
+.art-bg.has-art { opacity: .38; }
+.art-bg::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 40%, rgba(11,10,9,.35), rgba(11,10,9,.95) 75%); }
+#loading .panel { position: relative; }
+.menu-art { background: radial-gradient(ellipse at 50% 120%, rgba(120,30,14,.55), rgba(11,10,9,.94) 60%), var(--menu-art, none) right center / auto 120% no-repeat, rgba(11,10,9,.9); }
+.tip { font-family: var(--display); font-size: clamp(20px, 2.6vw, 28px); line-height: 1.25; color: var(--bone); max-width: 46ch; margin: 18px auto 6px; opacity: .92; text-wrap: balance; }
+.tip:empty { display: none; }
+.menu-actions { margin: -6px 0 18px; }
+.menu-actions .big-btn { margin: 0; }
+.codex-panel { width: min(1100px, 100%); max-height: 100%; display: flex; flex-direction: column; }
+.codex-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.codex-head h2 { font-family: var(--display); font-weight: 400; font-size: 56px; margin: 4px 0 0; line-height: 1; }
+.codex-body { display: grid; grid-template-columns: minmax(200px, 280px) 1fr; gap: 22px; min-height: 0; flex: 1; }
+@media (max-width: 720px) { .codex-body { grid-template-columns: 1fr; } }
+.codex-list { overflow-y: auto; max-height: 70vh; display: grid; align-content: start; gap: 2px; padding-right: 6px; min-width: 0; }
+.cx-group { font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--ember); margin: 14px 0 4px; }
+.cx-group:first-child { margin-top: 0; }
+.cx-item { font: inherit; text-align: left; background: transparent; color: var(--ash); border: 0; border-left: 2px solid transparent; padding: 6px 10px; cursor: pointer; font-size: 13px; }
+.cx-item:hover, .cx-item:focus-visible { color: var(--bone); outline: none; border-left-color: #5a4d40; }
+.cx-item.on { color: var(--bone); border-left-color: var(--brass); background: rgba(184,149,90,.08); }
+.codex-entry { overflow-y: auto; max-height: 70vh; min-width: 0; }
+.codex-entry img { float: right; max-width: min(40%, 360px); max-height: 56vh; margin: 0 0 12px 18px; object-fit: contain; filter: drop-shadow(0 6px 18px rgba(0,0,0,.6)); }
+.codex-entry h3 { font-family: var(--display); font-weight: 400; font-size: 38px; margin: 0 0 10px; color: var(--bone); line-height: 1.05; }
+.codex-entry p { color: #cfc5b4; line-height: 1.65; font-size: 14px; max-width: 70ch; white-space: pre-line; }
 @media (prefers-reduced-motion: reduce) { .faction, #center-msg { transition: none; } }
 </style>
 </head>
@@ -104,16 +128,18 @@ h1 { font-family: var(--display); font-weight: 400; font-size: clamp(54px, 10vw,
 </div>
 
 <div id="loading" class="screen">
+  <div id="load-art" class="art-bg"></div>
   <div class="panel center">
     <div class="eyebrow">Окопная хроника</div>
     <h1>Загрузка</h1>
     <div class="loadbox"><div id="load-bar"></div></div>
     <p class="lede center-lede" id="load-txt">Загрузка фотосканов…</p>
-    <p class="note">Около 30 МБ текстур и моделей. Качество графики: <span id="q-label">Высокое</span> (меняется в меню).</p>
+    <blockquote class="tip" id="load-tip"></blockquote>
+    <p class="note">Около 35 МБ текстур и моделей. Качество графики: <span id="q-label">Высокое</span> (меняется в меню).</p>
   </div>
 </div>
 
-<div id="menu" class="screen" hidden>
+<div id="menu" class="screen menu-art" hidden>
   <div class="panel">
     <div class="eyebrow">Плёнка №07 · Ничейная земля · 1914</div>
     <h1>Окопная хроника</h1>
@@ -132,6 +158,7 @@ h1 { font-family: var(--display); font-weight: 400; font-size: clamp(54px, 10vw,
         <span class="go">Начать →</span>
       </button>
     </div>
+    <div class="menu-actions"><button class="big-btn" id="open-codex" type="button">Архив: лор и арсенал</button></div>
     <div class="cols">
       <dl class="keys">
         <dt>WASD</dt><dd>движение</dd>
@@ -145,7 +172,8 @@ h1 { font-family: var(--display); font-weight: 400; font-size: clamp(54px, 10vw,
       </dl>
       <div class="opts">
         <label for="sens">Чувствительность <input id="sens" type="range" min="0.3" max="2.5" step="0.05" value="1"></label>
-        <label for="vol">Громкость <input id="vol" type="range" min="0" max="1" step="0.05" value="0.8"></label>
+        <label for="vol">Звук <input id="vol" type="range" min="0" max="1" step="0.05" value="0.8"></label>
+        <label for="musicvol">Музыка <input id="musicvol" type="range" min="0" max="1" step="0.05" value="0.55"></label>
         <label for="quality">Графика <select id="quality">
           <option value="low">Низкое</option><option value="medium">Среднее</option><option value="high">Высокое</option><option value="ultra">Ультра</option>
         </select></label>
@@ -156,10 +184,26 @@ h1 { font-family: var(--display); font-weight: 400; font-size: clamp(54px, 10vw,
   </div>
 </div>
 
+<div id="codex" class="screen" hidden>
+  <div class="panel codex-panel">
+    <div class="codex-head"><div><div class="eyebrow">Архив Нового Антиоха · выписки из книги правил</div><h2>Архив</h2></div><button class="big-btn" id="close-codex" type="button">Закрыть</button></div>
+    <div class="codex-body">
+      <nav id="codex-list" class="codex-list" aria-label="Статьи архива"></nav>
+      <article class="codex-entry">
+        <img id="cx-art" alt="" hidden>
+        <h3 id="cx-title"></h3>
+        <p id="cx-text"></p>
+        <p class="note" id="cx-src"></p>
+      </article>
+    </div>
+  </div>
+</div>
+
 <div id="pause" class="screen" hidden>
   <div class="panel center">
     <div class="eyebrow">Запись приостановлена</div>
     <h1>Пауза</h1>
+    <blockquote class="tip" id="pause-tip"></blockquote>
     <button class="big-btn" id="resume" type="button">Продолжить</button>
     <button class="big-btn" id="quit" type="button">В меню</button>
   </div>
@@ -170,6 +214,7 @@ h1 { font-family: var(--display); font-weight: 400; font-size: clamp(54px, 10vw,
     <div class="eyebrow">Сигнал потерян</div>
     <h1>Конец записи</h1>
     <div class="stats" id="stats"></div>
+    <blockquote class="tip" id="dead-tip"></blockquote>
     <button class="big-btn" id="again" type="button">Ещё раз</button>
     <button class="big-btn" id="tomenu" type="button">Сменить сторону</button>
   </div>

@@ -13,6 +13,8 @@ import { SFX } from './audio.js';
 import { Viewmodel } from './weapon.js';
 import { Enemies } from './enemies.js';
 import { Post } from './post.js';
+import { MUSIC } from './music.js';
+import { loadContent, applyMenuArt, setLoadingArt, buildCodex, tipText, musicUrl } from './content.js';
 
 // ------------------------------------------------------------ рендерер
 // качество: сохранённое, иначе по видеокарте
@@ -56,6 +58,8 @@ let world = null, fx = null, enemies = null, vm = null;
 // ------------------------------------------------------------ загрузка и мир
 async function boot() {
   $('q-label').textContent = Q.label;
+  await loadContent();
+  setLoadingArt();
   const bar = $('load-bar'), txt = $('load-txt');
   try {
     await loadAll(renderer, (p, what) => { bar.style.width = Math.round(p * 100) + '%'; txt.textContent = `Загрузка фотосканов: ${Math.round(p * 100)}%`; });
@@ -85,6 +89,8 @@ async function boot() {
   resize();
   renderer.compile(scene, camera);
   state.mode = 'menu';
+  applyMenuArt();
+  buildCodex();
   $('loading').hidden = true; $('menu').hidden = false;
 }
 
@@ -328,7 +334,7 @@ function startGame(faction) {
   if (vm) vm.dispose(camera);
   vm = new Viewmodel(camera, f);
   resetRun();
-  SFX.init();
+  startAudio();
   state.mode = 'playing';
   $('menu').hidden = true; $('dead').hidden = true; $('pause').hidden = true; $('hud').hidden = false;
   $('dot').style.display = showDot ? 'block' : 'none';
@@ -339,9 +345,15 @@ function requestLock() {
   if (noLock) return;
   try { const r = canvas.requestPointerLock(); if (r && r.catch) r.catch(() => { noLock = true; }); } catch (e) { noLock = true; }
 }
+// звук и музыка стартуют только после действия игрока (правило браузеров)
+function startAudio() {
+  SFX.init();
+  if (!MUSIC.bus) MUSIC.init(musicUrl()).then(() => MUSIC.start());
+  else MUSIC.start();
+}
 function pause() {
   if (state.mode !== 'playing') return;
-  state.mode = 'paused'; $('pause').hidden = false;
+  state.mode = 'paused'; $('pause').hidden = false; $('pause-tip').textContent = tipText();
   mouseDown = false; rmb = false; for (const k in keys) keys[k] = false;
 }
 function resume() { state.mode = 'playing'; $('pause').hidden = true; SFX.init(); requestLock(); }
@@ -361,6 +373,7 @@ function die() {
     const acc = state.shots ? Math.round((state.hits / state.shots) * 100) : 0;
     const t = Math.floor(state.survived);
     $('stats').innerHTML = `Волна: ${state.wave}<br>Убито: ${state.kills}<br>Точность: ${acc}%<br>Продержались: ${Math.floor(t / 60)} мин ${t % 60} с`;
+    $('dead-tip').textContent = tipText();
     $('dead').hidden = false; $('hud').hidden = true;
   }, 2300);
 }
@@ -405,6 +418,12 @@ sensEl.addEventListener('input', () => { sens = +sensEl.value; store.set('sens',
 volEl.addEventListener('input', () => { SFX.setVol(+volEl.value); store.set('vol', +volEl.value); });
 dotEl.addEventListener('change', () => { showDot = dotEl.checked; store.set('showdot', showDot); });
 qEl.addEventListener('change', () => { store.set('quality', qEl.value); location.reload(); });
+const musicEl = $('musicvol');
+musicEl.value = MUSIC.vol;
+musicEl.addEventListener('input', () => MUSIC.setVol(+musicEl.value));
+$('open-codex').addEventListener('click', () => { startAudio(); $('menu').hidden = true; $('codex').hidden = false; });
+$('close-codex').addEventListener('click', () => { $('codex').hidden = true; $('menu').hidden = false; });
+document.addEventListener('keydown', (ev) => { if (ev.code === 'Escape' && !$('codex').hidden) { $('codex').hidden = true; $('menu').hidden = false; } });
 
 // ------------------------------------------------------------ рендер-параметры
 const P = {
@@ -501,6 +520,10 @@ function step(dt) {
     updateRats(dt, player);
     terrainUniforms.uTime.value = performance.now() / 1000;
   }
+  if (state.mode === 'playing' && enemies) {
+    const near = enemies.list.some((e) => e.alive && (e.alert || Math.hypot(e.x - player.x, e.z - player.z) < 14));
+    MUSIC.setDuck(near ? 0.35 : 1);
+  } else MUSIC.setDuck(state.mode === 'menu' ? 1 : 0.6);
   fxs.dmg = Math.max(0, fxs.dmg - dt * 0.9);
   fxs.flash = Math.max(0, fxs.flash - dt * 14);
   fxs.glitch = Math.max(0, fxs.glitch - dt * 1.5);

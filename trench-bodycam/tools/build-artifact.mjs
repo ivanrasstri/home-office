@@ -18,5 +18,11 @@ for (const dir of ['models', 'hdri']) for (const f of fs.readdirSync(`assets/${d
   fs.writeFileSync(out, fs.readFileSync(`assets/${dir}/${f}`).toString('base64'));
   files[`assets/${dir}/${f}.txt`] = `trench-bodycam/${out}`;
 }
+// приватный контент (арты книги правил, музыка) — только в приватную сборку, в git он не попадает
+if (fs.existsSync('assets-private/manifest.json')) {
+  files['assets-private/manifest.json'] = 'trench-bodycam/assets-private/manifest.json';
+  if (fs.existsSync('assets-private/art')) for (const f of fs.readdirSync('assets-private/art')) files[`assets-private/art/${f}`] = `trench-bodycam/assets-private/art/${f}`;
+  if (fs.existsSync('assets-private/music')) for (const f of fs.readdirSync('assets-private/music')) if (/\.(mp3|ogg|wav)$/i.test(f)) files[`assets-private/music/${f}`] = `trench-bodycam/assets-private/music/${f}`;
+}
 fs.writeFileSync('dist/artifact-files.json', JSON.stringify(files));
 console.log('dist/artifact.html', (fs.statSync('dist/artifact.html').size / 1e6).toFixed(2), 'MB;', Object.keys(files).length, 'файлов ассетов');
