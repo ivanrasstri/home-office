@@ -50,7 +50,7 @@ const post = new Post(renderer, Q);
 // ------------------------------------------------------------ состояние
 const CLOCK0 = 4 * 3600 + 13 * 60 + 27;
 const state = {
-  mode: 'loading', faction: 'loyal', mission: store.get('mission', 'hold'), wave: 0, kills: 0, queue: [], spawnT: 0, breakT: 0, time: 0, clock: CLOCK0,
+  mode: 'loading', faction: 'loyal', mission: store.get('mission', 'hold'), wave: 0, repelled: 0, kills: 0, queue: [], spawnT: 0, breakT: 0, time: 0, clock: CLOCK0,
   deadT: 0, shots: 0, hits: 0, survived: 0, alarm: false, reinfT: 0, relic: null, extract: null, events: [], lastShot: -99, wonT: 0,
 };
 const player = {
@@ -92,7 +92,7 @@ async function boot() {
   fx = new FX(scene, Q, ht);
   enemies = new Enemies(scene, {
     factionData: FACTIONS.loyal, wave: () => state.wave, audio: SFX, fx, lights: { muzzleFlash },
-    onPlayerHit: hurtPlayer, onKill: (e, o) => { if (!o.exploded) state.kills++; }, onHit: () => { fxs.hit = 0.12; },
+    onPlayerHit: hurtPlayer, onKill: (e, o) => { if (o.byPlayer) state.kills++; }, onHit: () => { fxs.hit = 0.12; },
     onEvent: enemyEvent, explode: (x, y, z, o) => hazards.explode(x, y, z, o),
   });
   hazards = new Hazards(scene, { fx, audio: SFX, enemies, player, hurtPlayer, shake: (k) => { player.shake = Math.min(1, player.shake + k); fxs.glitch = Math.min(1, fxs.glitch + k * 0.5); }, noise: (x, z, r) => enemies.noise(x, z, r) });
@@ -137,9 +137,11 @@ function hurtPlayer(dmg, sx, sz, kind, opts = {}) {
   }
   if (kind === 'melee' && p.downT > 0) dmg *= 1.3;
   const raw = dmg;
+  // сбивает с ног только тяжёлый удар; после подъёма три с лишним секунды на то, чтобы прийти в себя
+  const knock = (opts.big || raw >= 30) && p.downT <= 0 && state.time - p.downAt > 3.4;
   dmg *= 1 + 0.06 * p.blood;
   p.hp -= dmg; p.lastHurt = state.time;
-  if (!bath) p.blood = Math.min(MAX_BLOOD, p.blood + 1 + (opts.shrapnel ? 1 : 0));
+  if (!bath) p.blood = Math.min(MAX_BLOOD, p.blood + (knock ? 0 : 1) + (opts.shrapnel ? 1 : 0));
   fxs.dmg = Math.min(1, fxs.dmg + dmg / 40); fxs.glitch = Math.min(1, fxs.glitch + dmg / 45);
   p.shake = Math.min(1, p.shake + dmg / 28);
   const a = Math.atan2(sx - p.x, sz - p.z);
@@ -147,9 +149,9 @@ function hurtPlayer(dmg, sx, sz, kind, opts = {}) {
   SFX.hurt(dmg > 19);
   if (opts.crit) showEvent(term('critical', 'КРИТ'), 1.2, true);
   if (p.hp <= 0) { die(); return; }
-  // сбивает с ног только тяжёлый удар; после подъёма две секунды на то, чтобы прийти в себя
-  if ((opts.big || raw >= 30) && p.downT <= 0 && state.time - p.downAt > 3.4) {
-    p.downT = 1.4; p.downAt = state.time; p.treatT = 0; p.reloadT = 0; p.throwT = 0;
+  if (knock) {
+    if (p.throwT > 0 && !p.thrown) p.grenades++;   // граната не успела уйти — остаётся в подсумке
+    p.downT = 1.4; p.downAt = state.time; p.treatT = 0; p.reloadT = 0; p.throwT = 0; p.thrown = false; p.meleeT = 0; p.meleeHit = false;
     showEvent(term('down', 'СБИТ С НОГ'), 1.6, true);
   } else if (!bath && kind !== 'gas') showEvent(term('minor_hit', 'РАНЕН'), 0.9);
 }
@@ -215,13 +217,13 @@ function updateMelee() {
   for (const e of enemies.list) {
     if (!e.alive) continue;
     const dx = e.x - p.x, dz = e.z - p.z, d = Math.hypot(dx, dz);
-    // СТРАХ: по демону удар уже и слабее (стр. 17, 54)
+    // СТРАХ: по такому врагу штыком труднее попасть — окно удара уже (стр. 17, 54)
     if (d > bd || (dx * fx_ + dz * fz_) / d < (e.u.fear ? 0.82 : 0.65)) continue;
     best = e; bd = d;
   }
   if (best) {
     const hb = enemies.hitboxes(best)[2];
-    enemies.damage(best, 70 * (best.u.fear ? 0.75 : 1), hb[0], hb[1], hb[2], fx_, fz_, 'body', { melee: true, byPlayer: true });
+    enemies.damage(best, 70, hb[0], hb[1], hb[2], fx_, fz_, 'body', { melee: true, byPlayer: true });
     best.knock.x += fx_ * 4; best.knock.z += fz_ * 4; best.hitT = 0.7;
     p.shake = Math.min(1, p.shake + 0.3);
     if (best.u.fear) showEvent(term('fear', 'СТРАХ'), 0.9);
@@ -237,7 +239,6 @@ function toggleMask() {
   const p = player;
   if (busy() || p.hp <= 0) return;
   p.maskOn = !p.maskOn; p.maskT = 1.0; SFX.maskOn();
-  setTimeout(() => SFX.muffle(p.maskOn), 700);
 }
 function throwGrenade() {
   const p = player;
@@ -322,7 +323,7 @@ function updatePlayer(dt) {
       else showEvent('Перевязка сорвалась', 1.4, true);
     }
   }
-  if (p.maskT > 0) p.maskT -= dt;
+  if (p.maskT > 0) { const prev = p.maskT; p.maskT -= dt; if (prev > 0.3 && p.maskT <= 0.3) SFX.muffle(p.maskOn); }
   p.mask = lerp(p.mask, p.maskOn && p.maskT <= 0.3 ? 1 : 0, damp(8, dt));
   if (p.maskOn) { p.breathT -= dt; if (p.breathT <= 0) { p.breathPh = !p.breathPh; p.breathT = p.breathPh ? 1.4 : 1.7; SFX.breath(p.breathPh); } }
   // граната: бросок на середине замаха
@@ -471,7 +472,7 @@ function updateEvents(dt) {
 function updateWaves(dt) {
   if (state.breakT > 0) { state.breakT -= dt; if (state.breakT <= 0) startWave(); return; }
   updateEvents(dt);
-  const alive = enemies.alive();
+  const alive = enemies.fighting();
   if (state.queue.length) {
     state.spawnT -= dt;
     if (state.spawnT <= 0 && alive < 10) {
@@ -483,6 +484,8 @@ function updateWaves(dt) {
       } else state.spawnT = 0.5;
     }
   } else if (alive === 0 && state.wave > 0) {
+    enemies.dismissFleeing();
+    state.repelled++;
     if (state.mission === 'hold' && state.wave >= MISSIONS.hold.waves) { win('Рассвет', 'Окоп удержан. Ночь кончилась, вы живы.'); return; }
     state.breakT = 10;
     showCenter('Атака отбита', 'Перевяжитесь (Q) и пополните патроны.', 3);
@@ -590,7 +593,8 @@ function resetRun() {
     blood: 0, downT: 0, downAt: -99, riseT: 0, treatT: 0, mask: 0, maskOn: false, maskT: 0, gasT: 0, grenades: G.count, throwT: 0, hasRelic: false,
   });
   SFX.muffle(false);
-  Object.assign(state, { wave: 0, kills: 0, queue: [], breakT: 4, time: 0, deadT: 0, shots: 0, hits: 0, clock: CLOCK0, alarm: false, relic: null, extract: null, events: [], lastShot: -99 });
+  Object.assign(state, { wave: 0, repelled: 0, kills: 0, queue: [], breakT: 4, time: 0, deadT: 0, shots: 0, hits: 0, clock: CLOCK0, alarm: false, relic: null, extract: null, events: [], lastShot: -99 });
+  $('wave').textContent = state.mission === 'hold' ? `АТАКА 0/${MISSIONS.hold.waves}` : 'ВОЛНА 0';
   if (state.mission === 'raid') { setupRaid(); state.breakT = 0; }
   else computeFlow(player.x, player.z);
   // смотрим вдоль самого длинного прохода
@@ -642,14 +646,14 @@ function toMenu() {
   state.mode = 'menu';
   $('pause').hidden = true; $('dead').hidden = true; $('hud').hidden = true; $('menu').hidden = false;
   if (document.pointerLockElement) document.exitPointerLock();
-  enemies.clear(); hazards.clear(); SFX.muffle(false);
+  enemies.clear(); hazards.clear(); player.maskOn = false; player.mask = 0; SFX.muffle(false);
   if (relicObj) { scene.remove(relicObj); relicObj = null; }
   if (vm) { vm.dispose(camera); vm = null; }
 }
 function statsHtml() {
   const acc = state.shots ? Math.round((state.hits / state.shots) * 100) : 0;
   const t = Math.floor(state.survived);
-  const first = state.mission === 'raid' ? `Задание: ${MISSIONS.raid.name}` : `Атак отбито: ${Math.max(0, state.wave - (state.mode === 'won' ? 0 : 1))}`;
+  const first = state.mission === 'raid' ? `Задание: ${MISSIONS.raid.name}` : `Атак отбито: ${state.repelled}`;
   return `${first}<br>Убито: ${state.kills}<br>Бежало: ${enemies.fled}<br>Точность: ${acc}%<br>Продержались: ${Math.floor(t / 60)} мин ${t % 60} с`;
 }
 function endScreen(eyebrow, title, won) {
@@ -666,6 +670,7 @@ function die() {
   setTimeout(() => { state.mode = 'dead'; endScreen('Сигнал потерян', 'Конец записи', false); }, 2300);
 }
 function win(title, sub) {
+  if (state.mode !== 'playing' || player.hp <= 0) return;
   state.mode = 'won'; state.survived = state.time;
   showCenter(title, sub, 4);
   hazards.barrage.dur = 0; hazards.gas.dur = 0;
@@ -806,7 +811,7 @@ function step(dt) {
       if (Math.floor(state.time * 4) !== Math.floor((state.time - dt) * 4)) computeFlow(player.x, player.z);
       enemies.update(dt, player);
       hazards.update(dt);
-      if (state.mission === 'raid') updateRaid(dt); else updateWaves(dt);
+      if (state.mode === 'playing') { if (state.mission === 'raid') updateRaid(dt); else updateWaves(dt); }
     } else {
       state.deadT += dt; updatePlayer(dt);
       enemies.update(dt * 0.5, player);

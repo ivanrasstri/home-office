@@ -313,7 +313,16 @@ export function collide(p, r) {
       const ex = p.x - qx, ez = p.z - qz, d = Math.hypot(ex, ez);
       if (d < r) {
         if (d > 1e-5) { p.x += (ex / d) * (r - d); p.z += (ez / d) * (r - d); }
-        else { p.x = cellCenter(cx); p.z = cellCenter(cz); }
+        else {
+          // точка внутри сплошной клетки: выталкиваем через ближайший край, за которым проход
+          let best = null, bd = Infinity;
+          for (const [ox, oz] of DIRS) {
+            if (solid(x + ox, z + oz)) continue;
+            const dist = ox > 0 ? maxX - p.x : ox < 0 ? p.x - minX : oz > 0 ? maxZ - p.z : p.z - minZ;
+            if (dist < bd) { bd = dist; best = [ox, oz]; }
+          }
+          if (best) { if (best[0]) p.x = best[0] > 0 ? maxX + r : minX - r; else p.z = best[1] > 0 ? maxZ + r : minZ - r; }
+        }
       }
     }
   }

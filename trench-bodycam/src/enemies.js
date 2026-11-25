@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import { MODELS, TEX, cloneModel, addPatch, pbr } from './assets.js';
-import { CELL, GW, GH, WALL_H, ARMOUR_MULT, diceChance } from './config.js';
+import { CELL, GW, GH, WALL_H } from './config.js';
 import { solid, idx, cellOf, cellCenter, flow, flowDir, los, collide, heightAt, DIRS } from './trenchmap.js';
 import { dressing } from './dressing.js';
 import { clamp, lerp, rr, damp } from './util.js';
@@ -15,6 +15,13 @@ const UP = new THREE.Vector3(0, 1, 0);
 export let MASK_YAW = 0;
 export function setMaskYaw(v) { MASK_YAW = v; }
 const roll2d6 = (dice = 2) => { const r = Array.from({ length: dice }, () => 1 + Math.floor(Math.random() * 6)).sort((a, b) => b - a); return r[0] + r[1]; };
+// бросок успеха по ступени: +DICE — лучшие два из 2+n кубиков, −DICE — худшие два (стр. 15, 24–25)
+function rollStep(step) {
+  step = clamp(Math.round(step), -2, 2);
+  const n = 2 + Math.abs(step);
+  const r = Array.from({ length: n }, () => 1 + Math.floor(Math.random() * 6)).sort((a, b) => b - a);
+  return step >= 0 ? r[0] + r[1] : r[n - 1] + r[n - 2];
+}
 
 // ------------------------------------------------------------ работа с костями
 function rotateBoneToward(bone, cur, des, blend = 1) {
@@ -375,6 +382,7 @@ export class Enemies {
     this.list = [];
     this.drops = [];
     this.squads = [];
+    this.blasts = [];      // отложенные взрывы (смертник рвётся через миг после смерти) — по игровому времени
     this.fled = 0;
   }
   newSquad(opts = {}) {
@@ -387,12 +395,12 @@ export class Enemies {
     const m = buildModel(u.model);
     const scale = u.scale || 1;
     m.group.scale.setScalar(scale);
-    const hpMul = 1 + this.ctx.wave() * 0.03;
+    const hpMul = (u.armour || 0) >= -1 ? 1 + this.ctx.wave() * 0.03 : 1;
     const e = {
       key, u, m, scale, x: opts.x ?? cellCenter(cx) + rr(-0.4, 0.4), z: opts.z ?? cellCenter(cz) + rr(-0.4, 0.4), yaw: opts.yaw ?? rr(-3, 3),
       hp: u.hp * hpMul, maxHp: u.hp * hpMul, alive: true, deadT: 0, speed: u.speed * rr(0.9, 1.1), curSpeed: 0,
       atkCd: rr(0.5, 1.5), aimT: 0, aimW: 0, attackT: 0, alert: !opts.guard, guard: !!opts.guard, voiceT: rr(1, 5), knock: V(), hitT: 0,
-      strafe: Math.random() < 0.5 ? 1 : -1, strafeT: rr(1, 3), downT: 0, downTotal: 1, toughUsed: false, burstN: 0, burstT: 0, reloadT: 0, stillT: 0,
+      strafe: Math.random() < 0.5 ? 1 : -1, strafeT: rr(1, 3), downT: 0, downTotal: 1, toughUsed: false, burstN: 0, burstT: 0, reloadT: 0, stillT: 0, hits: [], fleeT: 0,
       fuseT: 0, fleeing: false, charge: 1, retreatCd: 0, cleaveT: 0, squad: opts.squad || null, home: null, patrolT: rr(2, 6), patrol: null, dropY: 0, dropV: 0,
     };
     if (opts.drop) { e.dropY = WALL_H + 0.3; e.dropV = 1.6; }
@@ -406,11 +414,15 @@ export class Enemies {
     return e;
   }
   clear() {
-    for (const e of this.list) this.scene.remove(e.m.group);
+    for (const e of this.list) { this.scene.remove(e.m.group); e.alive = false; e.gone = true; e.hits.length = 0; }
     for (const d of this.drops) this.scene.remove(d.obj);
-    this.list.length = 0; this.drops.length = 0; this.squads.length = 0; this.fled = 0;
+    this.list.length = 0; this.drops.length = 0; this.squads.length = 0; this.fled = 0; this.blasts.length = 0;
   }
   alive() { return this.list.filter((e) => e.alive).length; }
+  // кто ещё воюет: бегущие волну не держат
+  fighting() { return this.list.filter((e) => e.alive && !e.fleeing).length; }
+  // бегущие, когда воевать больше некому, уходят с поля
+  dismissFleeing() { for (const e of this.list) if (e.alive && e.fleeing) { e.alive = false; e.gone = true; this.fled++; } }
   hitboxes(e) {
     const B = e.m.B, out = [], s = e.scale;
     const add = (bone, r, mult, part, bone2) => {
@@ -467,7 +479,8 @@ export class Enemies {
     if (!e.alive) return null;
     const { audio, fx } = this.ctx;
     const u = e.u;
-    if (part !== 'head' && !opts.ignoreArmour) dmg *= ARMOUR_MULT[u.armour] ?? 1;
+    // броня уже в запасе hp (GAME_MAPPING §1.5); IGNORE ARMOUR бьёт так, будто запаса брони нет
+    if (opts.ignoreArmour && (u.armour || 0) < 0) dmg *= Math.max(1, u.hp / 90);
     if (opts.melee && e.downT > 0) dmg *= 1.3;          // по лежачему (стр. 49)
     if (opts.holy && u.demonic) dmg *= 1.3;
     e.hp -= dmg; e.hitT = 0.35;
@@ -495,14 +508,18 @@ export class Enemies {
     return { hit: true };
   }
   knockDown(e, t, dx = 0, dz = 0) {
-    e.downT = t; e.downTotal = t; e.burstN = 0; e.aimT = 0;
+    e.downT = t; e.downTotal = t; e.burstN = 0; e.aimT = 0; e.hits.length = 0; e.cleaveT = 0;
+    e.knock.multiplyScalar(0.3);
     e.downDir = (dx * Math.sin(e.yaw) + dz * Math.cos(e.yaw)) > 0 ? 1 : -1;
     this.onIncap(e);
   }
   kill(e, dx = 0, dz = 0, opts = {}) {
     const { audio } = this.ctx;
-    e.alive = false; e.deadT = 0; e.downT = 0;
-    e.fall = { dir: Math.random() < 0.5 ? 1 : -1, side: rr(-0.4, 0.4), spin: rr(-0.6, 0.6), fwd: (dx * Math.sin(e.yaw) + dz * Math.cos(e.yaw)) > 0 ? 1 : -1 };
+    // добитый на земле падает дальше из той позы, в которой лежал, а не встаёт на кадр
+    const wasDown = e.downT > 0, x0 = wasDown ? e.m.group.rotation.x : 0;
+    e.alive = false; e.deadT = 0; e.downT = 0; e.hits.length = 0;
+    const fwd = wasDown ? e.downDir : (dx * Math.sin(e.yaw) + dz * Math.cos(e.yaw)) > 0 ? 1 : -1;
+    e.fall = { dir: Math.random() < 0.5 ? 1 : -1, side: wasDown ? 0 : rr(-0.4, 0.4), spin: wasDown ? 0 : rr(-0.6, 0.6), fwd, x0, y0: wasDown ? -0.05 * Math.abs(x0) / 1.35 : 0 };
     e.m.mixer.stopAllAction();
     e.snap = [];
     e.m.root.traverse((o) => { if (o.isBone) e.snap.push([o, o.quaternion.clone()]); });
@@ -511,8 +528,7 @@ export class Enemies {
     this.ctx.onKill && this.ctx.onKill(e, opts);
     // смертник может рвануть и мёртвым
     if (e.u.ai === 'bomber' && !opts.noChain && Math.random() < 0.4) {
-      const x = e.x, z = e.z;
-      setTimeout(() => this.ctx.explode && this.ctx.explode(x, heightAt(x, z) + 0.6, z, { radius: e.u.blast, dmg: e.u.dmg, owner: 'enemy', los: true }), 350);
+      this.blasts.push({ t: 0.35, x: e.x, z: e.z, o: { radius: e.u.blast, dmg: e.u.dmg, owner: 'enemy', los: true, credit: !!opts.byPlayer } });
     } else if (Math.random() < (e.u.ai === 'rusher' || e.u.ai === 'bomber' ? 0.35 : 0.65)) this.spawnDrop(e.x, e.z);
     if (e.squad && e.squad.leader === e) { this.ctx.onEvent && this.ctx.onEvent('leader_down', e); e.squad.testT = 0; }
     this.onIncap(e);
@@ -543,6 +559,12 @@ export class Enemies {
     this.drops.push({ obj: o, x: o.position.x, z: o.position.z, t: 0 });
   }
   update(dt, player) {
+    for (let i = this.blasts.length - 1; i >= 0; i--) {
+      const b = this.blasts[i];
+      if ((b.t -= dt) > 0) continue;
+      this.blasts.splice(i, 1);
+      this.ctx.explode && this.ctx.explode(b.x, heightAt(b.x, b.z) + 0.6, b.z, b.o);
+    }
     for (const s of this.squads) {
       if (s.testT > 0) s.testT -= dt;
       else if (!s.fled && s.members.length > 1) {
@@ -556,6 +578,13 @@ export class Enemies {
       if ((!e.alive && e.deadT > 40) || e.gone) { this.scene.remove(e.m.group); this.list.splice(i, 1); }
     }
     if (this.list.length > 34) { const i = this.list.findIndex((e) => !e.alive); if (i >= 0) { this.scene.remove(this.list[i].m.group); this.list.splice(i, 1); } }
+  }
+  // отброс от попаданий: не больше 0,25 м за кадр, иначе тело проскочит сквозь стенку окопа
+  knockStep(e, dt) {
+    let kx = e.knock.x * dt, kz = e.knock.z * dt;
+    const kl = Math.hypot(kx, kz);
+    if (kl > 0.25) { kx *= 0.25 / kl; kz *= 0.25 / kl; }
+    e.x += kx; e.z += kz;
   }
   // куда бежать от игрока: соседняя клетка, которая дальше по полю пути
   fleeDir(e) {
@@ -585,6 +614,7 @@ export class Enemies {
   updateOne(e, dt, player) {
     const { audio } = this.ctx;
     const m = e.m, u = e.u;
+    if (e.gone) return;                       // ушёл с поля: тела нет, убираем в конце кадра
     if (!e.alive) { this.updateDeath(e, dt); return; }
     const dx = player.x - e.x, dz = player.z - e.z, dist = Math.hypot(dx, dz);
     e.atkCd -= dt; e.voiceT -= dt; e.hitT -= dt; e.retreatCd -= dt;
@@ -596,17 +626,27 @@ export class Enemies {
     // сбит с ног: лежит, потом встаёт с половинной скоростью (стр. 20, 49)
     if (e.downT > 0) {
       e.downT -= dt;
+      e.knock.multiplyScalar(Math.pow(0.02, dt));
       this.animate(e, dt, 0);
       this.updateDown(e);
       return;
     }
     const see = this.sees(e, player, dist);
     if (see && !e.alert) this.alertOne(e, true);
+    for (let i = e.hits.length - 1; i >= 0; i--) {
+      const h = e.hits[i];
+      if ((h.t -= dt) > 0) continue;
+      e.hits.splice(i, 1);
+      if (dist < h.r) this.ctx.onPlayerHit(h.dmg, e.x, e.z, 'melee', { unit: e });
+    }
     const shaken = e.squad && e.squad.shaken;
     let mvx = 0, mvz = 0, faceX = dx, faceZ = dz, aiming = false;
     if (e.fleeing) {
+      e.fleeT += dt;
       [mvx, mvz] = this.fleeDir(e); faceX = mvx || dx; faceZ = mvz || dz;
-      if (dist > 26 && !see) { e.gone = true; e.alive = false; this.fled++; return; }
+      const stuck = mvx === 0 && mvz === 0;
+      if (!see && (dist > 26 || stuck || e.fleeT > 8)) { e.gone = true; e.alive = false; this.fled++; return; }
+      if (stuck && see && dist < 12) { e.fleeing = false; e.charge = 1; }   // загнан в угол
       if (e.voiceT <= 0) { e.voiceT = rr(2, 4); audio.scream(e.x, e.z, 0.4); }
     } else if (e.guard && !e.alert) {
       // часовой: стоит или ходит у своего поста
@@ -637,7 +677,8 @@ export class Enemies {
     const sp = e.speed * e.charge * rising * (e.hitT > 0 ? 0.3 : 1) * (e.dropY > 0 ? 0 : 1) * (e.fleeing ? 1.25 : 1) * Math.min(1, ml);
     if (ml > 1e-3) { mvx /= ml; mvz /= ml; }
     e.curSpeed = lerp(e.curSpeed, sp, damp(6, dt));
-    e.x += (mvx * e.curSpeed + e.knock.x) * dt; e.z += (mvz * e.curSpeed + e.knock.z) * dt;
+    e.x += mvx * e.curSpeed * dt; e.z += mvz * e.curSpeed * dt;
+    this.knockStep(e, dt);
     e.knock.multiplyScalar(Math.pow(0.02, dt));
     collide(e, 0.3);
     for (const c of dressing.colliders) {
@@ -700,7 +741,7 @@ export class Enemies {
     e.atkCd = u.atkCd || 1.1; e.attackT = 0.45;
     audio.swing();
     const r = range || (u.reach || 1.5) + 0.4;
-    setTimeout(() => { if (e.alive && e.downT <= 0 && Math.hypot(player.x - e.x, player.z - e.z) < r) this.ctx.onPlayerHit(u.dmg * rr(0.85, 1.15), e.x, e.z, 'melee', { unit: e }); }, 220);
+    e.hits.push({ t: 0.22, r, dmg: u.dmg * rr(0.85, 1.15) });
     if (u.cleave && !second) e.cleaveT = 0.5;   // CLEAVE 2: второй удар следом
   }
   aiRanged(e, dt, player, dx, dz, dist, see, shaken) {
@@ -710,7 +751,7 @@ export class Enemies {
       // очередь идёт: стоим и стреляем
       aiming = true; e.burstT -= dt;
       if (e.burstT <= 0) { this.shoot(e, dist, player); e.burstN--; e.burstT = u.burstGap || 0.1; if (e.burstN === 0) { if (u.reload) e.reloadT = u.reload; e.atkCd = u.fireCd ? rr(...u.fireCd) : 0.5; } }
-      if (!u.assault) return [0, 0, dx, dz, true];
+      if (!u.fireOnMove) return [0, 0, dx, dz, true];
     }
     if (e.reloadT > 0) e.reloadT -= dt;
     const heavy = u.ai === 'heavy', sniper = u.ai === 'sniper';
@@ -718,7 +759,7 @@ export class Enemies {
       aiming = e.reloadT <= 0;
       e.aimT += dt;
       e.strafeT -= dt; if (e.strafeT < 0) { e.strafe *= -1; e.strafeT = rr(1, 2.5); }
-      const [near, far] = sniper ? [18, 60] : u.assault ? [7, 14] : heavy ? [10, 32] : [6, 15];
+      const [near, far] = sniper ? [18, 60] : u.fireOnMove ? [7, 14] : heavy ? [10, 32] : [6, 15];
       if (sniper && dist < near) [mvx, mvz] = this.fleeDir(e);
       else if (dist > far) { mvx = dx / dist * 0.55; mvz = dz / dist * 0.55; }
       else if (!heavy && !sniper && dist < near) { mvx = -dx / dist * 0.5; mvz = -dz / dist * 0.5; }
@@ -827,10 +868,11 @@ export class Enemies {
     if (Math.hypot(player.vx, player.vz) > 3.4) step -= 1;   // [допущение] бегущую цель труднее поймать
     if (e.squad && e.squad.shaken) step -= 1;
     if (e.dropY > 0.5) step += 1;                              // стрелок выше цели (стр. 43)
-    const chance = diceChance(step);
-    if (Math.random() < chance) {
-      const crit = Math.random() < 0.028;                      // 12+ на 2d6
-      this.ctx.onPlayerHit(u.dmg * rr(0.85, 1.15) * (crit ? 1.5 : 1), e.x, e.z, 'bullet', { unit: e, crit, big: u.dmg >= 40 });
+    const roll = rollStep(step);
+    if (roll >= 7) {
+      const crit = roll >= 12;
+      const k = crit ? (u.critical ? 1.5 : 1.3) : 1;
+      this.ctx.onPlayerHit(u.dmg * rr(0.85, 1.15) * k, e.x, e.z, 'bullet', { unit: e, crit, big: u.dmg >= 40 });
     } else {
       audio.crack(-audio.panOf(e.x, e.z));
       if (Math.random() < 0.6) {
@@ -847,11 +889,11 @@ export class Enemies {
     const t = clamp(e.deadT / 0.75, 0, 1);
     const ease = t * t;
     // подкашиваются ноги, корпус складывается, тело падает
-    m.group.rotation.set(f.fwd * ease * 1.45, e.yaw + f.spin * ease, f.side * ease, 'YXZ');
-    e.x += e.knock.x * dt; e.z += e.knock.z * dt; e.knock.multiplyScalar(Math.pow(0.05, dt));
+    m.group.rotation.set(lerp(f.x0 || 0, f.fwd * 1.45, ease), e.yaw + f.spin * ease, f.side * ease, 'YXZ');
+    this.knockStep(e, dt); e.knock.multiplyScalar(Math.pow(0.05, dt));
     collide(e, 0.3);
     e.dropY = Math.max(0, e.dropY - dt * 6);
-    m.group.position.set(e.x, heightAt(e.x, e.z) + 0.02 - ease * 0.08 + e.dropY, e.z);
+    m.group.position.set(e.x, heightAt(e.x, e.z) + 0.02 + lerp(f.y0 || 0, -0.08, ease) + e.dropY, e.z);
     m.group.updateMatrixWorld(true);
     const right = V().set(-Math.cos(e.yaw), 0, Math.sin(e.yaw)).applyAxisAngle(UP, f.spin * ease);
     const k = Math.min(1, e.deadT / 0.5);

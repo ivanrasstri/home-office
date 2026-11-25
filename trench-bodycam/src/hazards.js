@@ -64,7 +64,7 @@ export class Hazards {
       if (g.fuse <= 0) {
         this.scene.remove(g.obj); this.grenades.splice(i, 1);
         const s = g.spec;
-        this.explode(p.x, p.y + 0.15, p.z, { radius: s.radius, dmg: s.dmg, owner: g.owner, los: s.los, ignoreArmour: s.ignoreArmour, holy: s.holy, color: s.color });
+        this.explode(p.x, p.y + 0.15, p.z, { radius: s.radius, dmg: s.dmg, owner: g.owner, los: s.los, ignoreArmour: s.ignoreArmour, holy: s.holy, color: s.color, noDebris: s.noDebris });
       }
     }
   }
@@ -77,11 +77,11 @@ export class Hazards {
     blastFlash(_p.set(x, y, z), [col[0] / lc, col[1] / lc, col[2] / lc], clamp(r / 5, 0.6, 1.4));
     audio.explosion(x, z, clamp(r / 5, 0.6, 1.5));
     const dirt = [0.07, 0.05, 0.035];
-    for (let i = 0; i < 70; i++) {
+    if (!o.noDebris) for (let i = 0; i < 70; i++) {
       const a = rr(0, 6.28), s = rr(2, 11), up = rr(3, 13);
       fx.lit.emit(x, y, z, Math.cos(a) * s, up, Math.sin(a) * s, dirt[0], dirt[1], dirt[2], rr(0.02, 0.06), rr(0.8, 1.8), { grav: 9.8, drag: 0.25 });
     }
-    for (let i = 0; i < 26; i++) {
+    if (!o.noDebris) for (let i = 0; i < 26; i++) {
       const a = rr(0, 6.28), s = rr(0.3, 2.4);
       fx.lit.emit(x + rr(-0.5, 0.5), y + rr(0, 0.8), z + rr(-0.5, 0.5), Math.cos(a) * s, rr(0.6, 2.4), Math.sin(a) * s, 0.16, 0.15, 0.14, rr(0.35, 0.7), rr(2.5, 5), { grav: -0.25, drag: 1.1, grow: rr(0.5, 1.1), alpha: 0.32 });
     }
@@ -90,15 +90,22 @@ export class Hazards {
       fx.glow.emit(x, y + 0.2, z, Math.cos(a) * s, rr(1, 9), Math.sin(a) * s, col[0], col[1], col[2], rr(0.01, 0.025), rr(0.1, 0.4), { grav: 9.8, drag: 0.4 });
     }
     for (let i = 0; i < 4; i++) fx.glow.emit(x, y + 0.4, z, rr(-1, 1), rr(0.5, 2), rr(-1, 1), col[0] * 0.5, col[1] * 0.5, col[2] * 0.5, rr(0.5, 0.9), 0.18, { grav: 0, drag: 2, grow: 2 });
-    fx.decal('hole', x, heightAt(x, z), z, 0, 1, 0, r * 0.45);
+    if (!o.noDebris) fx.decal('hole', x, heightAt(x, z), z, 0, 1, 0, r * 0.45);
+    else for (let i = 0; i < 40; i++) { const a = rr(0, 6.28), s = rr(1, 6); fx.glow.emit(x, y + 0.3, z, Math.cos(a) * s, rr(0.5, 4), Math.sin(a) * s, col[0] * 0.6, col[1] * 0.6, col[2] * 0.6, rr(0.03, 0.08), rr(0.4, 1.1), { grav: -0.5, drag: 1.5 }); }
     this.ctx.noise && this.ctx.noise(x, z, 45);
     // урон врагам
     const hitBy = (tx, ty, tz) => {
       const dx = tx - x, dy = ty - y, dz = tz - z, d = Math.hypot(dx, dy, dz);
       if (d > r) return 0;
       if (o.los !== false && d > 0.4) {
-        const w = rayTerrain(x, y + 0.25, z, dx / d, (dy - 0.25) / d, dz / d, d);
+        const oy = y + 0.25;
+        const w = rayTerrain(x, oy, z, dx / d, (ty - oy) / d, dz / d, d);
         if (w.hit && w.t < d - 0.35) return 0;
+        // rayTerrain видит стенку только при переходе из окопа в землю; взрыв на бруствере проверяем по карте высот
+        for (let t = 0.3; t < d - 0.35; t += 0.2) {
+          const f = t / d;
+          if (oy + (ty - oy) * f < heightAt(x + dx * f, z + dz * f) - 0.05) return 0;
+        }
       }
       return 1 - 0.6 * (d / r) * (d / r);
     };
@@ -108,7 +115,7 @@ export class Hazards {
       const k = hitBy(_p.x, _p.y, _p.z);
       if (k <= 0) continue;
       const dx = e.x - x, dz = e.z - z, dl = Math.hypot(dx, dz) || 1;
-      enemies.damage(e, o.dmg * k, _p.x, _p.y, _p.z, dx / dl, dz / dl, 'body', { blast: true, ignoreArmour: o.ignoreArmour, holy: o.holy, byPlayer: o.owner === 'player' });
+      enemies.damage(e, o.dmg * k, _p.x, _p.y, _p.z, dx / dl, dz / dl, 'body', { blast: true, ignoreArmour: o.ignoreArmour, holy: o.holy, byPlayer: o.owner === 'player' || !!o.credit });
     }
     // игрок: осколки всегда оставляют маркер крови (SHRAPNEL, стр. 55)
     if (player.hp > 0) {
@@ -119,7 +126,11 @@ export class Hazards {
     }
   }
   // ---------------------------------------------------------- газ
-  startGas(dur = 32) { this.gas.t = 0; this.gas.dur = dur; this.ctx.audio.gasAlarm(); }
+  startGas(dur = 32) {
+    if (this.gasActive()) this.gas.dur = Math.max(this.gas.dur, this.gas.t + dur);
+    else { this.gas.t = 0; this.gas.dur = dur; }
+    this.ctx.audio.gasAlarm();
+  }
   gasActive() { return this.gas.dur > 0; }
   updateGas(dt) {
     const g = this.gas;
