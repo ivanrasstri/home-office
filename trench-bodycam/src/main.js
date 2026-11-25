@@ -484,7 +484,7 @@ function updateWaves(dt) {
       } else state.spawnT = 0.5;
     }
   } else if (alive === 0 && state.wave > 0) {
-    enemies.dismissFleeing();
+    enemies.dismissFleeing(player);
     state.repelled++;
     if (state.mission === 'hold' && state.wave >= MISSIONS.hold.waves) { win('Рассвет', 'Окоп удержан. Ночь кончилась, вы живы.'); return; }
     state.breakT = 10;

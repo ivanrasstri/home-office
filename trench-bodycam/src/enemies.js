@@ -395,7 +395,7 @@ export class Enemies {
     const m = buildModel(u.model);
     const scale = u.scale || 1;
     m.group.scale.setScalar(scale);
-    const hpMul = (u.armour || 0) >= -1 ? 1 + this.ctx.wave() * 0.03 : 1;
+    const hpMul = 1;   // полосы hp по броне не растут с волной: сложность даёт состав отрядов
     const e = {
       key, u, m, scale, x: opts.x ?? cellCenter(cx) + rr(-0.4, 0.4), z: opts.z ?? cellCenter(cz) + rr(-0.4, 0.4), yaw: opts.yaw ?? rr(-3, 3),
       hp: u.hp * hpMul, maxHp: u.hp * hpMul, alive: true, deadT: 0, speed: u.speed * rr(0.9, 1.1), curSpeed: 0,
@@ -422,7 +422,9 @@ export class Enemies {
   // кто ещё воюет: бегущие волну не держат
   fighting() { return this.list.filter((e) => e.alive && !e.fleeing).length; }
   // бегущие, когда воевать больше некому, уходят с поля
-  dismissFleeing() { for (const e of this.list) if (e.alive && e.fleeing) { e.alive = false; e.gone = true; this.fled++; } }
+  dismissFleeing(player) {
+    for (const e of this.list) if (e.alive && e.fleeing && e.downT <= 0 && !los(e.x, e.z, player.x, player.z)) { e.alive = false; e.gone = true; this.fled++; }
+  }
   hitboxes(e) {
     const B = e.m.B, out = [], s = e.scale;
     const add = (bone, r, mult, part, bone2) => {
@@ -432,7 +434,7 @@ export class Enemies {
       out.push([_a.x, _a.y, _a.z, r * s, mult, part]);
     };
     add(B.Head, 0.13, 2.6, 'head', B.HeadTop_End);
-    add(B.Neck, 0.08, 2.0, 'head');
+    add(B.Neck, 0.08, 2.6, 'head');
     add(B.Spine2, 0.2, 1.1, 'body'); add(B.Spine1, 0.19, 1.0, 'body'); add(B.Spine, 0.19, 1.0, 'body'); add(B.Hips, 0.18, 0.9, 'body');
     add(B.LeftUpLeg, 0.11, 0.6, 'leg', B.LeftLeg); add(B.RightUpLeg, 0.11, 0.6, 'leg', B.RightLeg);
     add(B.LeftLeg, 0.08, 0.5, 'leg', B.LeftFoot); add(B.RightLeg, 0.08, 0.5, 'leg', B.RightFoot);
@@ -503,14 +505,16 @@ export class Enemies {
       this.kill(e, dx, dz, opts);
       return { killed: true };
     }
-    if (e.downT <= 0 && dmg >= e.maxHp * 0.4 && !u.steadfast) { this.knockDown(e, rr(1.6, 2.4), dx, dz); return { down: true }; }
+    const downAt = e.maxHp * (0.4 - 0.1 * Math.min(0, u.armour || 0));
+    if (e.downT <= 0 && dmg >= downAt && !u.steadfast) { this.knockDown(e, rr(1.6, 2.4), dx, dz); return { down: true }; }
     if (Math.random() < 0.4) (u.model === 'fiend' ? audio.growl(e.x, e.z, 0.8) : audio.shout(e.x, e.z, 0.7));
     return { hit: true };
   }
   knockDown(e, t, dx = 0, dz = 0) {
-    e.downT = t; e.downTotal = t; e.burstN = 0; e.aimT = 0; e.hits.length = 0; e.cleaveT = 0;
+    const already = e.downT > 0;
+    e.downT = t; e.downTotal = already ? t + 0.3 : t; e.burstN = 0; e.aimT = 0; e.hits.length = 0; e.cleaveT = 0;
     e.knock.multiplyScalar(0.3);
-    e.downDir = (dx * Math.sin(e.yaw) + dz * Math.cos(e.yaw)) > 0 ? 1 : -1;
+    if (!already) e.downDir = (dx * Math.sin(e.yaw) + dz * Math.cos(e.yaw)) > 0 ? 1 : -1;
     this.onIncap(e);
   }
   kill(e, dx = 0, dz = 0, opts = {}) {
@@ -646,7 +650,7 @@ export class Enemies {
       [mvx, mvz] = this.fleeDir(e); faceX = mvx || dx; faceZ = mvz || dz;
       const stuck = mvx === 0 && mvz === 0;
       if (!see && (dist > 26 || stuck || e.fleeT > 8)) { e.gone = true; e.alive = false; this.fled++; return; }
-      if (stuck && see && dist < 12) { e.fleeing = false; e.charge = 1; }   // загнан в угол
+      if (stuck && see) { e.fleeing = false; e.charge = 1; }   // загнан в угол и на виду — дерётся
       if (e.voiceT <= 0) { e.voiceT = rr(2, 4); audio.scream(e.x, e.z, 0.4); }
     } else if (e.guard && !e.alert) {
       // часовой: стоит или ходит у своего поста
