@@ -1,48 +1,64 @@
-# Подборка вакансий — 2026-11-25 16:57 UTC
+# Подборка вакансий — 2026-11-26 16:35 UTC
 
-Всего просмотрено: **171**. Новых подходящих: **5**.
+Всего просмотрено: **162**. Новых подходящих: **7**.
 
 > **Как откликнуться:** скопируй `ID` нужной вакансии и запусти workflow
 > **Actions → Apply to job → Run workflow**, вставив ID в поле `job_ids`
 > (можно несколько через запятую). Бот точечно подготовит письмо и
 > адаптированное резюме в папке `applications/`.
 
-## 1. Game Producer (AI R&D) Townlive Games Местоположение: Астана Формат работы: Удаленно Опубликована: 23 — @wntdpm  ·  46/100
+## 1. Content Producer ownr is a content agency that builds personal brands for entrepreneurs and experts, creating content in — @forproducer  ·  44/100
 _telegram_
 
-- 🆔 `c87cb5c9ab518bcf`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/wntdpm/1638
-- Почему подходит: совпадение в названии: producer; совпадение в описании: продюсер; доп. сигналы: дизайн, ии, ai; удалёнка
-- Game Producer (AI R&D) Townlive Games Местоположение: Астана Формат работы: Удаленно Опубликована: 23.11.2026 Требования: • Опыт продюсером в мобильных F2P-играх • Знание рынка casual-игр и системного геймдизайна • Понимание удержания и F2P-монетизации • Проверка игровых гипотез на игроках и решения…
+- 🆔 `0dce96fa150f6ee6`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/forproducer/2075
+- Почему подходит: совпадение в названии: producer; доп. сигналы: brand, контент, content, ai; удалёнка
+- Content Producer ownr is a content agency that builds personal brands for entrepreneurs and experts, creating content in Russian and English for clients all over the world. Remote work or hybrid (Barcelona). More details in Kristina Afanasenko's post on LinkedIn . Больше вакансий про контент: @foral…
 
-## 2. Technical Project Manager в Constructor 📍 Remote (EMEA) 💎 3+ года опыта в управлении техническими проектами или управлен — @zarubezhom_jobs  ·  46/100
-_telegram_
-
-- 🆔 `6dcc7d09395a824a`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/zarubezhom_jobs/4435
-- Почему подходит: совпадение в названии: project manager; совпадение в описании: проджект; доп. сигналы: design, ии, ai; удалёнка
-- Technical Project Manager в Constructor 📍 Remote (EMEA) 💎 3+ года опыта в управлении техническими проектами или управлении проектами по адаптации новых сотрудников, желательно в среде SaaS 🚀 СEO и ко-фаундер — Eli Finkelshteyn . В компании работает много русскоговорящих ребят 💙 Constructor — инструм…
-
-## 3. Product Operations Manager (Remote Eligible) — Smartsheet  ·  36/100
+## 2. Senior Webflow Project Manager (Contract) — N4 Studio  ·  40/100
 _weworkremotely · Remote_
 
-- 🆔 `e5ba25392c658aa0`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://weworkremotely.com/remote-jobs/smartsheet-product-operations-manager-remote-eligible
+- 🆔 `7b1bd4429f89e962`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://weworkremotely.com/remote-jobs/n4-studio-senior-webflow-project-manager-contract
+- Почему подходит: совпадение в названии: project manager; доп. сигналы: content, design, budget; удалёнка
+- Headquarters: Vancouver, British Columbia, Canada URL: http://www.n4.studio Role Overview We’re looking for a contract Senior Project Manager to own the end-to-end delivery of website and digital projects at N4 Studio, from initial scoping through to launch. You’ll be responsible for keeping project…
+
+## 3. Food Operations Manager — Foodsmart  ·  36/100
+_weworkremotely · Remote_
+
+- 🆔 `a525f8fd6717b99f`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://weworkremotely.com/remote-jobs/foodsmart-food-operations-manager
 - Почему подходит: совпадение в названии: operations manager; доп. сигналы: design, ai; удалёнка
-- Headquarters: -REMOTE, USA- For over 20 years, Smartsheet has empowered teams to manage work seamlessly and scale solutions smarter. Now, in our most ambitious chapter yet, we are uniting human teams with AI agents. By orchestrating the work agents do best, automating manual tasks and uncovering ins…
+- Headquarters: Remote (US) About Foodsmart: Foodsmart is the leading Foodcare platform in the U.S., built to deliver nutrition-driven healthcare at scale. Powered by a national network of Registered Dietitians, Foodsmart combines personalized clinical nutrition care, behavior change tools, and food b…
 
-## 4. Principal Pricing Program & Operations Manager (Remote Eligible) — Smartsheet  ·  32/100
-_weworkremotely · Remote_
-
-- 🆔 `2a704dfb7427e422`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://weworkremotely.com/remote-jobs/smartsheet-principal-pricing-program-operations-manager-remote-eligible
-- Почему подходит: совпадение в названии: operations manager; доп. сигналы: ai; удалёнка
-- Headquarters: -REMOTE, USA- For over 20 years, Smartsheet has empowered teams to manage work seamlessly and scale solutions smarter. Now, in our most ambitious chapter yet, we are uniting human teams with AI agents. By orchestrating the work agents do best, automating manual tasks and uncovering ins…
-
-## 5. Game Producer (AI R&D) в TownLive Games — студия разработки и продвижения мобильных игр — @forproducer  ·  32/100
+## 4. Резюме: Head of SMM / PR и SMM специалист 🧑‍💻 Дмитрий Ник tg: @Uoukou Номер телефона: +7 - 996 - 051-86-93 Email: mezxz@ — @digital_jobster  ·  34/100
 _telegram_
 
-- 🆔 `ffe6888550693192`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/forproducer/2074
-- Почему подходит: совпадение в названии: producer; доп. сигналы: ai; удалёнка
-- Game Producer (AI R&D) в TownLive Games — студия разработки и продвижения мобильных игр. Удалённая работа. Гибкое начало рабочего дня. Часовой пояс GMT+3. Ищет Татьяна Самусева, её пост на LinkedIn .
+- 🆔 `4ee0d9a116a2a8d7`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/digital_jobster/6680
+- Почему подходит: совпадение в описании: продюсер; доп. сигналы: маркетинг, бренд, контент, ии, ai; удалёнка
+- Резюме: Head of SMM / PR и SMM специалист 🧑‍💻 Дмитрий Ник tg: @Uoukou Номер телефона: +7 - 996 - 051-86-93 Email: mezxz@bk.ru https://www.instagram.com/dm_rison Возраст: 24 Формат/Локация : Москва - Удаленка Я SMM-продюсер и специалист по контент-маркетингу с 6+ годами опыта. Помогаю брендам и личны…
+
+## 5. Менеджер по поиску и привлечению клиентов (B2B) в компанию CreativCombinat 📍️ ️️️️️Формат/ Локация: Удаленка Работодател — @digital_jobster  ·  34/100
+_telegram_
+
+- 🆔 `bfa2136f50eaecf3`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/digital_jobster/6684
+- Почему подходит: совпадение в описании: креатив; доп. сигналы: бренд, контент, дизайн, ии, ai; удалёнка
+- Менеджер по поиску и привлечению клиентов (B2B) в компанию CreativCombinat 📍️ ️️️️️Формат/ Локация: Удаленка Работодатель : Компания CreativCombinat — креативная студия с опытом более 10 лет в рекламе и дизайне. Создаём сайты, брендинг, логотипы, брендбуки, бизнес-презентации, рекламные концепции и …
+
+## 6. Creative Director — Luxury Presence  ·  32/100
+_remoteok · US Only_
+
+- 🆔 `f345943b195017ee`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://remoteOK.com/remote-jobs/remote-creative-director-luxury-presence-1138146
+- Почему подходит: совпадение в названии: creative; доп. сигналы: brand, design, ai
+- Luxury Presence is building the AI growth platform for real estate. Backed by Bessemer Venture Partners and other top investors, we're a Series C company that has hit $100M in annual recurring revenue. More than 100,000 real estate professionals, including over 30% of the WSJ Real Trends top 100 age…
+
+## 7. Business Operations Manager — Davies  ·  28/100
+_weworkremotely · Remote_
+
+- 🆔 `e41a0f64e925190c`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://weworkremotely.com/remote-jobs/davies-business-operations-manager
+- Почему подходит: совпадение в названии: operations manager; удалёнка
+- Headquarters: Home, West Virginia, United States URL: https://davies-group.com Business Operations Manager Department: Forensic Accounting Employment Type: Permanent - Full Time Location: Home United States Compensation: $92,800 - $139,200 / year Description MDD, a Davies Company, is a community of …
