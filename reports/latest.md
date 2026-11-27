@@ -1,64 +1,79 @@
-# Подборка вакансий — 2026-11-26 16:35 UTC
+# Подборка вакансий — 2026-11-27 16:21 UTC
 
-Всего просмотрено: **162**. Новых подходящих: **7**.
+Всего просмотрено: **193**. Новых подходящих: **9**.
 
 > **Как откликнуться:** скопируй `ID` нужной вакансии и запусти workflow
 > **Actions → Apply to job → Run workflow**, вставив ID в поле `job_ids`
 > (можно несколько через запятую). Бот точечно подготовит письмо и
 > адаптированное резюме в папке `applications/`.
 
-## 1. Content Producer ownr is a content agency that builds personal brands for entrepreneurs and experts, creating content in — @forproducer  ·  44/100
-_telegram_
-
-- 🆔 `0dce96fa150f6ee6`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/forproducer/2075
-- Почему подходит: совпадение в названии: producer; доп. сигналы: brand, контент, content, ai; удалёнка
-- Content Producer ownr is a content agency that builds personal brands for entrepreneurs and experts, creating content in Russian and English for clients all over the world. Remote work or hybrid (Barcelona). More details in Kristina Afanasenko's post on LinkedIn . Больше вакансий про контент: @foral…
-
-## 2. Senior Webflow Project Manager (Contract) — N4 Studio  ·  40/100
+## 1. Data Strategy Operations Manager — Abnormal  ·  40/100
 _weworkremotely · Remote_
 
-- 🆔 `7b1bd4429f89e962`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://weworkremotely.com/remote-jobs/n4-studio-senior-webflow-project-manager-contract
-- Почему подходит: совпадение в названии: project manager; доп. сигналы: content, design, budget; удалёнка
-- Headquarters: Vancouver, British Columbia, Canada URL: http://www.n4.studio Role Overview We’re looking for a contract Senior Project Manager to own the end-to-end delivery of website and digital projects at N4 Studio, from initial scoping through to launch. You’ll be responsible for keeping project…
+- 🆔 `9b8d7750db89da22`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://weworkremotely.com/remote-jobs/abnormal-data-strategy-operations-manager
+- Почему подходит: совпадение в названии: operations manager; доп. сигналы: marketing, design, ai; удалёнка
+- Headquarters: Remote - USA About the Role As the Data Strategy and Operations Manager at Abnormal AI, you will own our go-to-market data quality strategy and serve as the steward of data across Salesforce and the systems around it. You will design the processes, controls, and intelligent workflows t…
 
-## 3. Food Operations Manager — Foodsmart  ·  36/100
-_weworkremotely · Remote_
-
-- 🆔 `a525f8fd6717b99f`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://weworkremotely.com/remote-jobs/foodsmart-food-operations-manager
-- Почему подходит: совпадение в названии: operations manager; доп. сигналы: design, ai; удалёнка
-- Headquarters: Remote (US) About Foodsmart: Foodsmart is the leading Foodcare platform in the U.S., built to deliver nutrition-driven healthcare at scale. Powered by a national network of Registered Dietitians, Foodsmart combines personalized clinical nutrition care, behavior change tools, and food b…
-
-## 4. Резюме: Head of SMM / PR и SMM специалист 🧑‍💻 Дмитрий Ник tg: @Uoukou Номер телефона: +7 - 996 - 051-86-93 Email: mezxz@ — @digital_jobster  ·  34/100
+## 2. Ещё 7 вакансий дня · Продакт · 26 — @wntdpm  ·  40/100
 _telegram_
 
-- 🆔 `4ee0d9a116a2a8d7`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/digital_jobster/6680
-- Почему подходит: совпадение в описании: продюсер; доп. сигналы: маркетинг, бренд, контент, ии, ai; удалёнка
-- Резюме: Head of SMM / PR и SMM специалист 🧑‍💻 Дмитрий Ник tg: @Uoukou Номер телефона: +7 - 996 - 051-86-93 Email: mezxz@bk.ru https://www.instagram.com/dm_rison Возраст: 24 Формат/Локация : Москва - Удаленка Я SMM-продюсер и специалист по контент-маркетингу с 6+ годами опыта. Помогаю брендам и личны…
+- 🆔 `48df6f36e5ee768c`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/wntdpm/1639
+- Почему подходит: совпадение в описании: producer, project manager; доп. сигналы: brand, jira, confluence, figma, ии, ai; удалёнка
+- Ещё 7 вакансий дня · Продакт · 26.11 Россия и СНГ 1. Founding Social & Brand Director — FurtherAI Не указано · Удаленно Навыки: LinkedIn, X, YouTube, social, video Вакансия · Контакт 2. Product Manager (iGaming) — RedCore Не указано · Удаленно · опыт 2+ лет Навыки: Product Management, iGaming, produ…
 
-## 5. Менеджер по поиску и привлечению клиентов (B2B) в компанию CreativCombinat 📍️ ️️️️️Формат/ Локация: Удаленка Работодател — @digital_jobster  ·  34/100
-_telegram_
-
-- 🆔 `bfa2136f50eaecf3`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://t.me/digital_jobster/6684
-- Почему подходит: совпадение в описании: креатив; доп. сигналы: бренд, контент, дизайн, ии, ai; удалёнка
-- Менеджер по поиску и привлечению клиентов (B2B) в компанию CreativCombinat 📍️ ️️️️️Формат/ Локация: Удаленка Работодатель : Компания CreativCombinat — креативная студия с опытом более 10 лет в рекламе и дизайне. Создаём сайты, брендинг, логотипы, брендбуки, бизнес-презентации, рекламные концепции и …
-
-## 6. Creative Director — Luxury Presence  ·  32/100
-_remoteok · US Only_
-
-- 🆔 `f345943b195017ee`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://remoteOK.com/remote-jobs/remote-creative-director-luxury-presence-1138146
-- Почему подходит: совпадение в названии: creative; доп. сигналы: brand, design, ai
-- Luxury Presence is building the AI growth platform for real estate. Backed by Bessemer Venture Partners and other top investors, we're a Series C company that has hit $100M in annual recurring revenue. More than 100,000 real estate professionals, including over 30% of the WSJ Real Trends top 100 age…
-
-## 7. Business Operations Manager — Davies  ·  28/100
+## 3. Commercial Credit Operations Manager — Stripe  ·  36/100
 _weworkremotely · Remote_
 
-- 🆔 `e41a0f64e925190c`  ← вставь в Apply to job, чтобы откликнуться
-- 🔗 https://weworkremotely.com/remote-jobs/davies-business-operations-manager
-- Почему подходит: совпадение в названии: operations manager; удалёнка
-- Headquarters: Home, West Virginia, United States URL: https://davies-group.com Business Operations Manager Department: Forensic Accounting Employment Type: Permanent - Full Time Location: Home United States Compensation: $92,800 - $139,200 / year Description MDD, a Davies Company, is a community of …
+- 🆔 `ca13d8d5459c0e16`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://weworkremotely.com/remote-jobs/stripe-commercial-credit-operations-manager
+- Почему подходит: совпадение в названии: operations manager; доп. сигналы: atl, ai; удалёнка
+- Headquarters: Chicago, Atlanta, US-Remote, Toronto Who we are About Stripe Stripe is a financial infrastructure platform for businesses. Millions of companies - from the world’s largest enterprises to the most ambitious startups - use Stripe to accept payments, grow their revenue, and accelerate new…
+
+## 4. Marketing Operations Manager — Dropbox  ·  32/100
+_weworkremotely · Remote_
+
+- 🆔 `3adbb811320f508c`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://weworkremotely.com/remote-jobs/dropbox-marketing-operations-manager
+- Почему подходит: совпадение в названии: operations manager; доп. сигналы: marketing; удалёнка
+- Headquarters: Remote - Canada: Select locations Role Description As&nbsp;the Marketing Operations Manager , you will serve as a deeply embedded, data-oriented partner to the Marketing team and help the business understand and driv e performance across the Marketing-to-Revenue funnel. You will analyz…
+
+## 5. Pursuit & Channel Operations Manager (R-20201) — Dun & Bradstreet  ·  32/100
+_weworkremotely · Remote_
+
+- 🆔 `4256e95fd0d250c5`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://weworkremotely.com/remote-jobs/dun-bradstreet-pursuit-channel-operations-manager-r-20201
+- Почему подходит: совпадение в названии: operations manager; доп. сигналы: ai; удалёнка
+- Headquarters: Vienna - Virginia - United States Shape the Future with Dun &amp; Bradstreet At Dun &amp; Bradstreet, we believe data has the power to create a better tomorrow. As a global leader in business decisioning data and analytics, we help companies worldwide grow, manage risk, and innovate. S…
+
+## 6. ⚡️ Technical Проджект менеджер Требования: • Высшее IT-образование либо высшее образование и опыт в программировании/раз — @careerstation_pm  ·  32/100
+_telegram_
+
+- 🆔 `070c3671956a429d`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/careerstation_pm/1636
+- Почему подходит: совпадение в названии: проджект; доп. сигналы: ии; удалёнка
+- ⚡️ Technical Проджект менеджер Требования: • Высшее IT-образование либо высшее образование и опыт в программировании/разработке. • Опыт управления проектами именно в заказной веб- или мобильной разработке (обязательно). Условия: • Санкт-Петербург, работаем удалённо, график гибкий. 📎 Как откликнуться…
+
+## 7. Director – Project Manager — GOOGLE · PMBA o'quv loyihasi  ·  32/100
+_linkedin · Ташкент, Ташкент, Узбекистан_
+
+- 🆔 `1dc4f984abe86f3e`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://uz.linkedin.com/jobs/view/director-%E2%80%93-project-manager-at-google-%C2%B7-pmba-o-quv-loyihasi-4495513059
+- Почему подходит: совпадение в названии: project manager; локация: Ташкент
+
+## 8. Partner Services Manager — Big Think  ·  30/100
+_weworkremotely · Remote_
+
+- 🆔 `a498118618b78f26`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://weworkremotely.com/remote-jobs/big-think-partner-services-manager
+- Почему подходит: совпадение в описании: creative; доп. сигналы: campaign, content, design, ai; удалёнка
+- Headquarters: Washington, District of Columbia, United States URL: https://bigthink.com/ Partner Services Manager - Creative Studio At Big Think Creative, we collaborate with our partners to shape and share their biggest ideas. We’re a team of editors, directors, designers and strategists - but also…
+
+## 9. #Вакансия #Outreach #Sales #Web3 #Parttime #Remote #Удаленно ⠀ Требуется Outreach-специалист / B2B Lead Generation Speci — @opento_crypto  ·  26/100
+_telegram_
+
+- 🆔 `915f0b2a83d98949`  ← вставь в Apply to job, чтобы откликнуться
+- 🔗 https://t.me/opento_crypto/853
+- Почему подходит: совпадение в описании: креатив; доп. сигналы: ии, chatgpt, gpt; удалёнка
+- #Вакансия #Outreach #Sales #Web3 #Parttime #Remote #Удаленно ⠀ Требуется Outreach-специалист / B2B Lead Generation Specialist в Hunt. (prev. XD STUDIOS) ⠀ Всем привет! Меня зовут Мэт, я основатель Hunt. ⠀ Последние 3 года мы продавали креативные услуги на десятки тысяч долларов за сделку через холод…
